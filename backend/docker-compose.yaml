@@ -1,0 +1,45 @@
+version: '3.0'
+
+services:
+  app:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${STAGE}
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      APP_NAME: ${APP_NAME}
+      STAGE: ${STAGE}
+      PORT: ${PORT}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_USERNAME: ${DB_USERNAME}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    container_name: ${APP_NAME}
+
+  db:
+    image: mysql:9.0.1
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 3305:3306
+    volumes:
+      - mysql-db:/var/lib/mysql
+    container_name: ${DB_NAME}
+
+volumes:
+  mysql-db:
+    external: false
