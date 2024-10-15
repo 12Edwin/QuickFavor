@@ -16,13 +16,12 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFCBDAD5),
       body: SafeArea( child: SingleChildScrollView(
       child: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.blue.shade900,
+              color: Theme.of(context).primaryColor,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(100),
                 bottomRight: Radius.circular(100),
@@ -55,34 +54,44 @@ class _LoginState extends State<Login> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
-                            'Login',
+                          Text(
+                            'Iniciar sesión',
                             style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
-                          TextField(
+                          TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
                               labelText: 'Email',
-                              prefixIcon: const Icon(Icons.email),
+                              labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                              prefixIcon: Icon(Icons.email, color: Theme.of(context).secondaryHeaderColor),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(32),
+                                borderSide: BorderSide.none,
                               ),
                             ),
                           ),
                           const SizedBox(height: 10),
-                          TextField(
+                          TextFormField(
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              filled: true,
                               labelText: 'Password',
-                              prefixIcon: const Icon(Icons.lock),
+                              labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                              prefixIcon: Icon(Icons.lock, color: Theme.of(context).secondaryHeaderColor),
+                              iconColor: Theme.of(context).secondaryHeaderColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(32),
+                                borderSide: BorderSide.none,
                               ),
                             ),
                           ),
@@ -91,7 +100,7 @@ class _LoginState extends State<Login> {
                             onPressed: () {
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade900,
+                              backgroundColor: Theme.of(context).primaryColor,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
@@ -109,6 +118,7 @@ class _LoginState extends State<Login> {
                           TextButton(
                             child: const Text('Sign Up'),
                             onPressed: () {
+                              Navigator.pushNamed(context, '/register');
                             },
                           ),
                         ],
