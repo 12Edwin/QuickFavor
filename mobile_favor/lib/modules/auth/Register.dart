@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -11,6 +12,16 @@ class _Register extends State<Register> {
   int _currentStep = 0;
   int _currentVehicleType = 0;
   String _userType = 'Cliente';
+  Color _currentColor = Colors.blue;
+  final List<Map<String, dynamic>> _vehicles =
+      [
+        {'icon': Icons.directions_car, 'name': 'car'},
+        {'icon': Icons.motorcycle, 'name': 'motorcycle'},
+        {'icon': Icons.pedal_bike, 'name': 'bike'},
+        {'icon': Icons.electric_scooter, 'name': 'scooter'},
+        {'icon': Icons.directions_walk, 'name': 'walk'},
+        {'icon': Icons.more_horiz, 'name': 'other'},
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +88,35 @@ class _Register extends State<Register> {
         ),
       ),
     )
+    );
+  }
+
+  void _openColorPicker() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pick a color'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: _currentColor,
+              onColorChanged: (Color color) {
+                setState(() {
+                  _currentColor = color;
+                });
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Elegir color'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -206,13 +246,19 @@ class _Register extends State<Register> {
           endIndent: 8,
         ),
         const SizedBox(height: 16),
-        _buildTextField(icon: Icons.car_crash, hint: 'Marca', type: 'text'),
-        _buildTextField(icon: Icons.description, hint: 'Modelo', type: 'text'),
-        _buildTextField(icon: Icons.credit_card, hint: 'Placas', type: 'text'),
+        (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name'])) ? _buildTextField(icon: Icons.car_crash, hint: 'Marca', type: 'text'): const SizedBox.shrink(),
+        (['car', 'motorcycle', 'bike', 'scooter'].contains(_vehicles[_currentVehicleType]['name'])) ? _buildTextField(icon: Icons.description, hint: 'Modelo', type: 'text'): const SizedBox.shrink(),
+        (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name'])) ?_buildTextField(icon: Icons.credit_card, hint: 'Placas', type: 'text'): const SizedBox.shrink(),
+        (['other'].contains(_vehicles[_currentVehicleType]['name'])) ?_buildTextField(icon: Icons.description, hint: 'Descripción', type: 'text'): const SizedBox.shrink(),
         Row(
           children: [
+            ElevatedButton.icon(
+              icon: Icon(Icons.circle, color: _currentColor, size: 25),
+              onPressed: _openColorPicker,
+              label: const Text('Color'),
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -323,14 +369,7 @@ class _Register extends State<Register> {
 
   Widget _buildVehicleOptions(){
     return _buildVehicleTypes(
-      [
-        {'icon': Icons.directions_car},
-        {'icon': Icons.motorcycle},
-        {'icon': Icons.pedal_bike},
-        {'icon': Icons.electric_scooter},
-        {'icon': Icons.directions_walk},
-        {'icon': Icons.more_horiz}
-      ]
+      _vehicles
     );
   }
 
@@ -370,22 +409,60 @@ class _Register extends State<Register> {
   Widget _buildNextButton() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
-          ),
-          minimumSize: const Size(double.infinity, 50),
-        ),
-        child: const Text('Siguiente'),
-        onPressed: () {
-          setState(() {
-            if (_userType == 'Cliente' && _currentStep < 1) _currentStep++;
-            if (_userType == 'Repartidor' && _currentStep < 2) _currentStep++;
-          });
-        },
-      ),
+      child:
+        Row(
+          children:[
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _currentStep > 0 ?
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).secondaryHeaderColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                ),
+                child: const Text('Anterior'),
+                onPressed: () {
+                  setState(() {
+                    if (_currentStep > 0) _currentStep--;
+                  });
+                },
+              ) : const SizedBox.shrink(),
+            ),
+            Expanded(
+              child:(_userType == 'Cliente' && _currentStep == 1) || (_userType == 'Repartidor' && _currentStep == 2) ?
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                  ),
+                  child: const Text('Registrar'),
+                  onPressed: () {
+
+                  },
+              ) :
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                ),
+                child: const Text('Siguiente'),
+                onPressed: () {
+                  setState(() {
+                    if (_userType == 'Cliente' && _currentStep < 1) _currentStep++;
+                    if (_userType == 'Repartidor' && _currentStep < 2) _currentStep++;
+                  });
+                },
+              ),
+            )
+          ]
+        )
     );
   }
 }
