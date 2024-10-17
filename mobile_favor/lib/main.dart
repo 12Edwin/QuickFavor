@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
+import 'package:mobile_favor/widgets/splash_screen.dart';
 
 import 'modules/auth/Register.dart';
 import 'modules/auth/login.dart';
+import 'navigation/navigation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,11 +19,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: appTheme(),
-
-      initialRoute: '/login',
+      initialRoute: '/splash',
       routes: {
+        '/splash': (context) => const SplashScreen(),
         '/login': (context) => const Login(),
         '/register': (context) => const Register(),
+        '/navigation': (context) => const Navigation(),
       },
       home: const Login(),
     );
