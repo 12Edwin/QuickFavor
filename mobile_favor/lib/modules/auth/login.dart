@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -97,9 +98,7 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/profile');
-                            },
+                            onPressed: _onLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
                               foregroundColor: Colors.white,
@@ -132,5 +131,19 @@ class _LoginState extends State<Login> {
           ),
       ),
     ));
+  }
+
+  void _onLogin() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_emailController.text == 'courier@gmail.com') {
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('role', 'courier');
+      Navigator.pushNamed(context, '/navigation');
+    }else if(_emailController.text == 'customer@gmail.com') {
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('role', 'customer');
+      Navigator.pushNamed(context, '/navigation');
+    }
+
   }
 }

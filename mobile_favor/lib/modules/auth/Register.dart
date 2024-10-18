@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:mobile_favor/kernel/widget/photo_picker.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -224,7 +225,19 @@ class _Register extends State<Register> {
 
     return Column(
       children: [
-        _buildMapField(),
+        if (_userType == 'Repartidor')
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PhotoPicker(label: 'Rostro', textDialog: 'Foto de su rostro', widthImg: 200, heightImg: 200),
+                PhotoPicker(label: 'INE', textDialog: 'Foto de su INE', widthImg: 856, heightImg: 540)
+              ],
+            ),
+          )
+        else
+          _buildMapField(),
         _buildTextField(icon: Icons.phone, hint: 'Teléfono', type: 'number'),
         _buildTextField(icon: Icons.mail, hint: 'Correo', type: 'email'),
         _buildTextField(icon: Icons.lock, hint: 'Contraseña', type: 'password'),
@@ -251,14 +264,23 @@ class _Register extends State<Register> {
         (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name'])) ?_buildTextField(icon: Icons.credit_card, hint: 'Placas', type: 'text'): const SizedBox.shrink(),
         (['other'].contains(_vehicles[_currentVehicleType]['name'])) ?_buildTextField(icon: Icons.description, hint: 'Descripción', type: 'text'): const SizedBox.shrink(),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (['car', 'motorcycle', 'bike', 'scooter'].contains(_vehicles[_currentVehicleType]['name']))
             ElevatedButton.icon(
               icon: Icon(Icons.circle, color: _currentColor, size: 25),
               onPressed: _openColorPicker,
               label: const Text('Color'),
             ),
+            if (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name']))
+            const PhotoPicker(label: 'Licencia', textDialog: 'Liciencia de conducir', widthImg: 856, heightImg: 540,),
           ],
         ),
+        if (['walk'].contains(_vehicles[_currentVehicleType]['name']))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Image.asset('assets/walk.png', height: 200),
+          )
       ],
     );
   }
