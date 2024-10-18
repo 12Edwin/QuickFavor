@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
 import 'package:mobile_favor/widgets/splash_screen.dart';
 
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const Login(),
         '/register': (context) => const Register(),
+        '/profile': (context) => const ProfileCourier(),
         '/navigation': (context) => const Navigation(),
       },
       home: const Login(),
