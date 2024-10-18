@@ -50,10 +50,10 @@ class _MapCustomerState extends State<MapCustomer> {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(1.0),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 500, // Ajustar la altura del mapa según sea necesario
+                  height: 550, // Ajustar la altura del mapa según sea necesario
                   child: MapWidget(),
                 ),
               ),
