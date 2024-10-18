@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/modules/profile/profile.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
 
 import 'modules/auth/Register.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/register': (context) => const Register(),
+        '/profile': (context) => const Profile(),
       },
       home: const Login(),
     );
