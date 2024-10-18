@@ -64,5 +64,47 @@ ThemeData appTheme() {
         backgroundColor: AppColors.primaryColor,
       ),
     ),
+  ).copyWith(
+    extensions: <ThemeExtension<dynamic>>[
+      CustomColors(
+        success: AppColors.success,
+        warning: AppColors.warning,
+        info: AppColors.info,
+        danger: AppColors.danger,
+      ),
+    ],
   );
+}
+
+
+class CustomColors extends ThemeExtension<CustomColors> {
+  final Color? success;
+  final Color? warning;
+  final Color? info;
+  final Color? danger;
+
+  CustomColors({this.success, this.warning, this.info, this.danger});
+
+  @override
+  CustomColors copyWith({Color? success, Color? warning, Color? info}) {
+    return CustomColors(
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      info: info ?? this.info,
+      danger: danger ?? this.danger,
+    );
+  }
+
+  @override
+  CustomColors lerp(ThemeExtension<CustomColors>? other, double t) {
+    if (other is! CustomColors) {
+      return this;
+    }
+    return CustomColors(
+      success: Color.lerp(success, other.success, t),
+      warning: Color.lerp(warning, other.warning, t),
+      info: Color.lerp(info, other.info, t),
+      danger: Color.lerp(danger, other.danger, t),
+    );
+  }
 }
