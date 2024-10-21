@@ -52,7 +52,7 @@ export default defineComponent({
   left: 0;
   width: 100%;
   height: 70px;
-  background-color: rgba(86, 105, 129, 0.6);
+  background-color: rgba(137, 167, 177, 0.6);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: right;

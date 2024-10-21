@@ -62,7 +62,7 @@ export default defineComponent ({
           items[i - 1].style.borderBottomRightRadius = '45px';
         }
         else
-          items[i].style.backgroundColor = '#2c3e50';
+          items[i].style.backgroundColor = '#89A7B1';
       }
       this.selected = name;
       this.$route.path.split('/')[1] !== name && this.$router.push({name});
@@ -89,9 +89,10 @@ export default defineComponent ({
 .sidebar {
   width: 250px;
   height: 100vh;
-  background: #2c3e50;
+  background: #89A7B1;
   position: relative;
   backdrop-filter: blur(5px);
+  
 }
 
 nav{
@@ -100,7 +101,7 @@ nav{
 
 .n-item {
   width: 100%;
-  background: #2c3e50;
+  background: #89A7B1;
 }
 
 .sidebar-item {
@@ -117,7 +118,7 @@ nav{
 
 .sidebar-item.selected {
   background-color: #CBDAD5;
-  color: #2c3e50;
+  color: #89A7B1;
   transform: translateX(8px);
 }
 
@@ -126,7 +127,7 @@ nav{
 }
 
 .sidebar-item.selected span{
-  color: #2c3e50;
+  color: #89A7B1;
 }
 
 .sidebar-item.selected::after {
@@ -137,7 +138,7 @@ nav{
   transform: translateY(-50%);
   width: 5px;
   height: 90%;
-  background-color: #2c3e50;
+  background-color: #89A7B1;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
 }
