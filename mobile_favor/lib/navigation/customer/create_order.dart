@@ -125,7 +125,6 @@ class _LoginState extends State<CreateOrder> {
                             icon: Icons.add_circle,
                             showEditIcon: false,
                             isPrimaryColor: true, // Ahora acepta este parámetro
-                            openModal: _openProductModal, // Abrir el modal
                           ),
                           const SizedBox(
                               height: 40), // Espacio entre el input y la imagen
@@ -173,8 +172,8 @@ class _LoginState extends State<CreateOrder> {
     required String hintText,
     required IconData icon,
     required bool showEditIcon,
-    bool isPrimaryColor = false, // Parámetro para cambiar el color de fondo
-    Function()? openModal, // Agregar una función opcional para abrir el modal
+    bool isPrimaryColor =
+        false, // Nuevo parámetro para cambiar el color de fondo
   }) {
     return Stack(
       clipBehavior: Clip.none,
@@ -216,58 +215,47 @@ class _LoginState extends State<CreateOrder> {
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  icon,
-                  color: AppColors.info, // Color info
+              // Mostrar el ícono de edición como botón solo si showEditIcon es true
+              if (showEditIcon)
+                IconButton(
+                  icon: Icon(
+                    Icons.edit_note,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: 24,
+                  ),
+                  onPressed: () {
+                    // Acción cuando se presiona el botón de editar
+                    print("Edit button pressed for $hintText");
+                  },
                 ),
-                iconSize: 40, // Tamaño del ícono más grande
-                onPressed: openModal ?? () {},
-              ),
             ],
           ),
         ),
-      ],
-    );
-  }
-
-  // Método para abrir el modal
-  void _openProductModal() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300, // Altura del modal
-          padding: const EdgeInsets.all(20.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        // Botón redondeado que sobresale del input
+        Positioned(
+          top: -8, // Para que sobresalga verticalmente
+          left: -15, // Para moverlo hacia la izquierda
+          child: Container(
+            width: 60,
+            height: 60, // Tamaño más grande del círculo
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white, // Cambiar el color de fondo a blanco
+            ),
+            child: IconButton(
+              icon: Icon(
+                icon,
+                color: AppColors.info, // Color info
+              ),
+              iconSize: 40, // Tamaño del ícono más grande
+              onPressed: () {
+                // Acción cuando se presiona el botón
+                print("$hintText button pressed");
+              },
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Lista de productos',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Lista de productos o contenido del modal
-              const Text('Producto 1'),
-              const SizedBox(height: 10),
-              const Text('Producto 2'),
-              const SizedBox(height: 10),
-              const Text('Producto 3'),
-              // Agrega más elementos según sea necesario
-            ],
-          ),
-        );
-      },
+        ),
+      ],
     );
   }
 
