@@ -32,10 +32,8 @@ ThemeData appTheme() {
         color: AppColors.primaryColor,
         fontWeight: FontWeight.w500,
       ),
-      bodySmall: TextStyle(
-        color: AppColors.primaryColor,
-        fontWeight: FontWeight.w500
-      ),
+      bodySmall:
+          TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.w500),
       titleLarge: TextStyle(
         color: AppColors.primaryColor,
         fontWeight: FontWeight.w500,
