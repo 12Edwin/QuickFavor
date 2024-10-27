@@ -16,7 +16,6 @@ class _ProfileCourierState extends State<ProfileCourier> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeigth = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
           title: const Text('Perfil'),
