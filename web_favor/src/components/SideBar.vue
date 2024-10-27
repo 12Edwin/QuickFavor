@@ -1,25 +1,28 @@
 <template>
-  <div class="sidebar pe-0 ps-0 text-white p-3">
-    <div class="h-sidebar">
-      <img src="@/assets/logo.png" height="100">
-      <h4 class=" mt-2">Quick Favor</h4>
-    </div>
-    <nav class="w-100 p-0">
-      <div class="n-item w-100 p-0"
-        v-for="(item, ind) in menuItems"
-        @click="setSelected(item.name, ind)"
-        :key="item.name">
-        <div
-            :class="[
-            'sidebar-item d-flex align-items-center w-100 border-0 p-4',
-            { 'selected': selected === item.name }
-          ]"
-        >
-          <component :is="item.icon" class="me-2" />
-          <span>{{ item.text }}</span>
-        </div>
+  <div class="d-flex flex-column">
+    <div class="head-sidebar"></div>
+    <div class="sidebar pr-0 pl-0 text-white pa-3">
+      <div class="h-sidebar">
+        <img src="@/assets/logo.png" height="100">
+        <h4 class=" mt-2">Quick Favor</h4>
       </div>
-    </nav>
+      <nav class="w-100 pa-0">
+        <div class="n-item w-100 pa-0"
+          v-for="(item, ind) in menuItems"
+          @click="setSelected(item.name, ind)"
+          :key="item.name">
+          <div
+              :class="[
+              'sidebar-item d-flex align-items-center w-100 border-0 pa-4',
+              { 'selected': selected === item.name }
+            ]"
+          >
+            <component :is="item.icon" class="ml-2" />
+            <span>{{ item.text }}</span>
+          </div>
+        </div>
+      </nav>
+    </div>
   </div>
 </template>
 
@@ -88,11 +91,21 @@ export default defineComponent ({
 }
 .sidebar {
   width: 250px;
-  height: 100vh;
+  height: 92vh;
   background: #89A7B1;
   position: relative;
   backdrop-filter: blur(5px);
   
+}
+
+.head-sidebar {
+  width: 250px;
+  height: 8vh;
+  position: relative;
+  top: 0;
+  left: 0;
+  background-color: rgba(137, 167, 177, 0.6);
+  backdrop-filter: blur(5px);
 }
 
 nav{

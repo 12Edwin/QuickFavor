@@ -30,6 +30,13 @@ export default defineComponent({
       let { width, height } = canvas.value!;
       ctx.value!.clearRect(0, 0, width, height);
 
+      // Save the context state
+      ctx.value!.save();
+
+      // Flip vertically
+      ctx.value!.scale(1, -1);
+      ctx.value!.translate(0, -height);
+
       ctx.value!.beginPath();
       ctx.value!.moveTo(0, height);
       ctx.value!.lineTo(0, height * 0.45);
@@ -66,6 +73,9 @@ export default defineComponent({
 
       ctx.value!.fillStyle = props.color;
       ctx.value!.fill();
+
+      // Restore the context state
+      ctx.value!.restore();
     };
 
     const resizeCanvas = () => {
@@ -99,7 +109,7 @@ export default defineComponent({
 
 canvas {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 90%;
