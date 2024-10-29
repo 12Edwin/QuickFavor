@@ -1,14 +1,11 @@
-import { RouteConfig} from 'vue-router'
-import Vue, {CreateElement} from "vue";
-import VueRouter from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
+import {h, resolveComponent} from 'vue';
 import publicRoutes from "@/router/public-routes";
 import courierRoutes from "@/router/courier-routes";
 import NotFound from "@/modules/order/views/NotFound.vue";
 import Unauthorized from "@/modules/order/views/Unauthorized.vue";
 
-Vue.use(VueRouter)
-
-const routes: Array<RouteConfig> = [
+const routes= [
   {
     path:'',
     redirect: '/login'
@@ -16,8 +13,8 @@ const routes: Array<RouteConfig> = [
   {
     path: '/',
     component: {
-      render (c: CreateElement){
-        return c("router-view")
+      render () {
+        return h(resolveComponent("router-view"))
       }
     },
     children:[
@@ -43,9 +40,8 @@ const routes: Array<RouteConfig> = [
   }
 ]
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(),
   routes
 })
 
