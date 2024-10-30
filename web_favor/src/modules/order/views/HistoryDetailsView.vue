@@ -24,6 +24,39 @@
         </button>
       </div>
     </div>
+
+    <div class="content-container">
+      <!-- Sección izquierda con el avatar y nombre -->
+      <div class="left-section">
+        <div class="left-content">
+          <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
+            <img
+              src="../../../assets/oldManUser.png"
+              alt="User Avatar"
+              style="width: 100%; height: 100%; border-radius: 50%"
+            />
+          </v-avatar>
+          <p class="username">Jose</p>
+          <v-chip
+            :color="getChipColor(historyItem.estatus)"
+            variant="flat"
+            class="chip-style"
+          >
+            <span style="color: white">{{ historyItem.estatus }}</span>
+          </v-chip>
+          <v-divider :thickness="4" color="#89a7b1"></v-divider>
+        </div>
+      </div>
+
+      <!-- Sección derecha con los detalles -->
+      <div class="details-section">
+        <h1>Detalles del Historial</h1>
+        <p>Producto: {{ historyItem.numeroProductos }} productos</p>
+        <p>Fecha: {{ historyItem.fecha }}</p>
+        <!-- Aquí puedes mostrar más detalles según el objeto -->
+      </div>
+    </div>
+
     <div v-if="data.length === 0" class="no-orders">
       <img
         src="../../../assets/empty2.png"
@@ -32,51 +65,35 @@
       />
       Aún no hay pedidos en esta cuenta
     </div>
-    <div v-else>
-      <div v-for="(item, index) in data" :key="index">
-        <v-card class="white-card card-overlay">
-          <div class="card-content">
-            <div class="left-strip"></div>
-            <div class="text-content">
-              <p class="title">{{ item.numeroProductos }} productos</p>
-              <p class="date">{{ item.fecha }}</p>
-            </div>
-            <v-chip
-              :color="getChipColor(item.estatus)"
-              variant="flat"
-              class="chip-style"
-            >
-              <span style="color: white">{{ item.estatus }}</span>
-            </v-chip>
-            <!-- Enlace clickeable al ícono -->
-            <router-link
-              :to="{ name: 'historyDetails', params: { id: index } }"
-              class="icon-link"
-            >
-              <i class="fa-solid fa-eye icon-style"></i>
-            </router-link>
-          </div>
-        </v-card>
-      </div>
-
-      <!-- Componente de paginación debajo de las cards -->
-      <v-pagination
-        :length="3"
-        :show-arrows="true"
-        rounded="circle"
-        class="pagination-style"
-      ></v-pagination>
-    </div>
+    <div v-else></div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import WaveComponent from "@/components/WaveComponent.vue";
+import { defineComponent, computed } from "vue";
+
+// Define el tipo para cada elemento en `data`
+interface Producto {
+  nombre: string;
+  descripcion: string;
+  cantidad: number;
+}
+
+interface HistorialItem {
+  numeroProductos: number;
+  fecha: string;
+  estatus: string;
+  productos: Producto[];
+}
 
 export default defineComponent({
-  name: "HistoryView",
-  components: { WaveComponent },
+  name: "HistoryDetailsView",
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       isActive: true, // Variable para manejar el estado del botón
@@ -259,7 +276,7 @@ export default defineComponent({
           estatus: "Cancelado",
           productos: [],
         },
-      ],
+      ] as HistorialItem[], // Define el tipo de `data` como un arreglo de `HistorialItem`
     };
   },
   methods: {
@@ -281,6 +298,11 @@ export default defineComponent({
       }
     },
   },
+  computed: {
+    historyItem(): HistorialItem {
+      return this.data[this.id];
+    },
+  },
 });
 </script>
 
@@ -299,6 +321,49 @@ export default defineComponent({
   padding: 16px;
   position: relative;
   z-index: 1;
+}
+
+/* Contenedor principal para la sección izquierda y derecha */
+.content-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Estilo para la sección izquierda */
+.left-section {
+  flex-basis: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.left-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.username {
+  margin-top: 10px;
+  font-size: 22px;
+  color: #34344e;
+}
+
+/* Estilo para la sección derecha */
+.details-section {
+  flex-basis: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.avatar-border {
+  border: 4px solid #89a7b1; /* Borde de color #89a7b1 */
+  border-radius: 50%; /* Mantiene la forma circular */
+  padding: 4px; /* Espacio entre la imagen y el borde */
+  box-sizing: border-box; /* Asegura que el tamaño total del avatar incluya el borde */
 }
 
 /* Estilo para el contenedor del título */
@@ -462,6 +527,7 @@ export default defineComponent({
   width: 150px; /* Ancho fijo para el chip */
   display: flex;
   justify-content: center;
+  margin-top: 12px;
 }
 
 .icon-style {
@@ -473,24 +539,5 @@ export default defineComponent({
 .icon-link {
   margin-left: 100px; /* Espacio entre el chip y el icono */
   text-decoration: none;
-}
-
-/* Estilos para el componente de paginación */
-.pagination-style {
-  color: #2c3e50; /* Color de texto de la paginación */
-  --v-pagination-active-color: #2c3e50; /* Color para el número activo */
-}
-
-.pagination-style .v-pagination__item--active {
-  background-color: #b0bec5 !important; /* Fondo para el número activo */
-  color: #ffffff !important; /* Color del número activo */
-}
-
-.pagination-style .v-pagination__item {
-  color: #2c3e50 !important; /* Color de los números no activos */
-}
-
-.pagination-style .v-pagination__item--arrow {
-  color: #2c3e50 !important; /* Color de las flechas */
 }
 </style>
