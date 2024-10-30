@@ -12,14 +12,21 @@
             </h2>
             <div class="switch-container">
               <label class="switch">
-                <input type="checkbox">
+                <input type="checkbox" v-model="isChecked">
                 <span class="slider"></span>
               </label>
             </div>
           </div>
           <!-- content -->
-          <div>
-
+          <div class="map-container">
+            <GoogleMap
+              api-key="API_KEY"
+              style="width: 100%; height: 100%;"
+              :center="center"
+              :zoom="15"
+            >
+              <Marker :options="{ position: center }" />
+            </GoogleMap>
           </div>
         </v-card>
       </v-col>
@@ -29,11 +36,18 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import WaveComponent from '@/components/WaveComponent.vue';
+import WaveComponent from '@/components/WaveComponent.vue'
+import { GoogleMap, Marker } from 'vue3-google-map'
 
 export default defineComponent({
   name: "MapView",
-  components: { WaveComponent }
+  components: { WaveComponent, GoogleMap, Marker },
+  data() {
+    return {
+      center: { lat: 40.689247, lng: -74.044502 },
+      isChecked: false 
+    }
+  }
 })
 </script>
 
@@ -57,7 +71,7 @@ export default defineComponent({
   height: 88vh;
   background-color: rgba(255, 255, 255, 0.5); 
   backdrop-filter: blur(10px);
-  overflow: visible; 
+  overflow: hidden; /* Cambiado a hidden para que el mapa no sobresalga */
   z-index: 1; 
 }
 .card-header {
@@ -125,4 +139,8 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+.map-container {
+  height: calc(100% - 64px); /* Resta la altura del header */
+  width: 100%;
+}
 </style>

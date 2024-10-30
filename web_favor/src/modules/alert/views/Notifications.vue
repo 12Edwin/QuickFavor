@@ -19,7 +19,7 @@
           </div>
           <!-- content -->
           <div>
-
+            
           </div>
         </v-card>
       </v-col>
