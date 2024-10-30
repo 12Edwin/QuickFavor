@@ -3,37 +3,46 @@
     <WaveComponent />
   </div>
   <div class="history-container">
-    <h1 class="titlePrincipal">Historial</h1>
-    <div v-for="(item, index) in data" :key="index">
-      <v-card class="white-card card-overlay">
-        <div class="card-content">
-          <div class="left-strip"></div>
-          <div class="text-content">
-            <p class="title">{{ item.numeroProductos }} productos</p>
-            <p class="date">{{ item.fecha }}</p>
-          </div>
-          <v-chip
-            :color="getChipColor(item.estatus)"
-            variant="flat"
-            class="chip-style"
-          >
-            <span style="color: white">{{ item.estatus }}</span>
-          </v-chip>
-          <!-- Enlace clickeable al ícono -->
-          <router-link to="/ruta-deseada" class="icon-link">
-            <i class="fa-solid fa-eye icon-style"></i>
-          </router-link>
-        </div>
-      </v-card>
+    <div class="title-container">
+      <i class="fa-solid fa-bell bell-icon"></i>
+      <h1 class="titlePrincipal">Historial</h1>
     </div>
+    <div v-if="data.length === 0" class="no-orders">
+      <img src="../../../assets/empty2.png" alt="No hay pedidos" class="no-orders-image" />
+      Aún no hay pedidos en esta cuenta
+    </div>
+    <div v-else>
+      <div v-for="(item, index) in data" :key="index">
+        <v-card class="white-card card-overlay">
+          <div class="card-content">
+            <div class="left-strip"></div>
+            <div class="text-content">
+              <p class="title">{{ item.numeroProductos }} productos</p>
+              <p class="date">{{ item.fecha }}</p>
+            </div>
+            <v-chip
+              :color="getChipColor(item.estatus)"
+              variant="flat"
+              class="chip-style"
+            >
+              <span style="color: white">{{ item.estatus }}</span>
+            </v-chip>
+            <!-- Enlace clickeable al ícono -->
+            <router-link to="/ruta-deseada" class="icon-link">
+              <i class="fa-solid fa-eye icon-style"></i>
+            </router-link>
+          </div>
+        </v-card>
+      </div>
 
-    <!-- Componente de paginación debajo de las cards -->
-    <v-pagination
-      :length="3"
-      :show-arrows="true"
-      rounded="circle"
-      class="pagination-style"
-    ></v-pagination>
+      <!-- Componente de paginación debajo de las cards -->
+      <v-pagination
+        :length="3"
+        :show-arrows="true"
+        rounded="circle"
+        class="pagination-style"
+      ></v-pagination>
+    </div>
   </div>
 </template>
 
@@ -51,15 +60,60 @@ export default defineComponent({
           numeroProductos: 10,
           fecha: "29-10-2024",
           estatus: "Proceso de Compra",
+          productos: [
+            { nombre: "1 litro aceite", descripcion: "Aceite 123 de litro", cantidad: 1 },
+            { nombre: "2 kg arroz", descripcion: "Arroz blanco 2 kg", cantidad: 2 },
+            { nombre: "500 g pasta", descripcion: "Pasta integral 500 g", cantidad: 1 },
+            { nombre: "3 litros leche", descripcion: "Leche entera 3 litros", cantidad: 3 },
+            { nombre: "1 kg azúcar", descripcion: "Azúcar blanca 1 kg", cantidad: 1 },
+            { nombre: "250 g café", descripcion: "Café molido 250 g", cantidad: 1 },
+            { nombre: "1 kg frijoles", descripcion: "Frijoles negros 1 kg", cantidad: 1 },
+            { nombre: "1 paquete tortillas", descripcion: "Tortillas de maíz", cantidad: 1 },
+            { nombre: "500 ml jugo", descripcion: "Jugo de naranja 500 ml", cantidad: 1 },
+            { nombre: "750 ml salsa", descripcion: "Salsa de tomate 750 ml", cantidad: 1 }
+          ]
         },
-        { numeroProductos: 12, fecha: "28-10-2024", estatus: "Finalizado" },
+        {
+          numeroProductos: 12,
+          fecha: "28-10-2024",
+          estatus: "Finalizado",
+          productos: [
+            { nombre: "1 litro aceite", descripcion: "Aceite 123 de litro", cantidad: 1 },
+            { nombre: "2 kg arroz", descripcion: "Arroz blanco 2 kg", cantidad: 2 },
+            { nombre: "500 g pasta", descripcion: "Pasta integral 500 g", cantidad: 1 },
+            { nombre: "3 litros leche", descripcion: "Leche entera 3 litros", cantidad: 3 },
+            { nombre: "1 kg azúcar", descripcion: "Azúcar blanca 1 kg", cantidad: 1 },
+            { nombre: "250 g café", descripcion: "Café molido 250 g", cantidad: 1 },
+            { nombre: "1 kg frijoles", descripcion: "Frijoles negros 1 kg", cantidad: 1 },
+            { nombre: "1 paquete tortillas", descripcion: "Tortillas de maíz", cantidad: 1 },
+            { nombre: "500 ml jugo", descripcion: "Jugo de naranja 500 ml", cantidad: 1 },
+            { nombre: "750 ml salsa", descripcion: "Salsa de tomate 750 ml", cantidad: 1 }
+          ]
+        },
         {
           numeroProductos: 5,
           fecha: "27-10-2024",
           estatus: "Proceso de entrega",
+          productos: [
+            { nombre: "1 litro aceite", descripcion: "Aceite 123 de litro", cantidad: 1 },
+            { nombre: "2 kg arroz", descripcion: "Arroz blanco 2 kg", cantidad: 2 },
+            { nombre: "500 g pasta", descripcion: "Pasta integral 500 g", cantidad: 1 },
+            { nombre: "3 litros leche", descripcion: "Leche entera 3 litros", cantidad: 3 },
+            { nombre: "1 kg azúcar", descripcion: "Azúcar blanca 1 kg", cantidad: 1 },
+            { nombre: "250 g café", descripcion: "Café molido 250 g", cantidad: 1 },
+            { nombre: "1 kg frijoles", descripcion: "Frijoles negros 1 kg", cantidad: 1 },
+            { nombre: "1 paquete tortillas", descripcion: "Tortillas de maíz", cantidad: 1 },
+            { nombre: "500 ml jugo", descripcion: "Jugo de naranja 500 ml", cantidad: 1 },
+            { nombre: "750 ml salsa", descripcion: "Salsa de tomate 750 ml", cantidad: 1 }
+          ]
         },
-        { numeroProductos: 8, fecha: "26-10-2024", estatus: "Cancelado" },
-      ],
+        {
+          numeroProductos: 8,
+          fecha: "26-10-2024",
+          estatus: "Cancelado",
+          productos: []
+        }
+      ]
     };
   },
   methods: {
@@ -76,8 +130,8 @@ export default defineComponent({
         default:
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
       }
-    },
-  },
+    }
+  }
 });
 </script>
 
@@ -98,9 +152,53 @@ export default defineComponent({
   z-index: 1;
 }
 
-.titlePrincipal {
+/* Estilo para el contenedor del título */
+.title-container {
+  width: 100%;
+  background-color: #566981; /* Color de fondo azul claro */
+  padding: 16px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
   margin-bottom: 25px;
 }
+
+.titlePrincipal {
+  color: #ffffff; /* Color de texto blanco */
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.bell-icon {
+  color: #ffffff; /* Mismo color que el texto del título */
+  font-size: 30px; /* Tamaño del icono */
+  margin-right: 30px;
+}
+
+/* Contenedor para centrar solo la sección de no-orders */
+.no-orders-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.no-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #34344e;
+  font-size: 18px;
+}
+
+.no-orders-image {
+  width: 300px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
 .white-card {
   background-color: white;
   width: 85%;
