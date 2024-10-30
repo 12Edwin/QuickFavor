@@ -4,11 +4,12 @@ import publicRoutes from "@/router/public-routes";
 import courierRoutes from "@/router/courier-routes";
 import NotFound from "@/modules/order/views/NotFound.vue";
 import Unauthorized from "@/modules/order/views/Unauthorized.vue";
+import Component from 'vue-class-component';
 
 const routes= [
   {
     path:'',
-    redirect: '/login'
+    redirect: '/login',
   },
   {
     path: '/',
@@ -27,6 +28,11 @@ const routes= [
         return {...route}
       })
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: ()=> import('@/views/Login.vue'),
   },
   {
     path: '/*',
