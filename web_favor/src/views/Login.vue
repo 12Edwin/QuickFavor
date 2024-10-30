@@ -89,7 +89,7 @@ export default defineComponent({
       }
 
       router.push('/map');
-      // Para quien le toque aquí, deberá implementar la lógica de login y eliminar el router push
+      // Para quien le toque, aquí, deberá implementar la lógica de login y eliminar el router push
 
     };
 
