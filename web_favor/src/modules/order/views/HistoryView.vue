@@ -83,6 +83,7 @@ export default defineComponent({
 
       data: [
         {
+          nombreCliente: "Jose",
           numeroProductos: 10,
           fecha: "29-10-2024",
           estatus: "Proceso de Compra",
@@ -140,6 +141,7 @@ export default defineComponent({
           ],
         },
         {
+          nombreCliente: "Miguel",
           numeroProductos: 12,
           fecha: "28-10-2024",
           estatus: "Finalizado",
@@ -197,6 +199,7 @@ export default defineComponent({
           ],
         },
         {
+          nombreCliente: "Santiago",
           numeroProductos: 5,
           fecha: "27-10-2024",
           estatus: "Proceso de entrega",
@@ -254,6 +257,7 @@ export default defineComponent({
           ],
         },
         {
+          nombreCliente: "Giovanni ",
           numeroProductos: 8,
           fecha: "26-10-2024",
           estatus: "Cancelado",
