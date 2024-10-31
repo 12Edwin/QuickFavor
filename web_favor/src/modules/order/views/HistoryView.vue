@@ -87,6 +87,8 @@ export default defineComponent({
           numeroProductos: 10,
           fecha: "29-10-2024",
           estatus: "Proceso de Compra",
+          tiempoCompletado: "Aun no completado",
+          subtotal: 0,
           productos: [
             {
               nombre: "1 litro aceite",
@@ -145,6 +147,8 @@ export default defineComponent({
           numeroProductos: 12,
           fecha: "28-10-2024",
           estatus: "Finalizado",
+          tiempoCompletado: "120 min",
+          subtotal: 300,
           productos: [
             {
               nombre: "1 litro aceite",
@@ -203,6 +207,8 @@ export default defineComponent({
           numeroProductos: 5,
           fecha: "27-10-2024",
           estatus: "Proceso de entrega",
+          tiempoCompletado: "Aun no completado",
+          subtotal: 0,
           productos: [
             {
               nombre: "1 litro aceite",
@@ -257,10 +263,12 @@ export default defineComponent({
           ],
         },
         {
-          nombreCliente: "Giovanni ",
+          nombreCliente: "Giovanni",
           numeroProductos: 8,
           fecha: "26-10-2024",
           estatus: "Cancelado",
+          tiempoCompletado: "No completado",
+          subtotal: 0,
           productos: [],
         },
       ],
