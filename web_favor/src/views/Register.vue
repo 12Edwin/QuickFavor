@@ -14,31 +14,31 @@
         <div v-if="step === 1">
           <div class="form-group">
             <div class="input-icon">
-              <v-icon color="primary">mdi-account</v-icon>
+              <img src="https://cdn-icons-png.flaticon.com/128/709/709699.png" alt="User Icon" class="flaticon-icon" />
             </div>
             <input type="text" v-model="form.nombre" placeholder="Nombre" />
           </div>
           <div class="form-group">
             <div class="input-icon">
-              <v-icon color="primary">mdi-account</v-icon>
+              <img src="https://cdn-icons-png.flaticon.com/128/709/709699.png" alt="User Icon" class="flaticon-icon" />
             </div>
             <input type="text" v-model="form.apellidoPaterno" placeholder="Apellido paterno" />
           </div>
           <div class="form-group">
             <div class="input-icon">
-              <v-icon color="primary">mdi-account</v-icon>
+              <img src="https://cdn-icons-png.flaticon.com/128/709/709699.png" alt="User Icon" class="flaticon-icon" />
             </div>
             <input type="text" v-model="form.apellidoMaterno" placeholder="Apellido materno" />
           </div>
           <div class="form-group">
             <div class="input-icon">
-              <v-icon color="primary">mdi-card-account-details</v-icon>
+              <img src="https://cdn-icons-png.flaticon.com/128/709/709699.png" alt="User Icon" class="flaticon-icon" />
             </div>
             <input type="text" v-model="form.curp" placeholder="CURP" />
           </div>
           <div class="form-group">
             <div class="input-icon">
-              <v-icon color="primary">mdi-gender-male-female</v-icon>
+              <img src="https://cdn-icons-png.flaticon.com/128/2017/2017653.png" alt="Gender Icon" class="flaticon-icon" />
             </div>
             <select v-model="form.sexo">
               <option value="" disabled>Sexo</option>
@@ -51,6 +51,29 @@
 
         <!-- Segundo Paso: Matrícula y Modelo -->
         <div v-if="step === 2">
+          <!-- Botones en la parte superior -->
+          <div class="icon-button-group">
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/6591/6591639.png" alt="Carro" />
+            </button>
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/7695/7695164.png" alt="Moto" />
+            </button>
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/732/732944.png" alt="Bicicleta" />
+            </button>
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/10059/10059782.png" alt="Patín" />
+            </button>
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/7512/7512332.png" alt="Caminante" />
+            </button>
+            <button class="icon-button">
+              <img src="https://cdn-icons-png.flaticon.com/128/512/512142.png" alt="Más" />
+            </button>
+          </div>
+
+          <!-- Formulario de Matrícula y Modelo -->
           <div class="form-group">
             <div class="input-icon">
               <v-icon color="primary">mdi-car</v-icon>
@@ -65,8 +88,8 @@
           </div>
         </div>
 
-        <!-- Tercer Paso: Contacto e Identificación -->
-        <div v-if="step === 3">
+        <!-- Tercer Paso: Contacto e Identificación (con desplazamiento) -->
+        <div v-if="step === 3" class="scrollable-step">
           <div class="form-group">
             <div class="input-icon">
               <v-icon color="primary">mdi-face-recognition</v-icon>
@@ -122,9 +145,14 @@
 
         <!-- Botones de navegación -->
         <div class="button-group">
-          <v-btn @click="prevStep" color="secondary" v-if="step > 1">Atrás</v-btn>
-          <v-btn @click="nextStep" color="primary" v-if="step < 3">Siguiente</v-btn>
-          <v-btn @click="submitForm" color="success" v-if="step === 3">Enviar</v-btn>
+          <v-btn @click="nextStep" class="next-button" v-if="step < 3">Siguiente</v-btn>
+          <v-btn @click="submitForm" class="next-button" v-if="step === 3">Siguiente</v-btn>
+        </div>
+
+        <!-- Texto de inicio en el primer paso y de atrás en el segundo y tercer paso -->
+        <div class="back-link">
+          <a v-if="step === 1" @click="goToInicio">Inicio</a>
+          <a v-if="step > 1" @click="prevStep">Atrás</a>
         </div>
       </form>
     </div>
@@ -181,7 +209,11 @@ export default defineComponent({
       console.log("Formulario enviado", form.value);
     };
 
-    return { step, form, items, nextStep, prevStep, submitForm };
+    const goToInicio = () => {
+      console.log("Redirigiendo a la pantalla de inicio...");
+    };
+
+    return { step, form, items, nextStep, prevStep, submitForm, goToInicio };
   }
 });
 </script>
@@ -191,19 +223,12 @@ export default defineComponent({
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   height: 100vh;
   background-color: #d0dadb;
   overflow: hidden;
-  padding: 0 5%;
-}
-
-@media (max-width: 768px) {
-  .register-container {
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
-  }
+  padding: 20px;
+  flex-direction: column;
 }
 
 .half-circle-background {
@@ -217,12 +242,6 @@ export default defineComponent({
   z-index: 0;
 }
 
-@media (max-width: 768px) {
-  .half-circle-background {
-    display: none;
-  }
-}
-
 .register-form {
   position: relative;
   background-color: #ffffff;
@@ -233,13 +252,6 @@ export default defineComponent({
   max-width: 400px;
   text-align: center;
   z-index: 1;
-  margin-left: 10%;
-}
-
-@media (max-width: 768px) {
-  .register-form {
-    margin: 0;
-  }
 }
 
 .logo {
@@ -263,20 +275,21 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #89A7B1;
+  background-color: #ffffff;
   border-radius: 50%;
   color: #fff;
   margin-right: 8px;
 }
 
-.form-group input,
-.form-group select {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  padding: 0.5rem;
-  background: transparent;
+.flaticon-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(54%) sepia(35%) saturate(2120%) hue-rotate(195deg) brightness(95%) contrast(90%);
+}
+
+.scrollable-step {
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .button-group {
@@ -286,19 +299,98 @@ export default defineComponent({
   margin-top: 1rem;
 }
 
-.custom-stepper .v-stepper-header {
-  border: none;
-  justify-content: center;
-  margin-top: 1rem;
-  background: none;
-  box-shadow: none;
-  padding: 0;
+/* Clase para mejorar la visibilidad del texto del botón */
+.next-button {
+  background-color: #505c86;
+  color: #ffffff !important;
+  font-weight: bold;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
 }
 
-.custom-stepper .stepper-item {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin: 0 5px;
+.back-link {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #A0A0A0;
+}
+
+.back-link a {
+  color: #A0A0A0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.right-logo {
+  display: none;
+}
+
+.icon-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.icon-button {
+  background-color: #d0dadb !important;
+  border: none;
+  padding: 6px !important;
+  border-radius: 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.icon-button img {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.icon-button:hover {
+  background-color: #b0c4d1 !important;
+}
+
+@media (max-width: 768px) {
+  .register-container {
+    padding: 20px;
+  }
+
+  .register-form {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .logo {
+    width: 60px;
+  }
+
+  .half-circle-background {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-form {
+    padding: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .input-icon {
+    margin-right: 8px;
+    margin-bottom: 0;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
 }
 </style>
