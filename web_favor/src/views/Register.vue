@@ -50,85 +50,180 @@
         </div>
 
         <!-- Segundo Paso: Matrícula y Modelo -->
-        <div v-if="step === 2">
-          <!-- Botones en la parte superior -->
-          <div class="icon-button-group">
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/6591/6591639.png" alt="Carro" />
-            </button>
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/7695/7695164.png" alt="Moto" />
-            </button>
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/732/732944.png" alt="Bicicleta" />
-            </button>
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/10059/10059782.png" alt="Patín" />
-            </button>
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/7512/7512332.png" alt="Caminante" />
-            </button>
-            <button class="icon-button">
-              <img src="https://cdn-icons-png.flaticon.com/128/512/512142.png" alt="Más" />
-            </button>
-          </div>
+<div v-if="step === 2">
+  <!-- Botones en la parte superior -->
+  <div class="icon-button-group">
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/6591/6591639.png" alt="Carro" />
+    </button>
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/7695/7695164.png" alt="Moto" />
+    </button>
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/732/732944.png" alt="Bicicleta" />
+    </button>
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/10059/10059782.png" alt="Patín" />
+    </button>
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/7512/7512332.png" alt="Caminante" />
+    </button>
+    <button class="icon-button">
+      <img src="https://cdn-icons-png.flaticon.com/128/512/512142.png" alt="Más" />
+    </button>
+  </div>
 
-          <!-- Formulario de Matrícula y Modelo -->
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-car</v-icon>
-            </div>
-            <input type="text" v-model="form.matricula" placeholder="Matrícula" />
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-format-list-bulleted-type</v-icon>
-            </div>
-            <input type="text" v-model="form.modelo" placeholder="Modelo" />
-          </div>
-        </div>
+  <!-- Formulario de Matrícula y Modelo -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/1743/1743637.png" alt="Matrícula Icono" class="flaticon-icon" />
+    </div>
+    <input type="text" v-model="form.matricula" placeholder="Matrícula" />
+  </div>
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/5812/5812183.png" alt="Modelo Icono" class="flaticon-icon" />
+    </div>
+    <input type="text" v-model="form.modelo" placeholder="Modelo" />
+  </div>
 
-        <!-- Tercer Paso: Contacto e Identificación (con desplazamiento) -->
-        <div v-if="step === 3" class="scrollable-step">
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-face-recognition</v-icon>
-            </div>
-            <input type="text" v-model="form.rostro" placeholder="Rostro" />
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-card-account-details</v-icon>
-            </div>
-            <input type="text" v-model="form.ine" placeholder="INE" />
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-phone</v-icon>
-            </div>
-            <input type="tel" v-model="form.telefono" placeholder="Teléfono" />
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-email</v-icon>
-            </div>
-            <input type="email" v-model="form.correo" placeholder="Correo" />
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-lock"></v-icon>
-            </div>
-            <input type="password" v-model="form.contrasena" placeholder="Contraseña" />
-            <v-icon color="primary" class="show-password">mdi-eye</v-icon>
-          </div>
-          <div class="form-group">
-            <div class="input-icon">
-              <v-icon color="primary">mdi-lock"></v-icon>
-            </div>
-            <input type="password" v-model="form.confirmarContrasena" placeholder="Repita la contraseña" />
-            <v-icon color="primary" class="show-password">mdi-eye</v-icon>
-          </div>
-        </div>
+  <!-- Selección de Color y Licencia -->
+  <div class="additional-options">
+    <!-- Selector de Color -->
+    <div class="color-picker">
+      <div class="color-sample" :style="{ backgroundColor: form.color }"></div>
+      <label>Color</label>
+      <input type="color" v-model="form.color" class="color-input" />
+    </div>
+
+    <!-- Licencia File Input -->
+    <div class="form-group">
+      <div class="input-icon">
+        <img src="https://cdn-icons-png.flaticon.com/128/7942/7942845.png" alt="Licencia Icon" class="flaticon-icon" />
+      </div>
+      <v-file-input
+        v-model="form.licenciaFile"
+        :show-size="1000"
+        color="deep-purple-accent-4"
+        label="Licencia"
+        placeholder="Selecciona un archivo"
+        prepend-icon="mdi-paperclip"
+        variant="outlined"
+        counter
+      >
+        <template v-slot:selection="{ fileNames }">
+          <template v-for="(fileName, index) in fileNames" :key="fileName">
+            <v-chip v-if="index < 2" class="me-2" color="deep-purple-accent-4" size="small" label>
+              {{ fileName }}
+            </v-chip>
+            <span v-else-if="index === 2" class="text-overline text-grey-darken-3 mx-2">
+              +{{ form.licenciaFile.length - 2 }} Archivo(s)
+            </span>
+          </template>
+        </template>
+      </v-file-input>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Step 3: Contact and Identification -->
+<div v-if="step === 3" class="scrollable-step">
+<!-- Rostro and INE Side by Side -->
+<div class="form-group-row">
+  <!-- Rostro -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/154/154368.png" alt="Face Icon" class="flaticon-icon" />
+    </div>
+    <v-file-input
+      v-model="form.rostroFile"
+      :show-size="1000"
+      color="deep-purple-accent-4"
+      label="Rostro"
+      placeholder="Selecciona un archivo"
+      prepend-icon="mdi-paperclip"
+      variant="outlined"
+      counter
+    >
+      <template v-slot:selection="{ fileNames }">
+        <template v-for="(fileName, index) in fileNames" :key="fileName">
+          <v-chip v-if="index < 2" class="me-2" color="deep-purple-accent-4" size="small" label>
+            {{ fileName }}
+          </v-chip>
+          <span v-else-if="index === 2" class="text-overline text-grey-darken-3 mx-2">
+            +{{ form.rostroFile.length - 2 }} Archivo(s)
+          </span>
+        </template>
+      </template>
+    </v-file-input>
+  </div>
+
+  <!-- INE -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/154/154368.png" alt="INE Icon" class="flaticon-icon" />
+    </div>
+    <v-file-input
+      v-model="form.ineFile"
+      :show-size="1000"
+      color="deep-purple-accent-4"
+      label="INE"
+      placeholder="Selecciona un archivo"
+      prepend-icon="mdi-paperclip"
+      variant="outlined"
+      counter
+    >
+      <template v-slot:selection="{ fileNames }">
+        <template v-for="(fileName, index) in fileNames" :key="fileName">
+          <v-chip v-if="index < 2" class="me-2" color="deep-purple-accent-4" size="small" label>
+            {{ fileName }}
+          </v-chip>
+          <span v-else-if="index === 2" class="text-overline text-grey-darken-3 mx-2">
+            +{{ form.ineFile.length - 2 }} Archivo(s)
+          </span>
+        </template>
+      </template>
+    </v-file-input>
+  </div>
+</div>
+
+
+  <!-- Teléfono -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/8050/8050833.png" alt="Phone Icon" class="flaticon-icon" />
+    </div>
+    <input type="tel" v-model="form.telefono" placeholder="Teléfono" />
+  </div>
+
+  <!-- Correo -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/3494/3494693.png" alt="Email Icon" class="flaticon-icon" />
+    </div>
+    <input type="email" v-model="form.correo" placeholder="Correo" />
+  </div>
+
+  <!-- Contraseña -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/8660/8660343.png" alt="Password Icon" class="flaticon-icon" />
+    </div>
+    <input type="password" v-model="form.contrasena" placeholder="Contraseña" />
+    <img src="https://cdn-icons-png.flaticon.com/128/159/159604.png" alt="Show Password Icon" class="show-password flaticon-icon" />
+  </div>
+
+  <!-- Confirmar Contraseña -->
+  <div class="form-group">
+    <div class="input-icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/8660/8660343.png" alt="Password Icon" class="flaticon-icon" />
+    </div>
+    <input type="password" v-model="form.confirmarContrasena" placeholder="Repita la contraseña" />
+    <img src="https://cdn-icons-png.flaticon.com/128/159/159604.png" alt="Show Password Icon" class="show-password flaticon-icon" />
+  </div>
+</div>
+
 
         <!-- Stepper de Vuetify debajo del formulario -->
         <v-stepper v-model="step" class="custom-stepper" flat>
@@ -327,8 +422,7 @@ export default defineComponent({
 
 .icon-button-group {
   display: flex;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-around;
   margin-bottom: 1rem;
 }
 
@@ -350,7 +444,7 @@ export default defineComponent({
 }
 
 .icon-button:hover {
-  background-color: #b0c4d1 !important;
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
@@ -378,19 +472,88 @@ export default defineComponent({
   }
 
   .form-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0.5rem;
-  }
+  display: flex;
+  align-items: center;
+  border: 1px solid #89A7B1;
+  border-radius: 25px;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #f0f5f8;
+}
 
   .input-icon {
-    margin-right: 8px;
-    margin-bottom: 0;
-  }
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  background-color: #ffffff;
+  border-radius: 50%;
+}
 
   .button-group {
     flex-direction: column;
   }
+
+.additional-options {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.color-sample {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  background-color: #000; /* Default color if none is selected */
+  margin-bottom: 5px;
+}
+
+.color-input {
+  visibility: hidden;
+  position: absolute;
+}
+
+.license-button {
+  background-color: #89A7B1;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+  font-weight: bold;
+}
+
+.license-button:hover {
+  transform: scale(1.05);
+}
+
+.license-button v-icon {
+  font-size: 24px; /* Adjust the icon size within the button */
+}
+
+@media (max-width: 768px) {
+  .additional-options {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
 }
 </style>
