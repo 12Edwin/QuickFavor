@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
@@ -16,9 +17,9 @@ class _NavigationState extends State<Navigation> {
   String _role = 'customer';
   bool _thereIsFavor = false;
 
-  late List <Widget> _courierWidgets = [];
-  final List <Widget> _customerWidgets = [
-    const Placeholder(),
+  late List<Widget> _courierWidgets = [];
+  final List<Widget> _customerWidgets = [
+    const MapCustomer(),
     const Placeholder(),
     const Placeholder(),
     const ProfileCustomer()
@@ -39,17 +40,17 @@ class _NavigationState extends State<Navigation> {
   }
 
   void initCourierWidgets() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  setState(() {
-    _thereIsFavor = prefs.getBool('thereIsFavor') ?? true;
-    _courierWidgets = [
-      _thereIsFavor ? const FavorProgressCourier() : const Placeholder(),
-      const Placeholder(),
-      const Placeholder(),
-      const ProfileCourier()
-    ];
-  });
-}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _thereIsFavor = prefs.getBool('thereIsFavor') ?? true;
+      _courierWidgets = [
+        _thereIsFavor ? const FavorProgressCourier() : const Placeholder(),
+        const Placeholder(),
+        const Placeholder(),
+        const ProfileCourier()
+      ];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,9 @@ class _NavigationState extends State<Navigation> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      body: _role == 'courier' ? _courierWidgets[_selectedIndex] : _customerWidgets[_selectedIndex],
+      body: _role == 'courier'
+          ? _courierWidgets[_selectedIndex]
+          : _customerWidgets[_selectedIndex],
     );
   }
 
@@ -71,45 +74,26 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  List<BottomNavigationBarItem> courierTabs(){
+  List<BottomNavigationBarItem> courierTabs() {
     return [
       const BottomNavigationBarItem(
-        icon: Icon(Icons.location_on),
-        label: 'Lugares'
-      ),
+          icon: Icon(Icons.location_on), label: 'Lugares'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.notifications),
-        label: 'Favores'
-      ),
+          icon: Icon(Icons.notifications), label: 'Favores'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'Historial'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Perfil'
-      )
+          icon: Icon(Icons.history), label: 'Historial'),
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil')
     ];
   }
 
-  List<BottomNavigationBarItem> customerTabs(){
+  List<BottomNavigationBarItem> customerTabs() {
     return [
+      const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Locales'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.search),
-        label: 'Locales'
-      ),
+          icon: Icon(Icons.add_circle), label: 'Nuevo favor'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.add_circle),
-        label: 'Nuevo favor'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'Historial'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Perfil'
-      )
+          icon: Icon(Icons.history), label: 'Historial'),
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil')
     ];
   }
 }

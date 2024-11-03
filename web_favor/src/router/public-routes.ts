@@ -1,4 +1,3 @@
-import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import RecoveryPassword from "@/views/RecoveryPassword.vue";
 import SendCode from "@/views/SendCode.vue";
@@ -12,14 +11,6 @@ export default [
             requireAuth: false
         },
         children:[
-            {
-                path: 'login',
-                name: 'login',
-                component: Login,
-                meta:{
-                    title: 'Iniciar sesión'
-                },
-            },
             {
                 path: 'register',
                 name: 'register',
