@@ -1557,6 +1557,11 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/google.maps@^3.58.1":
+  version "3.58.1"
+  resolved "https://registry.yarnpkg.com/@types/google.maps/-/google.maps-3.58.1.tgz#71ce3dec44de1452f56641d2c87c7dd8ea964b4d"
+  integrity sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==
+
 "@types/graceful-fs@^4.1.2":
   version "4.1.9"
   resolved "https://registry.npmjs.org/@types/graceful-fs/-/graceful-fs-4.1.9.tgz"
@@ -4355,6 +4360,11 @@ globby@^11.0.2, globby@^11.0.3:
     ignore "^5.2.0"
     merge2 "^1.4.1"
     slash "^3.0.0"
+
+google-maps-js-api-loader@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/google-maps-js-api-loader/-/google-maps-js-api-loader-4.0.3.tgz#ac050d9529b864865cd85d7beeae4a9ebafc404d"
+  integrity sha512-N3ic/MX9Vel419nb2wpsLZQtlEnQx5ZlS2vmAEzzrMFh8DH8xu5KN1OIQPQUiIK1xDTY0zeLj4kJFehFySWYvg==
 
 gopd@^1.0.1:
   version "1.0.1"

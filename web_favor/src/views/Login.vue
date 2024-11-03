@@ -134,8 +134,8 @@ export default defineComponent({
 
 .card-custom {
   position: relative; 
-  margin-left: 32px;
-  margin-right: 32px;
+  margin-left: 128px;
+  margin-right: 128px;
   border-radius: 16px;
   background-color: rgba(255, 255, 255, 0.8); 
   backdrop-filter: blur(10px);
@@ -237,4 +237,11 @@ export default defineComponent({
     margin-right: 16px;
   }
 }
+@media screen and (min-width: 961px) and (max-width: 1280px) {
+  .card-custom {
+    margin-left: 72px;
+    margin-right: 72px;
+  }
+}
+
 </style>
