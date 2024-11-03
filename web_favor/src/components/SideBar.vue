@@ -1,10 +1,14 @@
 <template>
   <div class="d-flex flex-column">
-    <div class="head-sidebar"></div>
-    <div class="sidebar pr-0 pl-0 text-white pa-3">
+    <div class="head-sidebar">
+      <v-button @click="toggleSidebar" class="d-block d-md-none">
+        <v-icon icon="fa-solid fa-grip-lines" class="icon-bar" />
+      </v-button>
+    </div>
+    <div class="sidebar pr-0 pl-0 text-white pa-3" :class="{ 'active': isSidebarOpen }">
       <div class="h-sidebar">
-        <img src="@/assets/logo.png" height="100" />
-        <h4 class="mt-2">Quick Favor</h4>
+        <img src="@/assets/logo.png" class="img-sidebar" height="100" />
+        <h4 class="text-center">Quick Favor</h4>
       </div>
       <nav class="w-100 pa-0">
         <div
@@ -19,8 +23,8 @@
               { selected: selected === item.name },
             ]"
           >
-            <component :is="item.icon" class="ml-2" />
-            <span>{{ item.text }}</span>
+            <div><v-icon :icon="item.icon" class="icon-sidebar" /></div>
+            <span class="text-sidebar">{{ item.text }}</span>
           </div>
         </div>
       </nav>
@@ -36,16 +40,24 @@ export default defineComponent({
   data() {
     return {
       selected: "",
+      isSidebarOpen: false, 
       menuItems: [
-        { name: "map", text: "Mapa" },
-        { name: "order", text: "Favor" },
-        { name: "notifications", text: "Notificaciones" },
-        { name: "history", text: "Historial" },
-        { name: "profile", text: "Perfil" },
+        { name: "map", text: "Mapa", icon: "fa-solid fa-location-dot" },
+        {
+          name: "notifications",
+          text: "Notificaciones",
+          icon: "fa-solid fa-bell",
+        },
+        { name: "order", text: "Favor", icon: "fa-solid fa-box" },
+        { name: "history", text: "Historial", icon: "fa-solid fa-history" },
+        { name: "profile", text: "Perfil", icon: "fa-solid fa-user" },
       ],
     };
   },
   methods: {
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen; // Alterna el estado
+    },
     setSelected(name: string, ind: number) {
       const items = document.getElementsByClassName(
         "n-item"
@@ -96,6 +108,18 @@ export default defineComponent({
   background: #89a7b1;
   position: relative;
   backdrop-filter: blur(5px);
+  transition: transform 0.3s ease; /* Transición para el sidebar */
+}
+
+.sidebar.active {
+  margin-top: 68px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%; 
+  z-index: 1000; 
+  transform: translateX(0);
 }
 
 .head-sidebar {
@@ -154,5 +178,20 @@ nav {
   background-color: #89a7b1;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
+}
+.icon-sidebar {
+  color: #cbdad5;
+  margin-left: 2px;
+  margin-right: 4px;
+}
+
+@media screen and (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%); /* Oculta el sidebar inicialmente */
+  }
+
+  .sidebar.active {
+    transform: translateX(0); /* Muestra el sidebar */
+  }
 }
 </style>
