@@ -818,7 +818,7 @@ export default defineComponent({
 .no-orders-image {
   width: 300px;
   height: auto;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
 }
 
 .white-card {
