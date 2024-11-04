@@ -8,7 +8,7 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa:fas fa-circle-notch fa-spin"></v-icon> ¿Dónde Estoy?
+              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> ¿Dónde Estoy?
             </h2>
             <div class="switch-container">
               <label class="switch">

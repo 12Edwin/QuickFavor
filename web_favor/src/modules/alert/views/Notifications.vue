@@ -8,7 +8,7 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa:fas fa-circle-notch fa-spin"></v-icon> Notificaciones de favores
+              <v-icon icon="fa-solid fa-bell" style="color: white;"></v-icon> Notificaciones de favores
             </h2>
             <div class="switch-container">
               <label class="switch">
@@ -117,7 +117,7 @@ export default defineComponent({
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   height: 88vh;
-  background-color: rgba(255, 255, 255, 0.5); 
+  background-color: rgba(255, 255, 255, 0.4); 
   backdrop-filter: blur(10px);
   overflow: visible; 
   z-index: 1; 

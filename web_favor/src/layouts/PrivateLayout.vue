@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex flex-column flex-md-row">
+    <div class="d-flex flex-column flex-md-row ">
       <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
         <div class="header">
@@ -20,30 +20,41 @@ import SideBar from "@/components/SideBar.vue";
 
 export default defineComponent({
   name: "PrivateLayout",
-  components: { SideBar }
+  components: { SideBar },
+  data() {
+    return {
+      isSidebarOpen: false
+    };
+  }
 });
 </script>
 
 <style scoped>
+
 .content {
   flex-grow: 1;
-  overflow: auto;
+  overflow: hidden;
   height: 100vh;
   position: relative;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+
+/* Oculta el scrollbar en Chrome, Safari y Opera */
 body::-webkit-scrollbar, .content::-webkit-scrollbar {
   display: none;
 }
 
+/* Cuerpo del contenido con padding */
 .content-body {
-  padding-top: 8px;
-  padding-left: 32px;
-  padding-right: 32px;
+  padding-top: 16px;
 }
 
+/* Encabezado sticky en la parte superior */
 .header {
   z-index: 1;
   position: sticky;
@@ -56,18 +67,23 @@ body::-webkit-scrollbar, .content::-webkit-scrollbar {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  padding-right: 16px; /* Espacio extra a la derecha */
 }
 
+/* Estilos específicos para pantallas pequeñas */
 @media (max-width: 900px) {
   .content {
     height: 100vh;
     padding-left: 0;
     padding-right: 0;
   }
+
+  /* Oculta el sidebar en pantallas pequeñas */
   .sidebar {
     display: none;
   }
 
+  /* Muestra el sidebar cuando está activo en pantallas pequeñas */
   .sidebar.active {
     display: block;
   }
