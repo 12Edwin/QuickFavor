@@ -233,8 +233,8 @@ export default defineComponent({
     width: 100px;
   }
   .card-custom {
-    margin-left: 16px;
-    margin-right: 16px;
+    margin-left: 0px;
+    margin-right: 0px;
   }
 }
 @media screen and (min-width: 961px) and (max-width: 1280px) {

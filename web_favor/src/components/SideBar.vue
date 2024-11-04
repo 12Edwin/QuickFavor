@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "SideBar",
@@ -56,7 +56,7 @@ export default defineComponent({
   },
   methods: {
     toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen; // Alterna el estado
+      this.isSidebarOpen = !this.isSidebarOpen; 
     },
     setSelected(name: string, ind: number) {
       const items = document.getElementsByClassName(
@@ -104,32 +104,32 @@ export default defineComponent({
 }
 .sidebar {
   width: 250px;
-  height: 92vh;
+  height: 100%; 
   background: #89a7b1;
-  position: relative;
   backdrop-filter: blur(5px);
-  transition: transform 0.3s ease; /* Transición para el sidebar */
+  transition: transform 0.3s ease; 
+  z-index: 1000;
+  margin-top: 56px;
 }
 
 .sidebar.active {
-  margin-top: 68px;
-  position: absolute;
+  margin-top: 67px;
   top: 0;
   left: 0;
   right: 0;
-  height: 100%; 
   z-index: 1000; 
   transform: translateX(0);
 }
 
+
 .head-sidebar {
   width: 250px;
-  height: 8vh;
-  position: relative;
+  height: 68px;
+  position: absolute;
   top: 0;
   left: 0;
   background-color: rgba(137, 167, 177, 0.6);
-  backdrop-filter: blur(5px);
+  z-index: 1001;
 }
 
 nav {
@@ -187,11 +187,26 @@ nav {
 
 @media screen and (max-width: 900px) {
   .sidebar {
-    transform: translateX(-100%); /* Oculta el sidebar inicialmente */
+    transform: translateX(-100%); 
+    position: fixed;
   }
 
   .sidebar.active {
-    transform: translateX(0); /* Muestra el sidebar */
+    transform: translateX(0); 
+  }
+
+  .head-sidebar{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: transparent;
+    margin-left: 20px;
+  }
+
+  @media screen and (min-width: 900px) {
+    .sidebar {
+      transform: translateX(0);
+    }
   }
 }
 </style>
