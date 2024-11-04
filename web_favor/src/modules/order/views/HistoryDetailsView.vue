@@ -818,7 +818,7 @@ export default defineComponent({
 .no-orders-image {
   width: 300px;
   height: auto;
-  margin-bottom: 0px;
+  margin-bottom: 30px;
 }
 
 .white-card {
@@ -881,5 +881,17 @@ export default defineComponent({
 .icon-link {
   margin-left: 100px; /* Espacio entre el chip y el icono */
   text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .status-container {
+    flex-grow: 1;
+    margin-left: 20px;
+  }
+
+  .status-button {
+    width: 100%;
+    max-width: 200px; /* Define un ancho máximo solo en móviles */
+  }
 }
 </style>

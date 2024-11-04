@@ -338,6 +338,7 @@ export default defineComponent({
 }
 
 /* Estilos para el botón de estado */
+
 .status-container {
   margin-left: auto;
   display: flex;
@@ -358,7 +359,7 @@ export default defineComponent({
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   width: 350px;
   position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
+  overflow: visible;
 }
 
 .status-button.inactive {
@@ -487,22 +488,45 @@ export default defineComponent({
   text-decoration: none;
 }
 
-/* Estilos para el componente de paginación */
-.pagination-style {
-  color: #2c3e50; /* Color de texto de la paginación */
-  --v-pagination-active-color: #2c3e50; /* Color para el número activo */
-}
+/* Ajustes solo para dispositivos móviles */
+@media (max-width: 768px) {
+  .status-container {
+    flex-grow: 1;
+    margin-left: 20px;
+  }
 
-.pagination-style .v-pagination__item--active {
-  background-color: #b0bec5 !important; /* Fondo para el número activo */
-  color: #ffffff !important; /* Color del número activo */
-}
+  .status-button {
+    width: 100%;
+    max-width: 200px; /* Define un ancho máximo solo en móviles */
+  }
 
-.pagination-style .v-pagination__item {
-  color: #2c3e50 !important; /* Color de los números no activos */
-}
+  .v-chip.v-chip--size-default {
+    padding: 0 50px !important; /* Reduce el padding en dispositivos móviles */
+    font-size: 10px; /* Ajusta el tamaño de la fuente para mejorar la legibilidad */
+    width: 100%; /* Hace que el chip ocupe todo el ancho disponible */
+    justify-content: center; /* Centra el contenido del chip */
+    overflow: hidden; /* Evita que el texto se salga del chip */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es demasiado largo */
+    white-space: nowrap; /* Mantiene el texto en una sola línea */
+  }
 
-.pagination-style .v-pagination__item--arrow {
-  color: #2c3e50 !important; /* Color de las flechas */
+  .icon-style {
+    font-size: 30px;
+    color: #312070;
+    padding: 10px 8px 6px 0px;
+  }
+
+  .icon-link {
+    margin-left: 3px; /* Espacio entre el chip y el icono */
+    text-decoration: none;
+  }
+
+  .left-strip {
+    width: 95px;
+    min-height: 95px;
+    background-color: #34344e;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
 }
 </style>
