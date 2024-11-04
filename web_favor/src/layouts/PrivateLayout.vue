@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="d-flex">
-      <SideBar/>
+    <div class="d-flex flex-column flex-md-row ">
+      <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
         <div class="header">
           <span class="text-light text me-3">Juan Rodrígo</span>
@@ -15,37 +15,47 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue'
+import { defineComponent } from 'vue';
 import SideBar from "@/components/SideBar.vue";
-import WaveComponent from "@/components/WaveComponent.vue";
 
 export default defineComponent({
   name: "PrivateLayout",
-  components: {WaveComponent, SideBar}
-})
+  components: { SideBar },
+  data() {
+    return {
+      isSidebarOpen: false
+    };
+  }
+});
 </script>
 
 <style scoped>
-.content{
-  width: 100%;
-  overflow: auto;
+
+.content {
+  flex-grow: 1;
+  overflow: hidden;
   height: 100vh;
   position: relative;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+
+/* Oculta el scrollbar en Chrome, Safari y Opera */
 body::-webkit-scrollbar, .content::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, and Opera */
+  display: none;
 }
 
-.content-body{
-  padding-top: 8px;
-  padding-left: 32px;
-  padding-right: 32px;
+/* Cuerpo del contenido con padding */
+.content-body {
+  padding-top: 16px;
 }
 
-.header{
+/* Encabezado sticky en la parte superior */
+.header {
   z-index: 1;
   position: sticky;
   top: 0;
@@ -55,8 +65,27 @@ body::-webkit-scrollbar, .content::-webkit-scrollbar {
   background-color: rgba(137, 167, 177, 0.6);
   backdrop-filter: blur(5px);
   display: flex;
-  justify-content: right;
+  justify-content: flex-end;
   align-items: center;
-  padding: 16px;
+  padding-right: 16px; /* Espacio extra a la derecha */
+}
+
+/* Estilos específicos para pantallas pequeñas */
+@media (max-width: 900px) {
+  .content {
+    height: 100vh;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Oculta el sidebar en pantallas pequeñas */
+  .sidebar {
+    display: none;
+  }
+
+  /* Muestra el sidebar cuando está activo en pantallas pequeñas */
+  .sidebar.active {
+    display: block;
+  }
 }
 </style>
