@@ -490,8 +490,23 @@ export default defineComponent({
 
 /* Ajustes solo para dispositivos móviles */
 @media (max-width: 768px) {
+  .history-container {
+    height: 88vh;
+    padding: 0px;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto; /* Permite desplazamiento vertical */
+  }
+
+  .title-container {
+    flex-shrink: 0; /* Mantiene el tamaño del contenedor de título fijo */
+    width: 400px;
+    display: flex;
+    justify-content: center; /* Centra el título y el botón de estado */
+  }
+
   .status-container {
-    flex-grow: 1;
+    flex-grow: 0;
     margin-left: 20px;
   }
 
