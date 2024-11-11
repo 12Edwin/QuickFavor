@@ -1,18 +1,18 @@
 import {User} from 'firebase/auth';
 
-export interface LoginRequest {
+export type LoginRequest = {
     email: string;
     password: string;
 }
 
-export interface LoginResponse {
+export type LoginResponse = {
     user: UserDetail | null;
     token?: string;
     isEmailVerified: boolean;
     error?: string;
 }
 
-interface UserDetail {
+type UserDetail  ={
     uid: string;
     email: string;
     name: string;

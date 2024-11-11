@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-const serviceAccount = require('../../node-users-c60ae-firebase-adminsdk-98z1q-5654a6305c.json');
+const serviceAccount = require('../../node-users-c60ae-firebase-adminsdk-98z1q-ff8b99c1ea.json');
 
  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
@@ -21,3 +21,4 @@ export {
     admin,
     auth
 };
+export const messaging = admin.messaging();

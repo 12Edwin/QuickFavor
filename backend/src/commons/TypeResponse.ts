@@ -58,3 +58,12 @@ export function Response500<T>(data: T, message= "'Internal server error'"): Res
         data: data
     };
 }
+
+export function Response503<T>(data: T, message= "'Server is at maximum capacity'"): ResponseApi<T> {
+    return {
+        code: 503,
+        error: true,
+        message: message,
+        data: data
+    };
+}
