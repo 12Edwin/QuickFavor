@@ -8,8 +8,9 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@types/google.maps": "^3.58.1",
+    "@fortawesome/fontawesome-free": "^6.6.0",
     "@mdi/js": "^7.4.47",
+    "@types/google.maps": "^3.58.1",
     "core-js": "^3.8.3",
     "register-service-worker": "^1.7.2",
     "vue": "^3.5.12",

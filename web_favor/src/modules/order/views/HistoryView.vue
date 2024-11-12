@@ -4,79 +4,66 @@
   </div>
   <div class="history-container">
     <div class="title-container">
-      <i class="fa-solid fa-bell bell-icon"></i>
-      <h1 class="titlePrincipal">Historial</h1>
-      <div class="status-container">
-        <button
-          class="status-button"
-          :class="{ inactive: !isActive }"
-          @click="toggleStatus"
-        >
-          <div class="icon-circle" :class="{ 'inactive-icon': !isActive }">
-            <i
-              class="fa-solid fa-power-off power-icon"
-              :class="{ 'inactive-icon': !isActive }"
-            ></i>
-          </div>
-          <span class="status-text">{{
-            isActive ? "Activo" : "Inactivo"
-          }}</span>
-        </button>
+      <div>
+        <i class="fas fa-history bell-icon"> <span class="ml-4 bell-icon fas"> H i s t o r i a l </span></i>
       </div>
-    </div>
-    <div v-if="data.length === 0" class="no-orders">
-      <img
-        src="../../../assets/empty2.png"
-        alt="No hay pedidos"
-        class="no-orders-image"
-      />
-      Aún no hay pedidos en esta cuenta
-    </div>
-    <div v-else>
-      <div v-for="(item, index) in data" :key="index">
-        <v-card class="white-card card-overlay">
-          <div class="card-content">
-            <div class="left-strip"></div>
-            <div class="text-content">
-              <p class="title">{{ item.numeroProductos }} productos</p>
-              <p class="date">{{ item.fecha }}</p>
-            </div>
-            <v-chip
-              :color="getChipColor(item.estatus)"
-              variant="flat"
-              class="chip-style"
-            >
-              <span style="color: white">{{ item.estatus }}</span>
-            </v-chip>
-            <!-- Enlace clickeable al ícono -->
-            <router-link
-              :to="{ name: 'historyDetails', params: { id: index } }"
-              class="icon-link"
-            >
-              <i class="fa-solid fa-eye icon-style"></i>
-            </router-link>
-          </div>
-        </v-card>
-      </div>
+      <Switch @onFalse="" @onTrue=""/>
 
-      <!-- Componente de paginación debajo de las cards -->
-      <v-pagination
-        :length="3"
-        :show-arrows="true"
-        rounded="circle"
-        class="pagination-style"
-      ></v-pagination>
     </div>
-  </div>
+    <div class="details-container">
+      <div v-if="data.length === 0" class="no-orders">
+        <img
+          src="../../../assets/empty2.png"
+          alt="No hay pedidos"
+          class="no-orders-image"
+        />
+        Aún no hay pedidos en esta cuenta
+      </div>
+      <div class="h-100" v-else>
+        <div class="h-100" v-for="(item, index) in data" :key="index">
+          <v-card class="white-card d-flex h-100 w-100">
+            <div class="left-strip"></div>
+            <v-row class="h-100">
+              <v-col xl="4" lg="4" md="4" sm="6" class="d-flex align-center flex-column justify-center">
+                <p class="title">{{ item.numeroProductos }} productos</p>
+                <p class="date">{{ item.fecha }}</p>
+              </v-col>
+              <v-col xl="5" lg="5" md="5" sm="6" class="d-flex justify-center align-center">
+                <v-chip :color="getChipColor(item.estatus)" variant="flat" class="chip-style">
+                  <span style="color: white">{{ item.estatus }}</span>
+                </v-chip>
+              </v-col>
+              <v-col xl="2" lg="2" md="2" sm="6" class="d-flex justify-end align-center">
+                <router-link
+                  :to="{ name: 'historyDetails', params: { id: index } }"
+                  class="icon-link">
+                  <i class="fa-solid fa-eye icon-style"></i>
+                </router-link>
+              </v-col>
+            </v-row>
+          </v-card>
+        </div>
+        </div>
+
+        <!-- Componente de paginación debajo de las cards -->
+        <v-pagination
+          :length="3"
+          :show-arrows="true"
+          rounded="circle"
+          class="pagination-style"
+        ></v-pagination>
+      </div>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
 
 export default defineComponent({
   name: "HistoryView",
-  components: { WaveComponent },
+  components: {Switch, WaveComponent },
   data() {
     return {
       isActive: true, // Variable para manejar el estado del botón
@@ -307,100 +294,43 @@ export default defineComponent({
 }
 
 .history-container {
-  height: 88vh;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  position: static;
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
 
-/* Estilo para el contenedor del título */
 .title-container {
-  width: 100%;
-  background-color: #566981; /* Color de fondo azul claro */
-  padding: 16px;
   display: flex;
-  justify-content: left;
   align-items: center;
-  margin-bottom: 25px;
+  background-color: #566981;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.titlePrincipal {
-  color: #ffffff; /* Color de texto blanco */
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
+.title-container > *:nth-child(n+4) {
+  justify-content: center;
+  width: 100%;
+  display: flex;
+}
+
+.details-container{
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
+  border-radius: 10px;
 }
 
 .bell-icon {
-  color: #ffffff; /* Mismo color que el texto del título */
-  font-size: 30px; /* Tamaño del icono */
-  margin-right: 30px;
-}
-
-/* Estilos para el botón de estado */
-.status-container {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
-
-.status-button {
-  display: flex;
-  align-items: center;
-  background-color: #89a7b1;
-  border: none;
-  border-radius: 50px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 16px;
+  color: #ffffff;
+  font-size: 20px;
   font-weight: bold;
-  cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
-}
-
-.status-button.inactive {
-  background-color: #f70b0b;
-}
-
-.icon-circle {
-  background-color: white;
-  border-radius: 50%;
-  padding: 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  position: absolute;
-  left: -8px; /* Ajusta cuánto sobresale el icono */
-}
-
-.icon-circle.inactive-icon {
-  background-color: #ffffff;
-}
-
-.power-icon {
-  color: #0066cc; /* Color del icono de encendido */
-  font-size: 24px;
-}
-
-.power-icon.inactive-icon {
-  color: #f70b0b;
-}
-
-.status-text {
-  color: white;
-  margin-left: 30px;
-}
-
-/* Contenedor para centrar solo la sección de no-orders */
-.no-orders-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  gap: 8px;
 }
 
 .no-orders {
@@ -421,16 +351,11 @@ export default defineComponent({
 .white-card {
   background-color: white;
   width: 85%;
-  margin: 0 auto;
-  margin-bottom: 20px; /* Espacio entre cards */
+  margin-bottom: 20px;
   padding: 0;
-  display: flex;
-  align-items: center;
 }
 
-.card-overlay {
-  z-index: 2;
-}
+
 
 .card-content {
   display: flex;
@@ -441,7 +366,6 @@ export default defineComponent({
 
 .left-strip {
   width: 20px;
-  min-height: 78px;
   background-color: #34344e;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;

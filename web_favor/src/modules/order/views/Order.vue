@@ -7,18 +7,7 @@
     <!-- Header con fondo azul y iconos de Font Awesome -->
     <div class="title-container">
       <i class="fas fa-bell bell-icon"> <span class="ml-4 bell-icon fas"> O r d e n </span></i>
-      <div class="status-container">
-        <button
-            :class="{ inactive: !isActive }"
-            class="status-button"
-            @click="toggleStatus"
-        >
-          <div :class="{ 'inactive-icon': !isActive }" class="icon-circle">
-            <i :class="['fas', 'fa-power-off', isActive ? 'power-icon' : 'power-icon-inactive']"></i>
-          </div>
-          <span class="status-text">{{ isActive ? "Activo" : "Inactivo" }}</span>
-        </button>
-      </div>
+      <Switch @onFalse="" @onTrue=""/>
     </div>
 
     <!-- Contenedor de detalles en fondo blanco -->
@@ -134,7 +123,7 @@
 
           <!-- Círculo pequeño -->
           <div class="step-item-small">
-            <span>Sig</span>
+            <span>-</span>
             <i class="fas fa-chevron-right step-icon"></i>
           </div>
 
@@ -145,7 +134,7 @@
 
           <!-- Círculo pequeño -->
           <div class="step-item-small">
-            <span>Sig</span>
+            <span>-</span>
             <i class="fas fa-chevron-right step-icon"></i>
           </div>
 
@@ -153,6 +142,20 @@
           <div class="step-item-large">
             <i class="fas fa-dollar-sign step-icon"></i>
           </div>
+        </div>
+
+        <div class="w-100">
+          <v-progress-linear
+              :color="white"
+              height="15"
+              rounded
+              :active="true"
+              :striped="true"
+              :rounded="true"
+              :rounded-bars="true"
+              :rounded-bar="true"
+              :model-value="statusText === 'Proceso de compra' ? 33 : statusText === 'Proceso de entrega' ? 66 : 100"
+          ></v-progress-linear>
         </div>
 
         <div class="buttons-container">
@@ -180,6 +183,7 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
 
 type Address = {
   name: string;
@@ -194,6 +198,7 @@ type Product = {
 export default defineComponent({
   name: "Order",
   components: {
+    Switch,
     WaveComponent,
   },
   data() {
@@ -300,6 +305,8 @@ export default defineComponent({
   padding: 1.5rem;
   border-radius: 10px;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .badge-style {
@@ -312,38 +319,11 @@ export default defineComponent({
 
 .bell-icon {
   color: #ffffff;
-  font-size: 28px;
+  font-size: 20px;
   font-weight: bold;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-
-.status-container {
-  display: flex;
-  align-items: center;
-}
-
-.status-button {
-  display: flex;
-  align-items: center;
-  background-color: #89a7b1;
-  border: none;
-  border-radius: 50px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
-}
-
-.status-button.inactive {
-  background-color: #f70b0b;
 }
 
 .icon-circle {
@@ -356,14 +336,8 @@ export default defineComponent({
   margin-right: 8px;
 }
 
-.status-text {
-  color: white;
-  margin-left: 8px;
-}
-
-/* Contenedor de detalles del pedido */
 .details-container {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.4);
   padding: 2rem;
   border-radius: 10px;
 }
@@ -373,11 +347,6 @@ export default defineComponent({
   margin-bottom: 1rem;
   font-size: 2rem;
   font-weight: bold;
-}
-
-/* Columna Izquierda (Perfil e Información del Usuario) */
-.left-column {
-  text-align: left;
 }
 
 .profile-avatar img {
@@ -412,10 +381,11 @@ export default defineComponent({
 /* Step Progress de Direcciones */
 .direction-buttons {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   margin-top: 1.5rem;
+  width: 80%;
 }
 
 .chat-container {
@@ -470,15 +440,6 @@ export default defineComponent({
   margin-top: 1rem;
 }
 
-/* Columna del Medio */
-.center-column {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 2rem;
-}
-
 .chat-icon {
   color: #0066cc;
   font-size: 18px;
@@ -501,42 +462,6 @@ export default defineComponent({
   width: 256px;
   height: 128px;
   margin-top: 1rem;
-}
-
-/* Columna Derecha */
-.right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.status-bar {
-  background-color: #f9a825; /* Color de fondo naranja claro */
-  color: #ffffff; /* Color de texto blanco */
-  border-radius: 20px; /* Bordes redondeados */
-  padding: 6px 16px; /* Espaciado más pequeño */
-  font-size: 14px; /* Tamaño de fuente más pequeño */
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: none; /* Sin sombra */
-  width: 350px;
-  border: none;
-  margin-bottom: 20px; /* Espaciado entre el botón y la tabla */
-
-}
-
-/* Título de la sección de productos */
-.product-section-title {
-  background-color: #566981;
-  color: white;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 8px 8px 0 0;
-  text-align: left;
-  font-size: 1.2rem;
-  margin-top: 8px;
-  width: 100%;
 }
 
 /* Contenedor principal de la lista de productos */
@@ -567,13 +492,6 @@ export default defineComponent({
   font-size: 1.2rem;
   color: #34344e;
   text-align: center;
-}
-
-.product-info {
-  display: flex;
-  flex-direction: column;
-  color: #34344e;
-  padding-left: 8px;
 }
 
 .product-name {

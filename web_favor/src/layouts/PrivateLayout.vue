@@ -4,7 +4,8 @@
       <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
         <div class="header-layout">
-          <span class="text-light text mr-3">Juan Rodrígo</span>
+          <span class="text-light text mr-3 font-weight-bold mr-3">Juan Rodrígo</span>
+          <span class="text-light text mr-3 font-weight-bold pa-2 px-5 cursor-pointer rounded-pill bg-blue-grey-lighten-4"> <i class="fas fa-sign-out-alt"></i> </span>
         </div>
         <div class="content-body">
           <router-view></router-view>
@@ -53,17 +54,18 @@ body::-webkit-scrollbar, .content::-webkit-scrollbar {
 .content-body {
   padding-top: 16px;
   position: relative;
+  flex-grow: 1;
 }
 
 /* Encabezado sticky en la parte superior */
 .header-layout {
-  z-index: 1;
+  z-index: 99;
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
-  padding-top: calc(4dvh - 13px);
-  padding-bottom: calc(4dvh - 13px);
+  padding-top: calc(4dvh - 20px);
+  padding-bottom: calc(4dvh - 20px);
   background-color: rgba(137, 167, 177, 0.6);
   backdrop-filter: blur(5px);
   display: flex;
