@@ -401,6 +401,25 @@ export default defineComponent({
   border-radius: 50%;
 }
 
+.input-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-radius: 50%;
+  color: #fff;
+  margin-right: 8px;
+}
+
+.flaticon-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(54%) sepia(35%) saturate(2120%) hue-rotate(195deg) brightness(95%) contrast(90%);
+}
+
+
 /* Inputs */
 input:checked+.slider {
   background-color: #4caf50;
