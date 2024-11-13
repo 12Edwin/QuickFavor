@@ -44,8 +44,20 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-card class="input-card">
-                  <input class="input" type="input" placeholder="Nuevo telefono" required />
-                  <input class="input" type="email" placeholder="Nuevo correo" required />
+                  <div class="input-group">
+                    <div>
+                      <v-icon class="icon" icon="fa-solid fa-phone"></v-icon>
+                    </div>
+                    <input class="input" type="input" placeholder="Nuevo telefono" required />
+                  </div>
+
+                  <div class="input-group">
+                    <div>
+                      <v-icon class="icon" icon="fa-solid fa-envelope"></v-icon>
+                    </div>
+                    <input class="input" type="email" placeholder="Nuevo correo" required />
+                  </div>
+
 
                   <div class="div-btn">
                     <v-btn class="btn">
@@ -242,7 +254,7 @@ export default defineComponent({
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .card-custom {
     overflow-y: auto;
     scrollbar-width: none;
@@ -253,7 +265,6 @@ export default defineComponent({
 
   .card-custom ::-webkit-scrollbar {
     display: none;
-    /* Para Chrome, Safari y Opera */
   }
 }
 
@@ -272,6 +283,9 @@ export default defineComponent({
   padding: 8px;
   border-radius: 16px;
   margin-bottom: 20px;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .card-header {
@@ -345,7 +359,7 @@ export default defineComponent({
 }
 
 .icon {
-  color: #000000;
+  color: #5686e1;
 }
 
 .icon-save {
@@ -387,6 +401,7 @@ export default defineComponent({
   border-radius: 50%;
 }
 
+/* Inputs */
 input:checked+.slider {
   background-color: #4caf50;
 }
@@ -416,6 +431,19 @@ input:checked+.slider:before {
   outline: none;
   transition: border-color 0.3s;
   margin: 10px;
+  background-color: white;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #89A7B1;
+  border-radius: 25px;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 /* Dialog */
@@ -489,24 +517,6 @@ input:checked+.slider:before {
 
 .small-file-input .v-file-input .v-label {
   font-size: 0.8rem;
-}
-
-.input-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border-radius: 50%;
-  color: #fff;
-  margin-right: 8px;
-}
-
-.flaticon-icon {
-  width: 24px;
-  height: 24px;
-  filter: invert(54%) sepia(35%) saturate(2120%) hue-rotate(195deg) brightness(95%) contrast(90%);
 }
 
 .scrollable-step {
