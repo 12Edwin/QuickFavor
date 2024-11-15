@@ -14,10 +14,23 @@
           <div class="content" sty>
             <v-row justify="center" no-gutters style="margin-top: 30px;">
               <v-col cols="12" md="3" class="text-center">
-                <v-avatar
-                  image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s"
-                  size="200" class="avatar">
-                </v-avatar>
+                <div class="profile-container">
+                  <v-avatar :image="avatarImage" size="200" class="avatar"></v-avatar>
+
+                  <!-- Botón para cambiar la foto en una esquina pegada al avatar -->
+                  <v-btn icon @click="triggerFileInput" class="upload-btn" >
+                    <v-icon class="icon" icon="fa-solid fa-camera"></v-icon>
+                  </v-btn>
+
+                  <!-- Input de archivo oculto para seleccionar la foto de perfil -->
+                  <input type="file" ref="fileInput" @change="onFileSelected" accept="image/*" style="display: none;" />
+
+                  <!-- Botón para guardar la imagen en local storage debajo de la foto -->
+                  <v-btn @click="saveImage" class="btn">
+                    <v-icon class="icon-save" icon="fa-solid fa-save"></v-icon>
+                    <v-text>Guardar</v-text>
+                  </v-btn>
+                </div>
                 <h3>Juan Rodrigo</h3>
                 <div class="d-flex align-center justify-center txt">
                   <v-icon icon="mdi-phone" style="color: black !important"></v-icon>
@@ -69,7 +82,7 @@
 
               </v-col>
               <v-col cols="12" md="6" class="d-flex justify-center">
-                <v-btn @click="openDialog" icon>
+                <v-btn style="margin-left: 16px;" @click="openDialog" icon>
                   <v-icon icon="fa-solid fa-pen" class="icon"></v-icon>
                 </v-btn>
                 <v-card class="pa-2 oval-card">
@@ -194,6 +207,8 @@ export default defineComponent({
       ineFile: [] as File[],
       descripcion: '',
     });
+    const avatarImage = ref('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s');
+    const fileInput = ref<HTMLInputElement | null>(null);
     const showDescriptionOnly = ref(false);
     const showImageOnly = ref(false);
     const selectOption = (index: number) => {
@@ -208,20 +223,51 @@ export default defineComponent({
         showImageOnly.value = false;
       }
     };
+
+    
+
+    // Trigger file input when button is clicked
+    const triggerFileInput = () => {
+      fileInput.value?.click();
+    };
+
+    // Handle file selection
+    const onFileSelected = (event: Event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        avatarImage.value = URL.createObjectURL(file);
+      }
+    };
+
+    // Save image to local storage (optional)
+    const saveImage = () => {
+      localStorage.setItem('profileImage', avatarImage.value);
+      alert('Profile picture saved!');
+    };
+
+    // Load saved image on component mount
+    if (localStorage.getItem('profileImage')) {
+      avatarImage.value = localStorage.getItem('profileImage') as string;
+    }
+
+    const openDialog = () => {
+      dialog.value = true;
+      console.log("Dialog opened");
+    };
+
     return {
       dialog,
       form,
       showDescriptionOnly,
       showImageOnly,
-      selectOption
+      selectOption,
+      avatarImage,
+      triggerFileInput,
+      onFileSelected,
+      fileInput,
+      saveImage,
+      openDialog
     };
-  },
-  methods: {
-    openDialog() {
-      this.dialog = true;
-      console.log("Dialog opened");
-
-    },
   },
 
 });
@@ -272,6 +318,8 @@ export default defineComponent({
   border-radius: 16px;
   background-color: #F5F5F5;
   margin-bottom: 20px;
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 .txt {
@@ -313,6 +361,7 @@ export default defineComponent({
   height: 250px;
   background-color: #89A7B1;
   margin-bottom: 20px;
+  margin-right: 16px;
 }
 
 @media (max-width: 768px) {
@@ -327,6 +376,28 @@ export default defineComponent({
     width: 90vw;
     height: 30vh;
   }
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.avatar {
+  margin-bottom: 10px;
+}
+
+.upload-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.save-btn {
+  margin-top: 10px;
+
 }
 
 /* textos, iconos, botones */
@@ -348,6 +419,7 @@ export default defineComponent({
   background-color: #566981;
   color: white;
   border-radius: 20px;
+
 }
 
 .btn v-icon {
@@ -401,23 +473,6 @@ export default defineComponent({
   border-radius: 50%;
 }
 
-.input-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border-radius: 50%;
-  color: #fff;
-  margin-right: 8px;
-}
-
-.flaticon-icon {
-  width: 24px;
-  height: 24px;
-  filter: invert(54%) sepia(35%) saturate(2120%) hue-rotate(195deg) brightness(95%) contrast(90%);
-}
 
 
 /* Inputs */
