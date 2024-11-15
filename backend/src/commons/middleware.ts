@@ -1,32 +1,36 @@
 import {validationResult} from "express-validator";
 import {Response400, Response401, Response403} from "./TypeResponse";
-import {NextFunction, Request, Response} from "express";
 import {admin} from "./config-SDK";
 import pool from "./connection-db";
 import {RowDataPacket} from "mysql2";
 import {decrypt} from "./crypt-config";
+import {NextFunction, Response, Request} from "express";
 
-const validateMiddlewares = (req: Request, res: Response, next: NextFunction) => {
+const validateMiddlewares = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const result= Response400(errors.array(), 'Bad Request');
-        return res.status(result.code).json(result);
+        const result = Response400(errors.array(), 'Bad Request');
+        res.status(result.code).json(result);
+        return
+    } else {
+        next();
     }
-    next();
-}
+};
 
-const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
+const validateJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
     const authHeader = req.headers.authorization;
     const result = Response401('Invalid token');
     if (!authHeader) {
-        return res.status(result.code).json(result);
+        res.status(result.code).json(result);
+        return;
     }
 
-    const token = authHeader.split('Bearer ')[1];
+    const token = authHeader.split('Bearer ')[1] || authHeader;
 
     if (!token){
-        return res.status(result.code).json(result);
+        res.status(result.code).json(result);
+        return;
     }
     try {
         const decryptedToken = decrypt(token);
@@ -34,32 +38,51 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
         const user = await admin.auth().getUser(req.body.user.uid);
         if (user.disabled) {
             const response = Response403(null, 'User disabled');
-            return res.status(response.code).json(response);
+            res.status(response.code).json(response);
+            return;
         }
         next();
     } catch (error) {
-        return res.status(result.code).json(result);
+        res.status(result.code).json(result);
     }
 }
 
-const checkAdminRole = async (req: Request, res: Response, next: NextFunction) => {
-    const {uid} = req.body.user;
-    try {
-        const role = await getRoleByUid(uid);
-        if (role !== 'admin') {
+const checkRole = (roles: string[] = []) => {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const {uid} = req.body.user;
+        try {
+            const role = await getRoleByUid(uid);
+            if (!roles.includes(role)) {
+                const response = Response403(null, 'Forbidden');
+                res.status(response.code).json(response);
+                return
+            }
+            next();
+        } catch (error) {
             const response = Response403(null, 'Forbidden');
-            return res.status(response.code).json(response);
+            res.status(response.code).json(response);
+            return
         }
-        next();
+    }
+}
+
+const checkRoleGRPC = async (roles: string[] = [], encrypted: string) => {
+
+    const token = encrypted.split('Bearer ')[1] || encrypted;
+    if (!token)return false;
+    try {
+        const decryptedToken = decrypt(token);
+        const {uid} = await admin.auth().verifyIdToken(decryptedToken);
+        const role = await getRoleByUid(uid);
+        return roles.includes(role);
     } catch (error) {
-        const response = Response403(null, 'Forbidden');
-        return res.status(response.code).json(response);
+        return false
     }
 }
 
 const getRoleByUid = async (uid: string = ''): Promise<string> => {
     try {
-        const [result] =  await pool.query('SELECT role FROM users WHERE firebase_uid = ? limit 1', [uid])
+        const [result] =  await pool.query('SELECT role FROM People WHERE uid = ? limit 1', [uid])
         const rows = result as RowDataPacket[]
         if (rows.length === 0) throw new Error('User not found');
 
@@ -72,5 +95,6 @@ const getRoleByUid = async (uid: string = ''): Promise<string> => {
 export {
     validateMiddlewares,
     validateJWT,
-    checkAdminRole
+    checkRole,
+    checkRoleGRPC
 }
