@@ -8,7 +8,8 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> ¿Dónde Estoy?
+              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> 
+              <span class="ml-4 bell-icon fas text-white"> D o n d e   e s t o y? </span>
             </h2>
             <div class="toggle">
               <input type="checkbox" id="btn" v-model="isChecked" @change="toggleTracking" />
@@ -151,16 +152,20 @@ export default defineComponent({
 .card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
   background-color: #566981;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  height: 64px;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .header-title {
-  color: white;
-  font-size: 1.25rem;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .toggle {
   position: relative;
@@ -281,7 +286,7 @@ export default defineComponent({
     width: 180px;
   }
   .toggle input:checked + label .thumb {
-    left: 120px; 
+    left: 150px; 
     background-color: #fff;
   }
   

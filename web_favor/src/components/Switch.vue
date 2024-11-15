@@ -1,12 +1,17 @@
 <template>
   <div class="switch-container">
-    <label class="switch">
-      <input type="checkbox" @change="toggleSwitch">
-      <span class="slider">
-        <i style="color: #3b5b87" class="fas fa-power-off"></i>
-      </span>
-      <span class="switch-label">{{ isEnabled ? 'Activo' : 'Inactivo' }}</span>
-    </label>
+    <div class="toggle">
+              <input type="checkbox" id="btn" v-model="isChecked" @change="toggleTracking" />
+              <label for="btn">
+                <span class="track"></span>
+                <span class="thumb">
+                  <span class="icon_off"><v-icon icon="fa-solid fa-power-off"/> </span>
+                </span>
+                <span class="label-text" :class="{'on': isChecked, 'off': !isChecked}">
+                  {{ isChecked ? 'Activo' : 'Inactivo' }}
+                </span>
+              </label>
+            </div>
   </div>
 </template>
 
@@ -43,67 +48,129 @@ export default defineComponent({
   display: flex;
   align-items: center;
 }
-
-.switch {
+.toggle {
   position: relative;
   display: inline-block;
-  width: 140px;
-  height: 32px;
-  margin-right: 10px;
+  width: 300px;
+  height: 40px;
+  box-shadow: #666;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+.toggle input[type="checkbox"] {
+  display: none;
 }
 
-.slider {
-  position: absolute;
+.toggle label {
+  position: relative;
+  display: block;
+  background-color: #ccc; /* color por defecto (rojo) */
+  border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  transition: background-color 0.6s;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* La palanca (thumb) del toggle */
+.toggle .thumb {
+  position: absolute;
+  top: -3px;
+  left: -10px;
+  width: 45px;
+  height: 45px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: left 0.6s;
+  z-index: 1;
+  border: 2px solid #999; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+}
+
+.toggle input:checked + label .thumb {
+  left: 260px; 
+  background-color: #fff;
+}
+
+.toggle .label-text {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #CB5E5E;
-  transition: background-color 0.4s;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.slider i {
-  color: white;
-  font-size: 12px;
-  position: absolute;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  border-radius: 50%;
-  height: 24px;
-  width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #4caf50;
-}
-
-input:checked + .slider i {
-  transform: translateX(108px);
-}
-
-.switch-label {
+  z-index: 2;
+  text-align: center;
+  line-height: 40px;
+  font-size: 14px;
   font-weight: bold;
-  position: absolute;
-  top: 50%;
-  right: 50%;
-  transform: translate(50%, -50%);
-  font-size: 1rem;
-  color: #e7e9e9;
+  color: #fff;
 }
+
+.toggle .label-text.on {
+  color: #fff;
+}
+
+.toggle .label-text.off {
+  color: #fff;
+}
+
+.toggle input:checked + label {
+  background-color: #89A7B1;
+}
+
+.toggle input:checked + label .track {
+  background-color: #89A7B1; 
+  box-shadow: 0 4px 8px rgba(0, 128, 0, 0.3); 
+}
+
+.toggle input:checked + label .label-text {
+  color: #fff;
+}
+
+.toggle input:checked + label .thumb {
+  background-color: #fff;
+}
+
+.toggle input:not(:checked) + label {
+  background-color: #e74c3c; /* Rojo cuando está desactivado */
+}
+
+.toggle .thumb .icon_off {
+  position: absolute;
+  top: 49%;
+  left: 49%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  color: #666; 
+  transition: color 0.6s;
+  box-shadow: #666;
+}
+
+.toggle input:checked + label .thumb .icon_off {
+  color:  #0672ff; 
+}
+
+.toggle .track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border-radius: 20px;
+  z-index: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .toggle {
+    width: 180px;
+  }
+  .toggle input:checked + label .thumb {
+    left: 150px; 
+    background-color: #fff;
+  }
+  
+}
+
 </style>
