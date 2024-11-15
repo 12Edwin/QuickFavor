@@ -108,7 +108,7 @@ export default defineComponent({
   background: #89a7b1;
   backdrop-filter: blur(5px);
   transition: transform 0.3s ease; 
-  z-index: 1000;
+  z-index: 100;
   margin-top: 56px;
 }
 
@@ -117,7 +117,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; 
+  z-index: 100;
   transform: translateX(0);
 }
 
@@ -129,7 +129,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   background-color: rgba(137, 167, 177, 0.6);
-  z-index: 1001;
+  z-index: 100;
 }
 
 nav {

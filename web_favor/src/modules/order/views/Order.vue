@@ -12,9 +12,9 @@
 
     <!-- Contenedor de detalles en fondo blanco -->
     <div class="details-container">
-      <div class="d-flex w-100 justify-space-between">
+      <div class="d-flex w-100 justify-space-between flex-wrap ga-1 mb-3">
         <h2 class="details-title">Detalles del pedido</h2>
-        <div>
+        <div class="ml-auto">
           <div class="badge-style" :style="{'background-color': '#FFA500'}">
             {{statusText}}
           </div>
@@ -385,7 +385,7 @@ export default defineComponent({
   align-items: center;
   position: relative;
   margin-top: 1.5rem;
-  width: 80%;
+  width: 100%;
 }
 
 .chat-container {
@@ -522,9 +522,11 @@ export default defineComponent({
 .step-progress {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin-top: 16px;
   padding: 10px;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 /* Estilo para los círculos grandes */

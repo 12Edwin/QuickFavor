@@ -23,24 +23,26 @@
         <div class="h-100" v-for="(item, index) in data" :key="index">
           <v-card class="white-card d-flex h-100 w-100">
             <div class="left-strip"></div>
-            <v-row class="h-100">
-              <v-col xl="4" lg="4" md="4" sm="6" class="d-flex align-center flex-column justify-center">
-                <p class="title">{{ item.numeroProductos }} productos</p>
-                <p class="date">{{ item.fecha }}</p>
-              </v-col>
-              <v-col xl="5" lg="5" md="5" sm="6" class="d-flex justify-center align-center">
+            <div class="d-flex w-100 justify-space-between flex-wrap ga-2 pa-2">
+              <div class="d-flex mx-2 flex-column justify-center mr-auto">
+                <v-card-title class="px-0">{{ item.numeroProductos }} productos</v-card-title>
+                <p class="date ma-0 py-1">{{ item.fecha }}</p>
+              </div>
+              <div class="d-flex justify-center mx-2 align-center">
                 <v-chip :color="getChipColor(item.estatus)" variant="flat" class="chip-style">
                   <span style="color: white">{{ item.estatus }}</span>
                 </v-chip>
-              </v-col>
-              <v-col xl="2" lg="2" md="2" sm="6" class="d-flex justify-end align-center">
+              </div>
+              <div class="my-auto ml-auto">
+                <v-btn class="rounded-pill">
                 <router-link
                   :to="{ name: 'historyDetails', params: { id: index } }"
                   class="icon-link">
                   <i class="fa-solid fa-eye icon-style"></i>
                 </router-link>
-              </v-col>
-            </v-row>
+                </v-btn>
+              </div>
+            </div>
           </v-card>
         </div>
         </div>
@@ -365,7 +367,7 @@ export default defineComponent({
 }
 
 .left-strip {
-  width: 20px;
+  width: 16px;
   background-color: #34344e;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -388,8 +390,6 @@ export default defineComponent({
 .date {
   font-size: 14px;
   color: #6b7280;
-  margin: 0;
-  margin-left: 20px;
 }
 
 .chip-style {
@@ -401,13 +401,11 @@ export default defineComponent({
 }
 
 .icon-style {
-  font-size: 30px;
+  font-size: 20px;
   color: #312070;
-  padding: 15px;
 }
 
 .icon-link {
-  margin-left: 100px; /* Espacio entre el chip y el icono */
   text-decoration: none;
 }
 

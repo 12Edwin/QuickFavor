@@ -28,6 +28,7 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
+  name: "ConfirmationModal",
   props: {
     isVisible: Boolean,
     isCompleted: Boolean,

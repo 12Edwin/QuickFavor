@@ -69,7 +69,7 @@ export default defineComponent({
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {
         this.updateLocation(); 
-      }, 5000);
+      }, 5000) as any;
     },
     stopTracking() {
       if (this.locationInterval) {
@@ -111,7 +111,8 @@ export default defineComponent({
       } else {
         this.marker.setPosition(this.center);
       }
-    }
+    },
+
   },
   beforeUnmount() {
     this.stopTracking(); 

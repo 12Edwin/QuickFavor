@@ -1,3 +1,10 @@
+<template>
+  <div>
+    <h1>Unauthorized</h1>
+  </div>
+</template>
+
+
 <script lang="ts">
 import {defineComponent} from 'vue'
 
@@ -6,9 +13,7 @@ export default defineComponent({
 })
 </script>
 
-<template>
 
-</template>
 
 <style scoped>
 
