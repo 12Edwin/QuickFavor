@@ -165,10 +165,10 @@ LEFT JOIN Couriers cr ON o.id_courier = cr.no_courier
 LEFT JOIN People p_cour ON cr.id_person = p_cour.uid
 LEFT JOIN Places pl ON o.no_order = pl.id_order AND pl.type = 'Home';
 
-SELECT *,
+/*SELECT *,
     ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
     ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
     FROM Places p LEFT JOIN Couriers c ON p.id_courier = c.no_courier
     WHERE ST_Distance_Sphere(location, ST_PointFromText(?)) <= ? * 1000
     AND c.status = 'Available'
-    ORDER BY distance_km ASC LIMIT 20;
+    ORDER BY distance_km ASC LIMIT 20;*/

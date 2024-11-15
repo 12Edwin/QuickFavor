@@ -19,11 +19,10 @@ export class CustomerRepository{
     async editCustomerProfile(payload: User & Customer): Promise<any>{
         const connection = await pool.getConnection();
         try {
-            const { uid, direction, lastname, phone, email, name, surname }: User & Customer = payload
+            const { uid, lastname, phone, email, name, surname }: User & Customer = payload
             await connection.beginTransaction();
             await connection.query('UPDATE People SET name = $1, surname = $2, lastname = $3, phone = $4, email = $5 WHERE uid = $6',
                 [name, surname, lastname, phone, email, uid]);
-            await connection.query('UPDATE Customers SET direction = $1 WHERE id_person = $2', [direction, uid]);
             await connection.commit();
         } catch (error: any){
             connection.rollback();

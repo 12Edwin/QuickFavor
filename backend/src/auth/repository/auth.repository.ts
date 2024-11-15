@@ -100,7 +100,7 @@ export class AuthRepository {
     async customer_register(payload: UserType & Customer): Promise<boolean> {
         let connection: PoolConnection | null = null;
         try {
-            const { email, password, name, surname, lastname, direction, phone, sex, CURP } = payload;
+            const { email, password, name, surname, lastname, phone, sex, CURP } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -123,8 +123,8 @@ export class AuthRepository {
             );
 
             await connection.query(
-                'INSERT INTO Customers (id_person, direction) VALUES (?,?)',
-                [userRecord.uid, direction]
+                'INSERT INTO Customers (id_person) VALUES (?)',
+                [userRecord.uid]
             );
 
             return true;
