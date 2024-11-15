@@ -15,7 +15,7 @@ const fromUrlSafeBase64 = (urlSafe: string): string => {
   return result
 }
 
-export const decrypt = (encryptedText: string): string => {
+export const decrypt = (encryptedText: string): string | null => {
   try {
     if (!encryptedText) {
       throw new Error('El texto encriptado no puede estar vacío')
@@ -45,11 +45,11 @@ export const decrypt = (encryptedText: string): string => {
     return utf8Text
   } catch (e) {
     console.error('Error completo:', e)
-    return ''
+    return null
   }
 }
 
-export const encrypt = (text: string): string => {
+export const encrypt = (text: string): string | null => {
   try {
     if (!text) {
       throw new Error('El texto a encriptar no puede estar vacío')
@@ -71,6 +71,6 @@ export const encrypt = (text: string): string => {
     return result
   } catch (e) {
     console.error('Error completo:', e)
-    return ''
+    return null
   }
 }

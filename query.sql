@@ -86,6 +86,7 @@ CREATE TABLE Notifications (
   INDEX idx_driver_order (courier_id, customer_id, order_id)
 );
 
+Drop trigger if exists generate_no_courier;
 DELIMITER //
 CREATE TRIGGER generate_no_courier
 BEFORE INSERT ON Couriers
@@ -93,13 +94,14 @@ FOR EACH ROW
 BEGIN
     DECLARE max_id INT;
     DECLARE new_no_courier VARCHAR(20);
-    SELECT IFNULL(MAX(no_courier), 0) INTO max_id FROM Couriers;
+    SELECT IFNULL(MAX(CAST(SUBSTRING(no_courier, 6) AS UNSIGNED)), 0) INTO max_id FROM Couriers;
     SET new_no_courier = CONCAT('COUR_', max_id + 1);
     SET NEW.no_courier = new_no_courier;
 END;
 //
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS generate_no_customer;
 DELIMITER //
 CREATE TRIGGER generate_no_customer
 BEFORE INSERT ON Customers
@@ -107,13 +109,14 @@ FOR EACH ROW
 BEGIN
     DECLARE max_id INT;
     DECLARE new_no_customer VARCHAR(20);
-    SELECT IFNULL(MAX(no_customer), 0) INTO max_id FROM Customers;
+    SELECT IFNULL(MAX(CAST(SUBSTRING(no_customer, 6) AS UNSIGNED)), 0) INTO max_id FROM Customers;
     SET new_no_customer = CONCAT('CUST_', max_id + 1);
     SET NEW.no_customer = new_no_customer;
 END;
 //
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS generate_no_order;
 DELIMITER //
 CREATE TRIGGER generate_no_order
 BEFORE INSERT ON Orders
@@ -121,7 +124,7 @@ FOR EACH ROW
 BEGIN
     DECLARE max_id INT;
     DECLARE new_no_order VARCHAR(20);
-    SELECT IFNULL(MAX(no_order), 0) INTO max_id FROM Orders;
+    SELECT IFNULL(MAX(CAST(SUBSTRING(no_order, 5) AS UNSIGNED)), 0) INTO max_id FROM Orders;
     SET new_no_order = CONCAT('ORD_', max_id + 1);
     SET NEW.no_order = new_no_order;
 END;
@@ -162,10 +165,10 @@ LEFT JOIN Couriers cr ON o.id_courier = cr.no_courier
 LEFT JOIN People p_cour ON cr.id_person = p_cour.uid
 LEFT JOIN Places pl ON o.no_order = pl.id_order AND pl.type = 'Home';
 
-SELECT *,
+/*SELECT *,
     ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
     ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
     FROM Places p LEFT JOIN Couriers c ON p.id_courier = c.no_courier
     WHERE ST_Distance_Sphere(location, ST_PointFromText(?)) <= ? * 1000
     AND c.status = 'Available'
-    ORDER BY distance_km ASC LIMIT 20;
+    ORDER BY distance_km ASC LIMIT 20;*/
