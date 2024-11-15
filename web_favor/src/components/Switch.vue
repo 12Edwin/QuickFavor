@@ -1,14 +1,14 @@
 <template>
   <div class="switch-container">
     <div class="toggle">
-              <input type="checkbox" id="btn" v-model="isChecked" @change="toggleTracking" />
+              <input type="checkbox" id="btn" v-model="isEnabled" @change="toggleSwitch" />
               <label for="btn">
                 <span class="track"></span>
                 <span class="thumb">
                   <span class="icon_off"><v-icon icon="fa-solid fa-power-off"/> </span>
                 </span>
-                <span class="label-text" :class="{'on': isChecked, 'off': !isChecked}">
-                  {{ isChecked ? 'Activo' : 'Inactivo' }}
+                <span class="label-text" :class="{'on': isEnabled, 'off': !isEnabled}">
+                  {{ isEnabled ? 'Activo' : 'Inactivo' }}
                 </span>
               </label>
             </div>
