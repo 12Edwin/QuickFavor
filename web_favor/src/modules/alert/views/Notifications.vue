@@ -2,22 +2,15 @@
   <div class="back-container">
     <WaveComponent />
   </div>
-  <div class="container">
-    <v-row justify="center">
-      <v-col class="md-8">
-        <v-card class="card-custom">
-          <div class="card-header d-flex align-center justify-space-between">
-            <h2 class="header-title">
-              <v-icon icon="fa-solid fa-bell" style="color: white;"></v-icon> Notificaciones de favores
-            </h2>
-            <div class="switch-container">
-              <label class="switch">
-                <input type="checkbox">
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-          <div class="content">
+  <div class="notifications-container">
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-bell bell-icon text-white"> <span class="ml-4 bell-icon fas text-white"> N o t i f i c a c i o n e s </span></i>
+      </h2>
+      <Switch @onFalse="" @onTrue=""/>
+    </div>
+    <v-card class="container-details">
+      <div class="content">
             <v-row>
               <v-col cols="12">
                 <v-card class="notification-card" 
@@ -49,19 +42,18 @@
               <v-btn @click="nextPage" :disabled="currentPage === totalPages">Siguiente</v-btn>
             </v-row>
           </div>
-        </v-card>
-      </v-col>
-    </v-row>
+    </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
 
 export default defineComponent({
   name: "Notifications",
-  components: { WaveComponent },
+  components: {Switch, WaveComponent },
   data() {
     return {
       currentPage: 1,
@@ -94,7 +86,7 @@ export default defineComponent({
       if (this.currentPage > 1) {
         this.currentPage--;
       }
-    }
+    },
   }
 });
 </script>
@@ -125,65 +117,33 @@ export default defineComponent({
 .card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
   background-color: #566981;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  height: 64px;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .header-title {
-  color: white;
-  font-size: 1.25rem;
-}
-.switch-container {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 24px;
+.notifications-container{
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #CB5E5E;
-  transition: 0.4s;
-  border-radius: 24px; /* Bordes redondeados */
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4caf50;
-}
-
-input:checked + .slider:before {
-  transform: translateX(24px);
+.container-details{
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
+  border-radius: 10px;
 }
 
 .notification-card {

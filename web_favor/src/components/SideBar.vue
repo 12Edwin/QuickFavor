@@ -104,7 +104,7 @@ export default defineComponent({
 }
 .sidebar {
   width: 250px;
-  height: 100%; 
+  height: 100%;
   background: #89a7b1;
   backdrop-filter: blur(5px);
   transition: transform 0.3s ease; 
@@ -124,7 +124,7 @@ export default defineComponent({
 
 .head-sidebar {
   width: 250px;
-  height: 68px;
+  height: 8dvh;
   position: absolute;
   top: 0;
   left: 0;

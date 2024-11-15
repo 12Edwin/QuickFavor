@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'S3cur3Encr1pt10nK3y@2024!#AnTr0p'; // Debe ser de 32 caracteres para AES-256
+const ENCRYPTION_KEY = (process.env.ENCRYPTION_KEY || 'S3cur3Encr1pt10nK3y@2024!#AnTr0p').padEnd(32, '0');
 const IV_LENGTH = 16; // Para AES, esto es siempre 16
 
 function toUrlSafeBase64(base64: string): string {
