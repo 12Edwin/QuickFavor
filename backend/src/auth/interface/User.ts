@@ -25,7 +25,6 @@ export type Courier = {
 
 export type Customer = {
     no_customer?: number;
-    direction: string;
 }
 
 export type Role = 'COURIER' | 'CUSTOMER';
