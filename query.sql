@@ -165,6 +165,12 @@ LEFT JOIN Couriers cr ON o.id_courier = cr.no_courier
 LEFT JOIN People p_cour ON cr.id_person = p_cour.uid
 LEFT JOIN Places pl ON o.no_order = pl.id_order AND pl.type = 'Home';
 
+
+Insert into People (uid, email, name, surname, role, lastname, phone, sex, curp) values ('ZmLSSDEHuFUv2xyliSetlnPn2Lt2', 'valdovinos11pro@gmail.com', 'Sanlop', 'Cordero', 'Customer', 'Garcia', '1234567890', 'Masculino', 'VAGJ980101HDFLRL09');
+insert into Customers (no_customer, id_person) values ('CUST_1', 'ZmLSSDEHuFUv2xyliSetlnPn2Lt2');
+insert into  People (uid, email, name, curp, surname, role, lastname, phone, sex) values ('HUM8Nv7FfmZJd0JOJYEouqeWiK32', 'barragan11pro@gmail.com', 'Juan Rodrigo', 'BAJL980101HDFLRL09', 'Liconza', 'Courier','Nava', '1234567891', 'Masculino');
+insert into Couriers (id_person, vehicle_type, license_plate, status) values ('HUM8Nv7FfmZJd0JOJYEouqeWiK32', 'Carro', 'HUM-123', 'Available');
+
 /*SELECT *,
     ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
     ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
