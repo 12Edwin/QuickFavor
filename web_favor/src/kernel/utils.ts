@@ -136,10 +136,30 @@ const getColorByStatus = (status: string) => {
 const filterByName = (array: any[], name: any) => {
     return array.filter((item: any) => item.name.toLowerCase().includes(name.toLowerCase()));
 }
+
+const getStatusCourier = async () => {
+    try {
+        return localStorage.getItem("statusCourier");
+    } catch (error) {
+        return false;
+    }
+}
+
+const setStatusCourier = async (status: any) => {
+    try {
+        localStorage.setItem("statusCourier", status);
+    } catch (error) {
+        return false;
+    }
+}
+
+
 export {
     getRoleNameByToken,
     getToken,
     removeToken,
+    getStatusCourier,
+    setStatusCourier,
     getUserInfoByToken,
     limitDescription,
     getErrorMessages,

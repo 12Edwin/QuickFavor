@@ -3,12 +3,12 @@
     <WaveComponent />
   </div>
   <div class="history-container">
-    <div class="title-container">
-      <div>
-        <i class="fas fa-history bell-icon"> <span class="ml-4 bell-icon fas"> H i s t o r i a l </span></i>
-      </div>
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">H i s t o r i a l</span>
+      </h2>
       <Switch @onFalse="" @onTrue=""/>
-
     </div>
     <div class="details-container">
       <div v-if="data.length === 0" class="no-orders">
@@ -302,8 +302,7 @@ export default defineComponent({
   padding-right: 4vw;
   height: 100%;
 }
-
-.title-container {
+.card-header {
   display: flex;
   align-items: center;
   background-color: #566981;
@@ -314,12 +313,14 @@ export default defineComponent({
   gap: 1rem;
 }
 
-.title-container > *:nth-child(n+4) {
-  justify-content: center;
-  width: 100%;
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
   display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
 .details-container{
   background-color: rgba(255, 255, 255, 0.4);
   padding: 2rem;

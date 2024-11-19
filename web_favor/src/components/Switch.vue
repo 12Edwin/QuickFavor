@@ -16,6 +16,7 @@
 </template>
 
 <script lang="ts">
+import { getStatusCourier, setStatusCourier } from '@/kernel/utils';
 import {defineComponent} from 'vue'
 
 export default defineComponent({
@@ -27,12 +28,22 @@ export default defineComponent({
     }
   },
 
+  mounted() {
+    this.toggleCheckedCourier();
+  },
+
   methods: {
+    async toggleCheckedCourier() {
+      let status = await getStatusCourier();
+      this.isEnabled = (status === 'true');
+    },
     toggleSwitch(event: Event) {
       this.isEnabled = (event.target as HTMLInputElement).checked;
       if (this.isEnabled) {
+        setStatusCourier(true);
         this.$emit('onTrue');
       }else {
+        setStatusCourier(false);
         this.$emit('onFalse');
       }
     }
@@ -43,7 +54,6 @@ export default defineComponent({
 
 
 <style scoped>
-
 .switch-container {
   display: flex;
   align-items: center;

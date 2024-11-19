@@ -8,21 +8,10 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> 
-              <span class="ml-4 bell-icon fas text-white"> D o n d e   e s t o y? </span>
+              <v-icon icon="fa-solid fa-location-dot" style="color: white; font-size: 36px;"></v-icon> 
+              <span class="ml-4 fas text-white"> D o n d e  -  e s t o y? </span>
             </h2>
-            <div class="toggle">
-              <input type="checkbox" id="btn" v-model="isChecked" @change="toggleTracking" />
-              <label for="btn">
-                <span class="track"></span>
-                <span class="thumb">
-                  <span class="icon_off"><v-icon icon="fa-solid fa-power-off"/> </span>
-                </span>
-                <span class="label-text" :class="{'on': isChecked, 'off': !isChecked}">
-                  {{ isChecked ? 'Activo' : 'Inactivo' }}
-                </span>
-              </label>
-            </div>
+            <Switch v-model="isChecked" @onFalse="stopTracking" @onTrue="startTracking"/>
           </div>
           <div class="map-container">
             <GoogleMap
@@ -43,15 +32,15 @@
 import { defineComponent } from 'vue';
 import WaveComponent from '@/components/WaveComponent.vue';
 import { GoogleMap } from 'vue3-google-map';
+import Switch from '@/components/Switch.vue';
 
 export default defineComponent({
   name: "MapView",
-  components: { WaveComponent, GoogleMap },
+  components: { WaveComponent, GoogleMap, Switch },
   data() {
     return {
       center: { lat: 19.42847, lng: -99.12766 },
       isChecked: false,
-      isTracking: false,
       userIcon: require('@/assets/location/assistant_navigation.svg'),
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
@@ -59,19 +48,9 @@ export default defineComponent({
     };
   },
   mounted() {
-    if (this.isChecked) {
-      this.toggleTracking();
-    }
+    
   },
   methods: {
-    toggleTracking() {
-      this.isTracking = this.isChecked;
-      if (this.isTracking) {
-        this.startTracking();
-      } else {
-        this.stopTracking();
-      }
-    },
     startTracking() {
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {
@@ -167,130 +146,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.toggle {
-  position: relative;
-  display: inline-block;
-  width: 300px;
-  height: 40px;
-  box-shadow: #666;
-}
-
-.toggle input[type="checkbox"] {
-  display: none;
-}
-
-.toggle label {
-  position: relative;
-  display: block;
-  background-color: #ccc; /* color por defecto (rojo) */
-  border-radius: 20px;
-  width: 100%;
-  height: 100%;
-  transition: background-color 0.6s;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* La palanca (thumb) del toggle */
-.toggle .thumb {
-  position: absolute;
-  top: -3px;
-  left: -10px;
-  width: 45px;
-  height: 45px;
-  background-color: #fff;
-  border-radius: 50%;
-  transition: left 0.6s;
-  z-index: 1;
-  border: 2px solid #999; 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
-}
-
-.toggle input:checked + label .thumb {
-  left: 260px; 
-  background-color: #fff;
-}
-
-.toggle .label-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  text-align: center;
-  line-height: 40px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.toggle .label-text.on {
-  color: #fff;
-}
-
-.toggle .label-text.off {
-  color: #fff;
-}
-
-.toggle input:checked + label {
-  background-color: #89A7B1;
-}
-
-.toggle input:checked + label .track {
-  background-color: #89A7B1; 
-  box-shadow: 0 4px 8px rgba(0, 128, 0, 0.3); 
-}
-
-.toggle input:checked + label .label-text {
-  color: #fff;
-}
-
-.toggle input:checked + label .thumb {
-  background-color: #fff;
-}
-
-.toggle input:not(:checked) + label {
-  background-color: #e74c3c; /* Rojo cuando está desactivado */
-}
-
-.toggle .thumb .icon_off {
-  position: absolute;
-  top: 49%;
-  left: 49%;
-  transform: translate(-50%, -50%);
-  font-size: 14px;
-  color: #666; 
-  transition: color 0.6s;
-  box-shadow: #666;
-}
-
-.toggle input:checked + label .thumb .icon_off {
-  color:  #0672ff; 
-}
-
-.toggle .track {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: transparent;
-  border-radius: 20px;
-  z-index: 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-@media screen and (max-width: 768px) {
-  .toggle {
-    width: 180px;
-  }
-  .toggle input:checked + label .thumb {
-    left: 150px; 
-    background-color: #fff;
-  }
-  
 }
 
 /* map estilos */
