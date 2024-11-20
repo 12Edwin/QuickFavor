@@ -3,12 +3,12 @@
     <WaveComponent />
   </div>
   <div class="history-container">
-    <div class="title-container">
-      <div>
-        <i class="fas fa-history bell-icon"> <span class="ml-4 bell-icon fas"> H i s t o r i a l </span></i>
-      </div>
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">H i s t o r i a l</span>
+      </h2>
       <Switch @onFalse="" @onTrue=""/>
-
     </div>
     <div class="details-container">
       <div v-if="data.length === 0" class="no-orders">
@@ -302,8 +302,7 @@ export default defineComponent({
   padding-right: 4vw;
   height: 100%;
 }
-
-.title-container {
+.card-header {
   display: flex;
   align-items: center;
   background-color: #566981;
@@ -314,12 +313,14 @@ export default defineComponent({
   gap: 1rem;
 }
 
-.title-container > *:nth-child(n+4) {
-  justify-content: center;
-  width: 100%;
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
   display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
 .details-container{
   background-color: rgba(255, 255, 255, 0.4);
   padding: 2rem;
@@ -327,9 +328,43 @@ export default defineComponent({
 }
 
 .bell-icon {
-  color: #ffffff;
-  font-size: 20px;
+  color: #ffffff; /* Mismo color que el texto del título */
+  font-size: 30px; /* Tamaño del icono */
+  margin-right: 30px;
+}
+
+/* Estilos para el botón de estado */
+.status-container {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.status-button {
+  display: flex;
+  align-items: center;
+  background-color: #89a7b1;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 16px;
+  color: white;
+  font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  position: relative;
+  overflow: visible; /* Permite que el icono salga del botón */
+}
+
+.status-button.inactive {
+  background-color: #f70b0b;
+}
+
+.icon-circle {
+  background-color: white;
+  border-radius: 50%;
+  padding: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -409,22 +444,45 @@ export default defineComponent({
   text-decoration: none;
 }
 
-/* Estilos para el componente de paginación */
-.pagination-style {
-  color: #2c3e50; /* Color de texto de la paginación */
-  --v-pagination-active-color: #2c3e50; /* Color para el número activo */
-}
+/* Ajustes solo para dispositivos móviles */
+@media (max-width: 768px) {
+  .status-container {
+    flex-grow: 1;
+    margin-left: 20px;
+  }
 
-.pagination-style .v-pagination__item--active {
-  background-color: #b0bec5 !important; /* Fondo para el número activo */
-  color: #ffffff !important; /* Color del número activo */
-}
+  .status-button {
+    width: 100%;
+    max-width: 200px; /* Define un ancho máximo solo en móviles */
+  }
 
-.pagination-style .v-pagination__item {
-  color: #2c3e50 !important; /* Color de los números no activos */
-}
+  .v-chip.v-chip--size-default {
+    padding: 0 50px !important; /* Reduce el padding en dispositivos móviles */
+    font-size: 10px; /* Ajusta el tamaño de la fuente para mejorar la legibilidad */
+    width: 100%; /* Hace que el chip ocupe todo el ancho disponible */
+    justify-content: center; /* Centra el contenido del chip */
+    overflow: hidden; /* Evita que el texto se salga del chip */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es demasiado largo */
+    white-space: nowrap; /* Mantiene el texto en una sola línea */
+  }
 
-.pagination-style .v-pagination__item--arrow {
-  color: #2c3e50 !important; /* Color de las flechas */
+  .icon-style {
+    font-size: 30px;
+    color: #312070;
+    padding: 10px 8px 6px 0px;
+  }
+
+  .icon-link {
+    margin-left: 3px; /* Espacio entre el chip y el icono */
+    text-decoration: none;
+  }
+
+  .left-strip {
+    width: 95px;
+    min-height: 95px;
+    background-color: #34344e;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
 }
 </style>

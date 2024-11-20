@@ -5,7 +5,8 @@
   <div class="notifications-container">
     <div class="card-header d-flex align-center justify-space-between">
       <h2 class="header-title">
-        <i class="fas fa-bell bell-icon text-white"> <span class="ml-4 bell-icon fas text-white"> N o t i f i c a c i o n e s </span></i>
+        <i class="fas fa-bell fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">N o t i f i c a c i o n e s</span>
       </h2>
       <Switch @onFalse="" @onTrue=""/>
     </div>
@@ -59,11 +60,11 @@ export default defineComponent({
   },
   computed: {
     totalPages(): number {
-      return Math.ceil(this.notifications.length / 5);
+      return Math.ceil(this.notifications.length / 4);
     },
     paginatedNotifications(): Array<{ id: number; title: string; date: string; }> {
-      const start = (this.currentPage - 1) * 5;
-      return this.notifications.slice(start, start + 5);
+      const start = (this.currentPage - 1) * 4;
+      return this.notifications.slice(start, start + 4);
     }
   },
   methods: {

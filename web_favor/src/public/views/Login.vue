@@ -65,7 +65,7 @@ import { defineComponent, ref } from 'vue';
 import {LoginEntity} from "@/public/entity/auth.entity";
 import {login} from "@/public/services/auth";
 import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
-import {getErrorMessages, getToken} from "@/kernel/utils";
+import {getErrorMessages, setStatusCourier} from "@/kernel/utils";
 
 export default defineComponent({
   name: "Login",
@@ -100,6 +100,7 @@ export default defineComponent({
       if (result.error){
         showErrorToast(getErrorMessages(result.message))
       }else {
+        setStatusCourier(false);
         showSuccessToast(`Bienvenido ${result.data?.user.name}`);
         await router.push({name: "map"});
       }

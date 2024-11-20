@@ -5,8 +5,11 @@
 
   <div class="container-detail">
     <!-- Header con fondo azul y iconos de Font Awesome -->
-    <div class="title-container">
-      <i class="fas fa-bell bell-icon"> <span class="ml-4 bell-icon fas"> O r d e n </span></i>
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-cart-shopping fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">O r d e n</span>
+      </h2>
       <Switch @onFalse="" @onTrue=""/>
     </div>
 
@@ -298,7 +301,7 @@ export default defineComponent({
   height: 100%;
 }
 
-.title-container {
+.card-header {
   display: flex;
   align-items: center;
   background-color: #566981;
@@ -307,6 +310,15 @@ export default defineComponent({
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .badge-style {

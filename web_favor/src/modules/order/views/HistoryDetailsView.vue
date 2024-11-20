@@ -882,4 +882,16 @@ export default defineComponent({
   margin-left: 100px; /* Espacio entre el chip y el icono */
   text-decoration: none;
 }
+
+@media (max-width: 768px) {
+  .status-container {
+    flex-grow: 1;
+    margin-left: 20px;
+  }
+
+  .status-button {
+    width: 100%;
+    max-width: 200px; /* Define un ancho máximo solo en móviles */
+  }
+}
 </style>

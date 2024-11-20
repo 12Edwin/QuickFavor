@@ -1,75 +1,70 @@
 <template>
   <div class="back-container">
-    <WaveComponent />
+    <WaveComponent/>
   </div>
-  <v-responsive class="mx-auto">
-    <v-card class="bg-lighten-5" style="height: 88vh;">
-      <v-card-title style="background-color: #566981;">
-        <h1 style="color: white;">Perfil</h1>
-      </v-card-title>
-      <v-card-body>
-        <v-row align="center" justify="center" style=" margin-top: 20px;">
-          <v-col cols="3" class="text-center">
-            <v-avatar
-              image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s"
-              size="200"></v-avatar>
-            <h3>Juan Rodrigo</h3>
-            <div class="d-flex align-center justify-center">
-              <v-icon icon="mdi-phone" style="color: black !important"></v-icon>
-              <span sclass="ml-1">777-234-4325</span>
-            </div>
-          </v-col>
-          <v-col cols="6">
-            <v-card class="pa-4" outlined>
-              <v-card-title class="text-h6" align="center">Repartidor</v-card-title>
-              <v-card-text>
-                <v-row>
-                  <v-col align="center" cols="4"><strong>CURP</strong></v-col>
-                  <v-col align="center" cols="8">OOAZ900824MTSRLL08</v-col>
-
-                  <v-col align="center" cols="4"><strong>SEXO</strong></v-col>
-                  <v-col align="center" cols="8">Masculino</v-col>
-
-                  <v-col align="center" cols="4"><strong>CORREO</strong></v-col>
-                  <v-col align="center" cols="8">correo@gmail.com</v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col cols="6">
-            <div style="padding: 40px;"> 
-              <v-text-field  max-width="500" type="input" prepended-icon="mdi-phone" v-model="model"  label="Nuevo telefono">
-              </v-text-field>
-              <v-text-field  type="email" max-width="500" prepended-icon="mdi-email" v-model="model"  label="Nuevo correo">
-              </v-text-field>
-            </div>
-          </v-col>
-          <v-col cols="6">
-            <div style="background-color: #89A7B1; border-radius: 50%; width: 700px; height: 400px; margin: 0 auto;">
-
-              <v-row align="center" justify="center">
-                <v-col cols="6">
-                  <v-text>
-                    <h3>Reparidor a moto</h3>
-                  </v-text>
-                </v-col>
-              </v-row>
-            </div>
-          </v-col>
-        </v-row>
-      </v-card-body>
+  <div class="notifications-container">
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-user fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">P e r f i l</span>
+      </h2>
+      <Switch @onFalse="" @onTrue=""/>
+    </div>
+    <v-card class="container-details">
+      <div class="backgraund-blue"></div>
+      <div class="profile-container" >
+        <v-avatar
+          image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s"
+          size="200" class="avatar">
+        </v-avatar>
+      </div>
     </v-card>
-  </v-responsive>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import {defineComponent} from 'vue';
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
 
 export default defineComponent({
   name: "Profile",
-  components: { WaveComponent }
-})
+  components: {Switch, WaveComponent},
+  data() {
+    return {
+      currentPage: 1,
+      notifications: [
+        {id: 1, title: '10 productos nuevos', date: '2021-09-01'},
+        {id: 2, title: '11 productos nuevos', date: '2021-09-02'},
+        {id: 3, title: '12 productos nuevos', date: '2021-09-03'},
+        {id: 4, title: '13 productos nuevos', date: '2021-09-04'},
+        {id: 5, title: '14 productos nuevos', date: '2021-09-05'},
+        {id: 6, title: '15 productos nuevos', date: '2021-09-06'}
+      ] as Array<{ id: number; title: string; date: string; }>
+    };
+  },
+  computed: {
+    totalPages(): number {
+      return Math.ceil(this.notifications.length / 5);
+    },
+    paginatedNotifications(): Array<{ id: number; title: string; date: string; }> {
+      const start = (this.currentPage - 1) * 5;
+      return this.notifications.slice(start, start + 5);
+    }
+  },
+  methods: {
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+  }
+});
 </script>
 
 <style scoped>
@@ -81,4 +76,73 @@ export default defineComponent({
   left: 0;
   z-index: -1;
 }
+
+.card-custom {
+  position: relative;
+  margin-left: 16px;
+  margin-right: 16px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 88vh;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  overflow: visible;
+  z-index: 1;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  background-color: #566981;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifications-container {
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
+}
+
+.icon-style {
+  font-size: 20px;
+  color: #312070;
+}
+
+.container-details {
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+/* Profile styles */
+.background-blue {
+  width: 100%; 
+  height: 100px; 
+  background-color: blue; 
+  border-radius: 100px 100px 0 0; 
+}
+
+.profile-container {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
 </style>

@@ -185,6 +185,10 @@ nav {
   margin-right: 4px;
 }
 
+.sidebar-item.selected .icon-sidebar {
+  color: #89a7b1;
+}
+
 @media screen and (max-width: 900px) {
   .sidebar {
     transform: translateX(-100%); 

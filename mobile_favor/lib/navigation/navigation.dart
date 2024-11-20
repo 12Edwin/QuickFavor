@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
@@ -42,9 +43,9 @@ class _NavigationState extends State<Navigation> {
   void initCourierWidgets() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _thereIsFavor = prefs.getBool('thereIsFavor') ?? true;
+      _thereIsFavor = prefs.getBool('thereIsFavor') ?? false;
       _courierWidgets = [
-        _thereIsFavor ? const FavorProgressCourier() : const Placeholder(),
+        _thereIsFavor ? const FavorProgressCourier() : const MapCourier(),
         const Placeholder(),
         const Placeholder(),
         const ProfileCourier()
