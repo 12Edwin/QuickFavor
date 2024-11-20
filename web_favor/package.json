@@ -1,0 +1,44 @@
+{
+  "name": "web_favor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "@mdi/js": "^7.4.47",
+    "core-js": "^3.8.3",
+    "register-service-worker": "^1.7.2",
+    "vue": "^3.5.12",
+    "vue-class-component": "^7.2.6",
+    "vue-router": "^4.4.5",
+    "vue3-toastify": "^0.2.3",
+    "vuetify": "^3.7.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-pwa": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-plugin-unit-jest": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "@vue/vue3-jest": "^27.0.0-alpha.1",
+    "babel-jest": "^27.0.6",
+    "jest": "^27.0.5",
+    "ts-jest": "^27.0.4",
+    "typescript": "~4.5.5"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "jest": {
+    "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel"
+  }
+}
