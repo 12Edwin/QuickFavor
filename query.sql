@@ -22,6 +22,7 @@ create table Couriers(
     vehicle_type enum('Carro', 'Moto', 'Bicicleta',  'Scouter', 'Caminando', 'Otro') not null ,
     status enum('Available', 'Busy', 'Out of service') not null,
     license_plate varchar(8),
+    last_update timestamp default current_timestamp,
     id_person varchar(100) not null,
     foreign key (id_person) references People(uid)
 );
@@ -178,3 +179,15 @@ insert into Couriers (id_person, vehicle_type, license_plate, status) values ('H
     WHERE ST_Distance_Sphere(location, ST_PointFromText(?)) <= ? * 1000
     AND c.status = 'Available'
     ORDER BY distance_km ASC LIMIT 20;*/
+
+    -- Activar el scheduler de eventos si no está activo
+SET GLOBAL event_scheduler = ON;
+
+drop event if exists check_driver_locations;
+CREATE EVENT check_driver_locations
+ON SCHEDULE EVERY 1 MINUTE
+DO
+  UPDATE Couriers
+  SET status = 'Out of service'
+  WHERE status = 'Available'
+  AND TIMESTAMPDIFF(SECOND, last_update, NOW()) > 60;

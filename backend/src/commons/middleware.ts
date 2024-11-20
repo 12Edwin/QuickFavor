@@ -59,6 +59,7 @@ const checkRole = (roles: string[] = []) => {
             }
             next();
         } catch (error) {
+            console.log(error)
             const response = Response403(null, 'Forbidden');
             res.status(response.code).json(response);
             return

@@ -11,6 +11,9 @@ import {CustomerRouter} from "./modules/customer/router/customer.router";
 import {FavorRouter} from "./modules/favors/router/favor.router";
 import {DeliveryService} from "./grpc/services/locationService";
 import {NotificationService} from "./commons/notificationService";
+import proxy from "@grpc-web/proxy";
+import * as http2 from "node:http2";
+import {LocationRouter} from "./modules/maps/router/router";
 
 const app: Application = express();
 const port: Number = 3000;
@@ -36,6 +39,16 @@ pool.getConnection().then(connection => {
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to our services..');
 });
+
+
+proxy({
+    target: () => {
+        console.log('Connecting to gRPC server');
+        return http2.connect(`http://localhost:${grpcPort}`);
+    },
+    headers: '',
+    origin: "*"
+}).listen(3001);
 
 const grpcServer = new grpc.Server();
 
@@ -64,3 +77,4 @@ app.use('/auth', AuthRouter)
 app.use('/courier', CourierRouter)
 app.use('/customer', CustomerRouter)
 app.use('/favor', FavorRouter)
+app.use('/location', LocationRouter)

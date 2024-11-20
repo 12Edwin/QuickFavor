@@ -1,6 +1,6 @@
 import pool from "./connection-db";
-import {RowDataPacket} from "mysql2";
-import {messaging} from "./config-SDK";
+import { RowDataPacket } from "mysql2";
+import { messaging } from "./config-SDK";
 
 export class NotificationService {
   async sendOrderNotification(driverId: string, distance: number, order: any) {
@@ -30,7 +30,7 @@ export class NotificationService {
 
       const response = await messaging.send(message);
       await pool.query(
-        `Insert Into Notifications (courier_id, order_id, type, status) VALUES (?, ?, ?, ?);`,
+        `INSERT INTO Notifications (courier_id, order_id, type, status) VALUES (?, ?, ?, ?);`,
         [driverId, order.no_order, 'Order', 'Pending']
       );
 

@@ -62,7 +62,8 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
         // Send only if status has changed
         if (lastStatus !== result.get('status')) {
           lastStatus = result.get('status');
-          res.write(`data: ${JSON.stringify(Object.fromEntries(result))}\n\n`);
+          const response = Response200(Object.fromEntries(result));
+          res.write(`data: ${JSON.stringify(response)}\n\n`);
 
           // If status is "FINISHED", close connection
           if (result.get('status') === 'Finished') {
@@ -73,13 +74,12 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
         }
       } catch (error) {
         console.error('Error fetching status:', error);
-        res.write(`event: error\ndata: ${JSON.stringify({ message: 'Error fetching status' })}\n\n`);
-
         // If error is critical, close connection
         if (error instanceof Error && error.message.includes('CRITICAL')) {
           clearInterval(intervalId);
           connectionManager.removeConnection(connectionId);
           res.end();
+          throw new Error('Error fetching status')
         }
       }
     };
@@ -89,9 +89,7 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
     const connectionAdded = connectionManager.addConnection(connectionId, res, intervalId, fieldId);
 
     if (!connectionAdded) {
-      const response: ResponseApi<any> = Response503({ message: 'Server is at maximum capacity' });
-      res.status(response.code).json(response);
-      return;
+      throw new Error('Server is at maximum capacity');
     }
 
     // Send the initial status
@@ -125,7 +123,8 @@ const updateCourierStatus = async (req: Request, res: Response) => {
 
     // Send the new status to all connections
     connections.forEach((connection) => {
-      connection.res.write(`data: ${JSON.stringify(Object.fromEntries(result))}\n\n`);
+        const response = Response200(Object.fromEntries(result));
+      connection.res.write(`data: ${JSON.stringify(response)}\n\n`);
 
       // If status is "FINISHED", close connection
       if (newStatus === 'Finished') {
