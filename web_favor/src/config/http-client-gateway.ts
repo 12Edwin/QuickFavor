@@ -1,6 +1,7 @@
 import router from "@/router";
 import axios from "axios";
 import {showErrorToast} from "@/kernel/alerts";
+import Router from "@/router";
 const SERVER_URL = process.env.VUE_APP_BASE_URL;
 
 const AxiosClient = axios.create({
@@ -41,14 +42,13 @@ const setUpInterceptors = (client: any) => {
             }
             if(error.response.status){
                 switch(error.response.status){
-                    case 400:
-                        // onToast('Campo inválido', `${utils.getErrorMessages(error.response.data.message)}`, 'warning');
-                        break;
                     case 401:
-                        // onToast('No autorizado', 'No tienes permisos para realizar esta acción', 'warning');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('no_user');
+                        Router.push({name: 'login'});
                         break;
-                    case 500:
-                        // onToast('Error interno', 'Error interno del servidor', 'error');
+                    case 403:
+                        showErrorToast('You are not authorized to access this resource');
                         break;
                 }
                 return Promise.reject(error);

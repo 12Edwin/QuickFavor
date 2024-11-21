@@ -20,7 +20,7 @@ const port: Number = 3000;
 const grpcPort = process.env.GRPC_PORT || 50051;
 
 dotenv.config();
-app.use(express.json({limit:'50mb'}));
+app.use(express.json({limit:'15mb'}));
 app.use(cors({
     credentials: true,
     origin: '*'
@@ -39,16 +39,6 @@ pool.getConnection().then(connection => {
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to our services..');
 });
-
-
-proxy({
-    target: () => {
-        console.log('Connecting to gRPC server');
-        return http2.connect(`http://localhost:${grpcPort}`);
-    },
-    headers: '',
-    origin: "*"
-}).listen(3001);
 
 const grpcServer = new grpc.Server();
 

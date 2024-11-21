@@ -12,7 +12,6 @@ services:
     ports:
       - ${PORT}:${PORT}
       - 50051:50051
-      - 3001:3001
     environment:
       APP_VERSION: ${APP_VERSION}
       APP_NAME: ${APP_NAME}

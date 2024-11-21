@@ -1,56 +1,21 @@
 <template>
   <div class="public-layout">
     <router-view />
-    <button class="my-button" @click="startLocationStream">Iniciar</button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import {SearchDriversRequest} from "@/config/proto/delivery";
-import {deliveryService} from "@/config/protoLoader";
 
 export default defineComponent({
   name: "PublicLayout",
 
-  methods: {
-    async startLocationStream() {
-      console.log('Iniciando stream de ubicaciones');
-      try {
-        const searchRequest = SearchDriversRequest.create({
-          noOrder: '123',
-          deliveryPoint: {
-            address: '123 Main St',
-            lat: 37.7749,
-            lng: -122.4194,
-          },
-          searchRadiusKm: 5,
-        });
-
-        const call = deliveryService.searchDrivers(searchRequest);
-
-        // Suscribirse al stream
-
-          call.responses.onNext ((response: any) => {
-            console.log('Drivers:', response);
-          })
-          call.responses.onError ((error: any) => {
-            console.error('Error en el stream:', error);
-          })
-          call.responses.onComplete (() => {
-            console.log('Stream completado');
-          })
-
-
-        // Opcional: Guardar la suscripción para limpiarla después
-        // this.streamSubscription = subscription;
-
-      } catch (err: any) {
-        console.error('Error al iniciar el stream:', err);
-      }
-    }
+  data() {
+    return {
+    };
   },
 });
+
 </script>
 
 <style scoped>

@@ -12,7 +12,10 @@
     "useDefineForClassFields": true,
     "sourceMap": true,
     "baseUrl": ".",
+    "allowJs": true,
     "types": [
+      "google-protobuf",
+      "node",
       "webpack-env",
       "jest",
       "vue3-toastify/global"

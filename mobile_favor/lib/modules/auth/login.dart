@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/config/alerts.dart';
+import 'package:mobile_favor/config/error_types.dart';
+import 'package:mobile_favor/modules/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'entity/auth.entity.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -134,14 +139,16 @@ class _LoginState extends State<Login> {
   }
 
   void _onLogin() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_emailController.text == 'courier@gmail.com') {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('role', 'courier');
-      Navigator.pushNamed(context, '/navigation');
-    }else if(_emailController.text == 'customer@gmail.com') {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('role', 'customer');
+    final AuthService authService = AuthService(context);
+    final LoginEntity credentials = LoginEntity(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+    final response = await authService.login(credentials);
+    print(response);
+    if (response.error) {
+      showErrorAlert(context, getErrorMessages(response.message));
+    }else {
       Navigator.pushNamed(context, '/navigation');
     }
 

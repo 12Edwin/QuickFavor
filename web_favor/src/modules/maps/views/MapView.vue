@@ -33,6 +33,10 @@ import { defineComponent } from 'vue';
 import WaveComponent from '@/components/WaveComponent.vue';
 import { GoogleMap } from 'vue3-google-map';
 import Switch from '@/components/Switch.vue';
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {LocationUpdateEntity} from "@/modules/maps/entity/location.entity";
+import {getErrorMessages, getNo_courierByToken} from "@/kernel/utils";
+import {updateLocation} from "@/modules/maps/services/location.service";
 
 export default defineComponent({
   name: "MapView",
@@ -44,17 +48,27 @@ export default defineComponent({
       userIcon: require('@/assets/location/assistant_navigation.svg'),
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
-      marker: null as google.maps.Marker | null
+      marker: null as google.maps.Marker | null,
+      thereConnection: true
     };
   },
   mounted() {
     
   },
   methods: {
+    async toggleTracking() {
+      this.isTracking = this.isChecked;
+      if (this.isTracking) {
+        this.startTracking();
+      } else {
+        this.stopTracking();
+      }
+    },
     startTracking() {
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {
-        this.updateLocation(); 
+        this.updateLocation();
+        this.updateLocationService();
       }, 5000) as any;
     },
     stopTracking() {
@@ -99,7 +113,39 @@ export default defineComponent({
       }
     },
 
+    async updateLocationService() {
+      if (!navigator.onLine) {
+        showErrorToast("No hay conexión a Internet.");
+        this.thereConnection = false;
+        return;
+      }
+      if (navigator.onLine && !this.thereConnection) {
+        this.thereConnection = true;
+        showSuccessToast("Conexión a Internet restablecida.");
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const no_courier = await getNo_courierByToken()
+          const request = {
+            no_courier,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          } as LocationUpdateEntity;
+          const res = await updateLocation(request);
+          if (res.error){
+            showErrorToast(getErrorMessages(res.message));
+          }
+        }, (error) => {
+          console.error("Error obtaining location: ", error);
+        });
+      } else {
+        showErrorToast("La geolocalización no está soportada por este navegador.");
+      }
+    }
+
   },
+
   beforeUnmount() {
     this.stopTracking(); 
   }

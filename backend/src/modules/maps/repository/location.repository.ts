@@ -167,7 +167,15 @@ export const findNearbyDrivers = async(lat: number, lng: number, radiusKm: numbe
   export const updateCourierLocation = async (driver: any): Promise<boolean> => {
     const connection = await pool.getConnection();
     try {
+        if (!await existsCourier(driver.no_courier)) throw new Error('Courier not found');
         await connection.beginTransaction()
+
+        if (!await existsLocationDriver(driver.no_courier)) {
+            await connection.query<RowDataPacket[]>(
+                `INSERT INTO Places (id_courier, location, name, type) VALUES (?, ST_GeomFromText(?), ?, ?)`,
+                [driver.no_courier, `POINT(${driver.lng} ${driver.lat})`, 'Courier location', 'Courier'])
+        }
+
         await connection.query<RowDataPacket[]>(
           `UPDATE Places
            SET location = ST_GeomFromText(?) WHERE id_courier = ?`,
@@ -188,6 +196,34 @@ export const findNearbyDrivers = async(lat: number, lng: number, radiusKm: numbe
         throw (error as Error).message;
     } finally {
         connection.release();
+    }
+  }
+
+  const existsCourier = async (no_courier: string): Promise<boolean> => {
+    try {
+        const [rows] = await pool.query<RowDataPacket[]>(
+          'SELECT no_courier FROM Couriers WHERE no_courier = ?',
+          [no_courier]
+        );
+
+        return rows.length > 0;
+    }catch (error: any) {
+        console.error('Error in existsCourier:', error);
+        throw (error as Error).message;
+    }
+  }
+
+  export const existsLocationDriver = async (no_courier: string): Promise<boolean> => {
+    try {
+        const [rows] = await pool.query<RowDataPacket[]>(
+          'SELECT id FROM Places WHERE id_courier = ?',
+          [no_courier]
+        );
+
+        return rows.length > 0;
+    }catch (error: any) {
+        console.error('Error in existsLocationDriver:', error);
+        throw (error as Error).message;
     }
   }
 

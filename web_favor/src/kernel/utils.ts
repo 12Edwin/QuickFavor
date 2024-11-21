@@ -1,5 +1,6 @@
 import {jwtDecode} from "jwt-decode"
 import {useEncryption} from "@/config/crypt-config";
+
 const { encrypt, decrypt } = useEncryption()
 
 const getRoleNameByToken = async () => {
@@ -10,6 +11,15 @@ const getRoleNameByToken = async () => {
    } catch (error) {
         removeToken()
    }
+}
+
+const getNo_courierByToken = async (): Promise<string | null> => {
+    try {
+        return await localStorage.getItem("no_user")
+    } catch (error) {
+        removeToken()
+        return null
+    }
 }
 
 export const getNamesByToken = async () => {
@@ -42,6 +52,7 @@ const getToken = () => {
 
 const removeToken = () => {
     localStorage.removeItem("token")
+    localStorage.removeItem('no_user')
 }
 
 const getUserInfoByToken = async () => {
@@ -156,6 +167,7 @@ const setStatusCourier = async (status: any) => {
 
 export {
     getRoleNameByToken,
+    getNo_courierByToken,
     getToken,
     removeToken,
     getStatusCourier,

@@ -23,11 +23,22 @@ export class AuthRepository {
                 const token = conf_token.token;
                 const encryptedToken = encrypt(token);
                 const userDB = await this.findUserByEmail(user.email || '');
+                let no_user = ''
+                if (userDB.role === 'Courier'){
+                    const [courier] = await pool.query('SELECT no_courier FROM Couriers WHERE id_person = ?', [user.uid]);
+                    const rows = courier as RowDataPacket[]
+                    no_user = rows[0].no_courier
+                }else{
+                    const [customer] = await pool.query('SELECT no_customer FROM Customers WHERE id_person = ?', [user.uid]);
+                    const rows = customer as RowDataPacket[]
+                    no_user = rows[0].no_customer
+                }
                 const userData = {
                     uid: user.uid,
                     email: user.email,
                     name: user.displayName,
-                    role: userDB.role
+                    role: userDB.role,
+                    no_user
                 };
                 return new Promise( (res)=> res({ user: userData, isEmailVerified: true, token: encryptedToken, } as LoginResponse) );
             } else {

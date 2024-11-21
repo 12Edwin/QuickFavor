@@ -242,6 +242,8 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                                   await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
+                              prefs.remove('token');
+                              prefs.remove('no_user');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(

@@ -155,7 +155,7 @@ class _MapCustomerState extends State<MapCustomer> {
                   },
                   onSelected: _onPlaceSelected,
                   apiKey:
-                      'AIzaSyBqG_XDPOTcaSKF3lsfNWmtWbzl6x3L77Z', // Reemplaza con tu API key
+                      'AIzaSyBqG_XDPOTcaSKF3lsfNWmtWbzl6x3L77Y', // Reemplaza con tu API key
                 ),
               ),
             ),
