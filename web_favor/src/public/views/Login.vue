@@ -3,13 +3,13 @@
     <v-row class="fill-height" align="center" justify="center">
       <v-col cols="12" md="6">
         <div class="logo-content">
-          <img src="../assets/logo.png" alt="Logo" class="logo-image" />
+          <img src="../../assets/logo.png" alt="Logo" class="logo-image" />
           <h2>Quick Favor</h2>
         </div>
       </v-col>
       <v-col cols="12 pa-8" md="6">
         <v-card class="pa-4 card-custom">
-          <img src="../assets/car.png" width="200px" alt="auto" class="car-image" />
+          <img src="../../assets/car.png" width="200px" alt="auto" class="car-image" />
           <div class="login-form">
             <div class="text-center mb-7">
               <h2>Login</h2>
@@ -62,6 +62,10 @@
 <script lang="ts">
 import router from '@/router';
 import { defineComponent, ref } from 'vue';
+import {LoginEntity} from "@/public/entity/auth.entity";
+import {login} from "@/public/services/auth";
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {getErrorMessages, setStatusCourier} from "@/kernel/utils";
 
 export default defineComponent({
   name: "Login",
@@ -78,8 +82,8 @@ export default defineComponent({
     };
 
     const validatePassword = () => {
-      const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Mínimo 8 caracteres, al menos una letra y un número
-      passwordValidationMessage.value = regex.test(password.value) ? '' : 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra y un número';
+      const regex = /^.{6,}$/;
+      passwordValidationMessage.value = regex.test(password.value) ? '' : 'La contraseña debe tener al menos 6 caracteres';
     };
 
     const handleLogin = async () => {
@@ -87,9 +91,19 @@ export default defineComponent({
         errorMessage.value = 'Por favor, complete todos los campos.';
         return;
       }
+      const credentials = {
+        email: email.value,
+        password: password.value,
+      } as LoginEntity;
 
-      router.push('/map');
-      // Para quien le toque, aquí, deberá implementar la lógica de login y eliminar el router push
+      const result = await login(credentials);
+      if (result.error){
+        showErrorToast(getErrorMessages(result.message))
+      }else {
+        setStatusCourier(false);
+        showSuccessToast(`Bienvenido ${result.data?.user.name}`);
+        await router.push({name: "map"});
+      }
 
     };
 

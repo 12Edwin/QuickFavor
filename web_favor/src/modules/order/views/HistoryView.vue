@@ -3,80 +3,69 @@
     <WaveComponent />
   </div>
   <div class="history-container">
-    <div class="title-container">
-      <i class="fa-solid fa-bell bell-icon"></i>
-      <h1 class="titlePrincipal">Historial</h1>
-      <div class="status-container">
-        <button
-          class="status-button"
-          :class="{ inactive: !isActive }"
-          @click="toggleStatus"
-        >
-          <div class="icon-circle" :class="{ 'inactive-icon': !isActive }">
-            <i
-              class="fa-solid fa-power-off power-icon"
-              :class="{ 'inactive-icon': !isActive }"
-            ></i>
-          </div>
-          <span class="status-text">{{
-            isActive ? "Activo" : "Inactivo"
-          }}</span>
-        </button>
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">H i s t o r i a l</span>
+      </h2>
+      <Switch @onFalse="" @onTrue=""/>
+    </div>
+    <div class="details-container">
+      <div v-if="data.length === 0" class="no-orders">
+        <img
+          src="../../../assets/empty2.png"
+          alt="No hay pedidos"
+          class="no-orders-image"
+        />
+        Aún no hay pedidos en esta cuenta
       </div>
-    </div>
-    <div v-if="data.length === 0" class="no-orders">
-      <img
-        src="../../../assets/empty2.png"
-        alt="No hay pedidos"
-        class="no-orders-image"
-      />
-      Aún no hay pedidos en esta cuenta
-    </div>
-    <div v-else>
-      <div v-for="(item, index) in data" :key="index">
-        <v-card class="white-card card-overlay">
-          <div class="card-content">
+      <div class="h-100" v-else>
+        <div class="h-100" v-for="(item, index) in data" :key="index">
+          <v-card class="white-card d-flex h-100 w-100">
             <div class="left-strip"></div>
-            <div class="text-content">
-              <p class="title">{{ item.numeroProductos }} productos</p>
-              <p class="date">{{ item.fecha }}</p>
+            <div class="d-flex w-100 justify-space-between flex-wrap ga-2 pa-2">
+              <div class="d-flex mx-2 flex-column justify-center mr-auto">
+                <v-card-title class="px-0">{{ item.numeroProductos }} productos</v-card-title>
+                <p class="date ma-0 py-1">{{ item.fecha }}</p>
+              </div>
+              <div class="d-flex justify-center mx-2 align-center">
+                <v-chip :color="getChipColor(item.estatus)" variant="flat" class="chip-style">
+                  <span style="color: white">{{ item.estatus }}</span>
+                </v-chip>
+              </div>
+              <div class="my-auto ml-auto">
+                <v-btn class="rounded-pill">
+                <router-link
+                  :to="{ name: 'historyDetails', params: { id: index } }"
+                  class="icon-link">
+                  <i class="fa-solid fa-eye icon-style"></i>
+                </router-link>
+                </v-btn>
+              </div>
             </div>
-            <v-chip
-              :color="getChipColor(item.estatus)"
-              variant="flat"
-              class="chip-style"
-            >
-              <span style="color: white">{{ item.estatus }}</span>
-            </v-chip>
-            <!-- Enlace clickeable al ícono -->
-            <router-link
-              :to="{ name: 'historyDetails', params: { id: index } }"
-              class="icon-link"
-            >
-              <i class="fa-solid fa-eye icon-style"></i>
-            </router-link>
-          </div>
-        </v-card>
-      </div>
+          </v-card>
+        </div>
+        </div>
 
-      <!-- Componente de paginación debajo de las cards -->
-      <v-pagination
-        :length="3"
-        :show-arrows="true"
-        rounded="circle"
-        class="pagination-style"
-      ></v-pagination>
+        <!-- Componente de paginación debajo de las cards -->
+        <v-pagination
+          :length="3"
+          :show-arrows="true"
+          rounded="circle"
+          class="pagination-style"
+        ></v-pagination>
+      </div>
     </div>
-  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
 
 export default defineComponent({
   name: "HistoryView",
-  components: { WaveComponent },
+  components: {Switch, WaveComponent },
   data() {
     return {
       isActive: true, // Variable para manejar el estado del botón
@@ -307,28 +296,35 @@ export default defineComponent({
 }
 
 .history-container {
-  height: 88vh;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  position: static;
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
-
-/* Estilo para el contenedor del título */
-.title-container {
-  width: 100%;
-  background-color: #566981; /* Color de fondo azul claro */
-  padding: 16px;
+.card-header {
   display: flex;
-  justify-content: left;
   align-items: center;
-  margin-bottom: 25px;
+  background-color: #566981;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.titlePrincipal {
-  color: #ffffff; /* Color de texto blanco */
-  margin: 0;
-  font-size: 24px;
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.details-container{
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
+  border-radius: 10px;
 }
 
 .bell-icon {
@@ -338,7 +334,6 @@ export default defineComponent({
 }
 
 /* Estilos para el botón de estado */
-
 .status-container {
   margin-left: auto;
   display: flex;
@@ -359,7 +354,7 @@ export default defineComponent({
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   width: 350px;
   position: relative;
-  overflow: visible;
+  overflow: visible; /* Permite que el icono salga del botón */
 }
 
 .status-button.inactive {
@@ -372,36 +367,7 @@ export default defineComponent({
   padding: 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  position: absolute;
-  left: -8px; /* Ajusta cuánto sobresale el icono */
-}
-
-.icon-circle.inactive-icon {
-  background-color: #ffffff;
-}
-
-.power-icon {
-  color: #0066cc; /* Color del icono de encendido */
-  font-size: 24px;
-}
-
-.power-icon.inactive-icon {
-  color: #f70b0b;
-}
-
-.status-text {
-  color: white;
-  margin-left: 30px;
-}
-
-/* Contenedor para centrar solo la sección de no-orders */
-.no-orders-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  gap: 8px;
 }
 
 .no-orders {
@@ -422,16 +388,11 @@ export default defineComponent({
 .white-card {
   background-color: white;
   width: 85%;
-  margin: 0 auto;
-  margin-bottom: 20px; /* Espacio entre cards */
+  margin-bottom: 20px;
   padding: 0;
-  display: flex;
-  align-items: center;
 }
 
-.card-overlay {
-  z-index: 2;
-}
+
 
 .card-content {
   display: flex;
@@ -441,8 +402,7 @@ export default defineComponent({
 }
 
 .left-strip {
-  width: 20px;
-  min-height: 78px;
+  width: 16px;
   background-color: #34344e;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -465,8 +425,6 @@ export default defineComponent({
 .date {
   font-size: 14px;
   color: #6b7280;
-  margin: 0;
-  margin-left: 20px;
 }
 
 .chip-style {
@@ -478,13 +436,11 @@ export default defineComponent({
 }
 
 .icon-style {
-  font-size: 30px;
+  font-size: 20px;
   color: #312070;
-  padding: 15px;
 }
 
 .icon-link {
-  margin-left: 100px; /* Espacio entre el chip y el icono */
   text-decoration: none;
 }
 

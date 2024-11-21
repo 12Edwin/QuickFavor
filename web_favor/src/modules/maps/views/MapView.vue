@@ -8,14 +8,10 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> ¿Dónde Estoy?
+              <v-icon icon="fa-solid fa-location-dot" style="color: white; font-size: 36px;"></v-icon> 
+              <span class="ml-4 fas text-white"> D o n d e  -  e s t o y? </span>
             </h2>
-            <div class="switch-container">
-              <label class="switch">
-                <input type="checkbox" v-model="isChecked" @change="toggleTracking">
-                <span class="slider"></span>
-              </label>
-            </div>
+            <Switch v-model="isChecked" @onFalse="stopTracking" @onTrue="startTracking"/>
           </div>
           <div class="map-container">
             <GoogleMap
@@ -36,28 +32,31 @@
 import { defineComponent } from 'vue';
 import WaveComponent from '@/components/WaveComponent.vue';
 import { GoogleMap } from 'vue3-google-map';
+import Switch from '@/components/Switch.vue';
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {LocationUpdateEntity} from "@/modules/maps/entity/location.entity";
+import {getErrorMessages, getNo_courierByToken} from "@/kernel/utils";
+import {updateLocation} from "@/modules/maps/services/location.service";
 
 export default defineComponent({
   name: "MapView",
-  components: { WaveComponent, GoogleMap },
+  components: { WaveComponent, GoogleMap, Switch },
   data() {
     return {
       center: { lat: 19.42847, lng: -99.12766 },
       isChecked: false,
-      isTracking: false,
       userIcon: require('@/assets/location/assistant_navigation.svg'),
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
-      marker: null as google.maps.Marker | null
+      marker: null as google.maps.Marker | null,
+      thereConnection: true
     };
   },
   mounted() {
-    if (this.isChecked) {
-      this.toggleTracking();
-    }
+    
   },
   methods: {
-    toggleTracking() {
+    async toggleTracking() {
       this.isTracking = this.isChecked;
       if (this.isTracking) {
         this.startTracking();
@@ -68,8 +67,9 @@ export default defineComponent({
     startTracking() {
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {
-        this.updateLocation(); 
-      }, 5000);
+        this.updateLocation();
+        this.updateLocationService();
+      }, 5000) as any;
     },
     stopTracking() {
       if (this.locationInterval) {
@@ -111,8 +111,41 @@ export default defineComponent({
       } else {
         this.marker.setPosition(this.center);
       }
+    },
+
+    async updateLocationService() {
+      if (!navigator.onLine) {
+        showErrorToast("No hay conexión a Internet.");
+        this.thereConnection = false;
+        return;
+      }
+      if (navigator.onLine && !this.thereConnection) {
+        this.thereConnection = true;
+        showSuccessToast("Conexión a Internet restablecida.");
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const no_courier = await getNo_courierByToken()
+          const request = {
+            no_courier,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          } as LocationUpdateEntity;
+          const res = await updateLocation(request);
+          if (res.error){
+            showErrorToast(getErrorMessages(res.message));
+          }
+        }, (error) => {
+          console.error("Error obtaining location: ", error);
+        });
+      } else {
+        showErrorToast("La geolocalización no está soportada por este navegador.");
+      }
     }
+
   },
+
   beforeUnmount() {
     this.stopTracking(); 
   }
@@ -145,84 +178,25 @@ export default defineComponent({
 .card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
   background-color: #566981;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  height: 64px;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .header-title {
-  color: white;
-  font-size: 1.25rem;
-}
-.switch-container {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 24px;
-}
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #CB5E5E;
-  transition: 0.4s;
-  border-radius: 24px; 
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background-color: #4caf50;
-}
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
+
+/* map estilos */
 .map-container {
   height: calc(100% - 64px); 
   width: 100%;
-}
-.wave-animation {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px; 
-  height: 200px; 
-  background: rgba(75, 192, 192, 0.5);
-  border-radius: 50%;
-  animation: wave-animation 3s infinite;
-  transform: translate(-50%, -50%);
-  z-index: -1; 
-}
-@keyframes wave-animation {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(5);
-    opacity: 0;
-  }
 }
 </style>

@@ -5,7 +5,7 @@
 
     <!-- Contenedor de Registro -->
     <div class="register-form">
-      <img src="@/assets/logo.png" alt="Quick Favor Logo" class="logo" />
+      <img src="../../assets/logo.png" alt="Quick Favor Logo" class="logo" />
       <h1>Registro</h1>
 
       <!-- Formulario -->
@@ -242,7 +242,7 @@
 
     <!-- Contenedor del Logo en el Lado Derecho -->
     <div class="right-logo-container">
-      <img src="@/assets/logo.png" alt="Quick Favor Logo" class="right-logo" />
+      <img src="../../assets/logo.png" alt="Quick Favor Logo" class="right-logo" />
       <p class="right-logo-text">Quick Favor</p>
     </div>
   </div>

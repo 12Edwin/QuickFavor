@@ -1,23 +1,44 @@
 import {AuthRepository} from "../repository/auth.repository";
-import {LoginRequest, LoginResponse} from "../interface/login.interface";
-import {UserInterface} from "../interface/user.interface";
-import {ResetInterface} from "../interface/reset.interface";
+import {LoginRequest, LoginResponse} from "../interface/login.type";
+import {Reset} from "../interface/Reset";
 import {Pageable, PaginationResult} from "../../commons/Pageable";
-import {admin} from "../../commons/config-SDK";
 import {UserFirebaseInterface} from "../interface/userFirebase.interface";
+import {Courier, Customer, User} from "../interface/User";
 
 export class AuthService {
     constructor(private authRepository: AuthRepository) {}
 
     async login(payload: LoginRequest): Promise<LoginResponse> {
-        return await this.authRepository.login(payload);
+        try{
+            return await this.authRepository.login(payload);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
     }
 
-    async register(payload: UserInterface): Promise<boolean> {
-        return await this.authRepository.register(payload);
+    async courier_register(payload: User & Courier): Promise<boolean> {
+        try{
+            if (await this.authRepository.existsUserByEmail(payload.email)) throw new Error('email already exists');
+            if (await this.authRepository.existsUserByCurp(payload.CURP)) throw new Error('CURP already exists');
+            if (await this.authRepository.existsUserByPhone(payload.phone)) throw new Error('phone already exists');
+            return await this.authRepository.courier_register(payload);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
     }
 
-    async resetPassword(payload: ResetInterface): Promise<boolean> {
+    async customer_register(payload: User & Customer): Promise<boolean> {
+        try {
+            if (await this.authRepository.existsUserByEmail(payload.email)) throw new Error('email already exists');
+            if (await this.authRepository.existsUserByPhone(payload.phone)) throw new Error('phone already exists');
+            if (await this.authRepository.existsUserByCurp(payload.CURP)) throw new Error('curp already exists');
+            return await this.authRepository.customer_register(payload);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async resetPassword(payload: Reset): Promise<boolean> {
         return await this.authRepository.resetPassword(payload);
     }
 

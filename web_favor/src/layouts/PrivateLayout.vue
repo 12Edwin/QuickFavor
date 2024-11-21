@@ -3,8 +3,9 @@
     <div class="d-flex flex-column flex-md-row ">
       <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
-        <div class="header">
-          <span class="text-light text me-3">Juan Rodrígo</span>
+        <div class="header-layout">
+          <span class="text-light text mr-3 font-weight-bold mr-3">Juan Rodrígo</span>
+          <span @click="handleSessionModal" class="text-light text mr-3 font-weight-bold pa-2 px-5 cursor-pointer rounded-pill bg-blue-grey-lighten-4"> <i class="fas fa-sign-out-alt"></i> </span>
         </div>
         <div class="content-body">
           <router-view></router-view>
@@ -12,19 +13,32 @@
       </div>
     </div>
   </div>
+  <ConfirmationModal :is-visible="showModal" @cancel="handleSessionModal" @confirm="logout" :is-completed="false" message="¿Estás seguro de cerrar sesión?"/>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import SideBar from "@/components/SideBar.vue";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
 
 export default defineComponent({
   name: "PrivateLayout",
-  components: { SideBar },
+  components: {ConfirmationModal, SideBar },
   data() {
     return {
+      showModal: false,
       isSidebarOpen: false
     };
+  },
+
+  methods:{
+    handleSessionModal(){
+      this.showModal = !this.showModal;
+    },
+    logout(){
+      localStorage.removeItem('token');
+      this.$router.push({name: 'login'});
+    }
   }
 });
 </script>
@@ -33,12 +47,12 @@ export default defineComponent({
 
 .content {
   flex-grow: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   height: 100vh;
   position: relative;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -52,22 +66,25 @@ body::-webkit-scrollbar, .content::-webkit-scrollbar {
 /* Cuerpo del contenido con padding */
 .content-body {
   padding-top: 16px;
+  position: relative;
+  flex-grow: 1;
 }
 
 /* Encabezado sticky en la parte superior */
-.header {
-  z-index: 1;
+.header-layout {
+  z-index: 99;
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
-  height: 8vh;
+  padding-top: calc(4dvh - 20px);
+  padding-bottom: calc(4dvh - 20px);
   background-color: rgba(137, 167, 177, 0.6);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-right: 16px; /* Espacio extra a la derecha */
+  padding-right: 16px;
 }
 
 /* Estilos específicos para pantallas pequeñas */

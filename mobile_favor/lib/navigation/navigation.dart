@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
@@ -14,7 +15,7 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
-  String _role = 'customer';
+  String _role = '';
   bool _thereIsFavor = false;
 
   late List<Widget> _courierWidgets = [];
@@ -35,16 +36,16 @@ class _NavigationState extends State<Navigation> {
   void _getRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _role = prefs.getString('role') ?? 'customer';
+      _role = prefs.getString('role') ?? 'Customer';
     });
   }
 
   void initCourierWidgets() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _thereIsFavor = prefs.getBool('thereIsFavor') ?? true;
+      _thereIsFavor = prefs.getBool('thereIsFavor') ?? false;
       _courierWidgets = [
-        _thereIsFavor ? const FavorProgressCourier() : const Placeholder(),
+        _thereIsFavor ? const FavorProgressCourier() : const MapCourier(),
         const Placeholder(),
         const Placeholder(),
         const ProfileCourier()
@@ -56,13 +57,13 @@ class _NavigationState extends State<Navigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        items: _role == 'courier' ? courierTabs() : customerTabs(),
+        items: _role == 'Courier' ? courierTabs() : customerTabs(),
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      body: _role == 'courier'
+      body: _role == 'Courier'
           ? _courierWidgets[_selectedIndex]
           : _customerWidgets[_selectedIndex],
     );

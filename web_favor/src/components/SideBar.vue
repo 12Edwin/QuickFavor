@@ -104,11 +104,11 @@ export default defineComponent({
 }
 .sidebar {
   width: 250px;
-  height: 100%; 
+  height: 100%;
   background: #89a7b1;
   backdrop-filter: blur(5px);
   transition: transform 0.3s ease; 
-  z-index: 1000;
+  z-index: 100;
   margin-top: 56px;
 }
 
@@ -117,19 +117,19 @@ export default defineComponent({
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; 
+  z-index: 100;
   transform: translateX(0);
 }
 
 
 .head-sidebar {
   width: 250px;
-  height: 68px;
+  height: 8dvh;
   position: absolute;
   top: 0;
   left: 0;
   background-color: rgba(137, 167, 177, 0.6);
-  z-index: 1001;
+  z-index: 100;
 }
 
 nav {
@@ -183,6 +183,10 @@ nav {
   color: #cbdad5;
   margin-left: 2px;
   margin-right: 4px;
+}
+
+.sidebar-item.selected .icon-sidebar {
+  color: #89a7b1;
 }
 
 @media screen and (max-width: 900px) {

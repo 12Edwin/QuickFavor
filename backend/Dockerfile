@@ -27,6 +27,7 @@ COPY . .
 FROM node:22-alpine3.19 as prod
 LABEL authors="12edwin"
 EXPOSE 3000
+EXPOSE 50051
 WORKDIR /app
 COPY --from=dev-prod /app/node_modules ./node_modules
 COPY . .
