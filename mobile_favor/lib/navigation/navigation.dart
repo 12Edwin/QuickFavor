@@ -3,6 +3,7 @@ import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
+import 'package:mobile_favor/navigation/customer/create_order.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +22,7 @@ class _NavigationState extends State<Navigation> {
   late List<Widget> _courierWidgets = [];
   final List<Widget> _customerWidgets = [
     const MapCustomer(),
-    const Placeholder(),
+    const CreateOrder(),
     const Placeholder(),
     const ProfileCustomer()
   ];
