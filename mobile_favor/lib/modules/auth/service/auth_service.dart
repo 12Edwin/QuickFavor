@@ -29,4 +29,34 @@ class AuthService {
       }
     }
   }
+
+  Future<ResponseEntity> registerCourier(RegisterCourierEntity courier) async {
+    try {
+      final response = await dio.post('/auth/courier-register', data: courier.toJson());
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      }else {
+        return resp;
+      }
+    }
+  }
+
+  Future<ResponseEntity> registerCustomer(RegisterCustomerEntity customer) async {
+    try {
+      final response = await dio.post('/auth/customer-register', data: customer.toJson());
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      }else {
+        return resp;
+      }
+    }
+  }
 }

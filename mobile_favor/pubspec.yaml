@@ -43,6 +43,7 @@ dependencies:
   google_places_for_flutter: ^1.0.1
   dio: ^5.7.0
   fluttertoast: ^8.2.8
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:

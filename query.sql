@@ -23,6 +23,12 @@ create table Couriers(
     status enum('Available', 'Busy', 'Out of service') not null,
     license_plate varchar(8),
     last_update timestamp default current_timestamp,
+    face_url varchar(255) null,
+    ine_url varchar(255) null,
+    plate_url varchar(255) null,
+    brand varchar(100) null,
+    model varchar(200) null,
+    color varchar(100) null,
     id_person varchar(100) not null,
     foreign key (id_person) references People(uid)
 );
@@ -45,6 +51,8 @@ create table Orders(
     foreign key (id_customer) references Customers(no_customer),
     foreign key (id_courier) references Couriers(no_courier)
 );
+
+Select * From People;
 
 create table Products(
     id int primary key auto_increment,

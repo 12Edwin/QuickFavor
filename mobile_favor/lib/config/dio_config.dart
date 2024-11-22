@@ -7,8 +7,8 @@ class DioConfig {
   static Dio createDio(BuildContext context) {
     final dio = Dio(BaseOptions(
       baseUrl: 'https://backend-app-y3z1.onrender.com',
-      connectTimeout: const Duration(milliseconds: 5000),
-      receiveTimeout: const Duration(milliseconds: 3000),
+      connectTimeout: const Duration(milliseconds: 10000),
+      receiveTimeout: const Duration(milliseconds: 10000),
     ));
 
     dio.interceptors.add(InterceptorsWrapper(
@@ -27,13 +27,13 @@ class DioConfig {
       onError: (DioError error, handler) async {
         // Handle errors
         if (error.response == null) {
-          showErrorAlert(context, 'Error de conexión');
           return handler.reject(DioException(
             requestOptions: error.requestOptions,
             response: Response(
               requestOptions: error.requestOptions,
               statusCode: 502,
               statusMessage: 'Network error',
+              data: {'error': true, 'message': 'Network error', 'data': null},
             ),
           ));
         }

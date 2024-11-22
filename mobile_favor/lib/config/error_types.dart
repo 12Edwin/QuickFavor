@@ -22,6 +22,7 @@ String getErrorMessages(String errorCode) {
     'error network': 'No se ha podido establecer conexión con el servidor',
     'too many requests': 'Demasiadas solicitudes',
     'client not connected': 'Cliente no conectado',
+    'internal server error': 'Error interno del servidor',
     'default': 'Error interno del servidor',
   };
 

@@ -59,10 +59,10 @@ export class AuthRepository {
         }
     }
 
-    async courier_register(payload: UserType & Courier): Promise<boolean> {
+    async courier_register(payload: UserType & Courier): Promise<string> {
         let connection: PoolConnection | null = null;
         try {
-            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex } = payload;
+            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -86,12 +86,12 @@ export class AuthRepository {
 
 
             await connection.query(
-                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status) VALUES (?,?,?,?)',
-                [userRecord.uid, vehicle_type, license_plate, 'Out of service']
+                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status, face_url, ine_url, plate_url, brand, model, color) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [userRecord.uid, vehicle_type, license_plate, 'Out of service', face_photo, INE_photo, plate_photo, brand, model, color]
             );
 
             await connection.commit();
-            return true;
+            return userRecord.uid;
         } catch (error: any) {
             console.log(error)
             if (connection) {
@@ -109,9 +109,9 @@ export class AuthRepository {
     }
 
     async customer_register(payload: UserType & Customer): Promise<boolean> {
-        let connection: PoolConnection | null = null;
+        const connection = await pool.getConnection();
         try {
-            const { email, password, name, surname, lastname, phone, sex, CURP } = payload;
+            const { email, password, name, surname, lastname, phone, sex, CURP, direction, lat, lng } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -125,12 +125,12 @@ export class AuthRepository {
             await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: 'Customer' });
             await sendEmailVerification(userCredential.user);
 
-            connection = await pool.getConnection();
+
             await connection.beginTransaction();
 
             await connection.query(
                 'INSERT INTO People (uid, email, name, surname, role, lastname, phone, sex, curp) VALUES (?,?,?,?,?,?,?,?,?)',
-                [userRecord.uid, email, name, surname, 'CUSTOMER', lastname, phone, sex, CURP]
+                [userRecord.uid, email, name, surname, 'Customer', lastname, phone, sex, CURP]
             );
 
             await connection.query(
@@ -138,12 +138,20 @@ export class AuthRepository {
                 [userRecord.uid]
             );
 
+            const [rows_customer] = await connection.query<RowDataPacket[]>(
+                'SELECT no_customer FROM Customers WHERE id_person = ?', [userRecord.uid]
+            );
+
+            const no_customer = rows_customer[0].no_customer;
+            await connection.query<RowDataPacket[]>(
+                `INSERT INTO Places (id_customer, location, name, type) VALUES (?, ST_GeomFromText(?), ?, ?)`,
+                [no_customer, `POINT(${lng} ${lat})`, direction, 'Home'])
+
+            await connection.commit();
             return true;
         } catch (error: any) {
             console.log(error)
-            if (connection) {
-                await connection.rollback();
-            }
+            await connection.rollback();
             if (error.code.includes('auth/email-already-exists')){
                 throw new Error('Email already exists');
             }
