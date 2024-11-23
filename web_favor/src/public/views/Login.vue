@@ -16,7 +16,7 @@
             </div>
             <form @submit.prevent="handleLogin">
               <div class="input-container">
-                <i class="mdi mdi-email icon"></i>
+                <v-icon class="fa-solid fa-envelope icon"></v-icon>
                 <input
                   type="email"
                   v-model="email"
@@ -29,7 +29,7 @@
               <div v-if="emailValidationMessage" class="validation-message">{{ emailValidationMessage }}</div>
               
               <div class="input-container">
-                <i class="mdi mdi-lock icon"></i>
+                <v-icon class="fa-solid fa-key icon"></v-icon>
                 <input
                   type="password"
                   v-model="password"
@@ -45,10 +45,10 @@
               <button type="submit" class="login-button" :disabled="activeBtnLogin()">Login</button>
               <v-row class="mt-2">
                 <v-col cols="12" class="text-center">
-                  <button type="button" class="forgot-password">Recuperar contraseña</button>
+                  <button type="button" class="forgot-password" @click="redirectToForgotPassword">Recuperar contraseña</button>
                 </v-col>
                 <v-col cols="12" class="text-center">
-                  <button type="button" class="sign-up">Registrate</button>
+                  <button type="button" class="sign-up" @click="redirectToRegister">Registrate</button>
                 </v-col>
               </v-row>
             </form>
@@ -116,6 +116,8 @@ export default defineComponent({
   ); 
   }
 
+  
+
     return {
       email,
       password,
@@ -128,6 +130,14 @@ export default defineComponent({
       activeBtnLogin,
     };
   },
+  methods: {
+    redirectToRegister() {
+      this.$router.push('register');
+    },
+    redirectToForgotPassword() {
+      this.$router.push('recovery-password');
+    },
+  }
 });
 </script>
 
