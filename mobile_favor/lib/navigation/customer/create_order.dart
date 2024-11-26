@@ -98,7 +98,9 @@ class _LoginState extends State<CreateOrder> {
                       coordinates: _coordinates1,
                       showClear: false,
                       updateCoordinates: updateCoordinates1,
-                      icon: _address1Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
+                      icon: _address1Controller.text.isEmpty
+                          ? Icons.add_circle
+                          : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     _buildIconWithInput(
@@ -113,7 +115,9 @@ class _LoginState extends State<CreateOrder> {
                         });
                       },
                       updateCoordinates: updateCoordinates2,
-                      icon: _address2Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
+                      icon: _address2Controller.text.isEmpty
+                          ? Icons.add_circle
+                          : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     _buildIconWithInput(
@@ -128,7 +132,9 @@ class _LoginState extends State<CreateOrder> {
                         });
                       },
                       updateCoordinates: updateCoordinates3,
-                      icon: _address3Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
+                      icon: _address3Controller.text.isEmpty
+                          ? Icons.add_circle
+                          : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     Container(
@@ -320,7 +326,8 @@ class _LoginState extends State<CreateOrder> {
               Expanded(
                 child: TextField(
                   onTap: () {
-                    _pickCollectionLocation(coordinates, controller, updateCoordinates);
+                    _pickCollectionLocation(
+                        coordinates, controller, updateCoordinates);
                   },
                   readOnly: true,
                   controller: controller,
@@ -371,8 +378,7 @@ class _LoginState extends State<CreateOrder> {
     );
   }
 
-  void _showProductModal(BuildContext context,
-      {Products? producto}) {
+  void _showProductModal(BuildContext context, {Products? producto}) {
     final TextEditingController nombreController =
         TextEditingController(text: producto != null ? producto.name : '');
     final TextEditingController descripcionController = TextEditingController(
@@ -514,21 +520,21 @@ class _LoginState extends State<CreateOrder> {
                   onPressed: () {
                     if (!_nameKey.currentState!.validate() ||
                         !_descriptionKey.currentState!.validate()) {
-                      showErrorAlert(context, 'Por favor, rellena los campos correctamente');
+                      showErrorAlert(context,
+                          'Por favor, rellena los campos correctamente');
                       return;
                     }
                     setState(() {
                       if (producto != null) {
                         // Editar producto existente
-                        final index = products
-                            .indexWhere((p) => p.id == producto.id);
+                        final index =
+                            products.indexWhere((p) => p.id == producto.id);
                         if (index != -1) {
                           products[index] = new Products(
                               id: producto.id,
                               name: nombreController.text,
                               amount: cantidad,
-                              description: descripcionController.text
-                          );
+                              description: descripcionController.text);
                         }
                       } else {
                         // Agregar nuevo producto
@@ -536,8 +542,7 @@ class _LoginState extends State<CreateOrder> {
                             id: products.length + 1,
                             name: nombreController.text,
                             amount: cantidad,
-                            description: descripcionController.text
-                        ));
+                            description: descripcionController.text));
                       }
                     });
                     Navigator.pop(context);
@@ -579,7 +584,8 @@ class _LoginState extends State<CreateOrder> {
 
   Future<void> _searchForCourier() async {
     if (_coordinates1 == null) {
-      showWarningAlert(context, 'Por favor, selecciona al menos una dirección de recolección');
+      showWarningAlert(context,
+          'Por favor, selecciona al menos una dirección de recolección');
       return;
     }
     if (products.isEmpty) {
@@ -631,32 +637,35 @@ class _LoginState extends State<CreateOrder> {
     );
   }
 
-  void _pickCollectionLocation(LatLng? coordinates, TextEditingController controller, Function(LatLng) updateCoordinates) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => CollectionPicker(
-        initialLat: coordinates?.latitude,
-        initialLng: coordinates?.longitude,
-        onLocationPicked: (double lat, double lng, String address) {
-          setState(() {
-            LatLng newCoordinates = LatLng(lat, lng);
-            updateCoordinates(newCoordinates);
-            controller.text = address;
-          });
-        },
+  void _pickCollectionLocation(LatLng? coordinates,
+      TextEditingController controller, Function(LatLng) updateCoordinates) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CollectionPicker(
+          initialLat: coordinates?.latitude,
+          initialLng: coordinates?.longitude,
+          onLocationPicked: (double lat, double lng, String address) {
+            setState(() {
+              LatLng newCoordinates = LatLng(lat, lng);
+              updateCoordinates(newCoordinates);
+              controller.text = address;
+            });
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-void updateCoordinates1(LatLng coordinates) {
-  _coordinates1 = coordinates;
-}
-void updateCoordinates2(LatLng coordinates) {
-  _coordinates2 = coordinates;
-}
-void updateCoordinates3(LatLng coordinates) {
-  _coordinates3 = coordinates;
-}
+  void updateCoordinates1(LatLng coordinates) {
+    _coordinates1 = coordinates;
+  }
+
+  void updateCoordinates2(LatLng coordinates) {
+    _coordinates2 = coordinates;
+  }
+
+  void updateCoordinates3(LatLng coordinates) {
+    _coordinates3 = coordinates;
+  }
 }

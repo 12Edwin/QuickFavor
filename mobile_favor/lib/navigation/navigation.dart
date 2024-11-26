@@ -5,6 +5,7 @@ import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
 import 'package:mobile_favor/navigation/customer/favor_progress_customer.dart';
+import 'package:mobile_favor/navigation/customer/history_order.dart';
 import 'package:mobile_favor/navigation/customer/order_details.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,9 @@ class _NavigationState extends State<Navigation> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _courierWidgets = [
-        prefs.getString('no_order') != null ? const FavorProgressCourier() : const MapCourier(),
+        prefs.getString('no_order') != null
+            ? const FavorProgressCourier()
+            : const MapCourier(),
         const Placeholder(),
         const Placeholder(),
         const ProfileCourier()
@@ -56,29 +59,35 @@ class _NavigationState extends State<Navigation> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _customerWidgets = [
-        prefs.getString('no_order') != null ? const FavorProgressCustomer() : const MapCustomer(),
+        prefs.getString('no_order') != null
+            ? const FavorProgressCustomer()
+            : const MapCustomer(),
         const CreateOrder(),
-        const Placeholder(),
+        const HistoryOrder(),
         const ProfileCustomer()
       ];
     });
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    bottomNavigationBar: BottomNavigationBar(
-      items: _role == 'Courier' ? courierTabs() : customerTabs(),
-      selectedItemColor: Theme.of(context).primaryColor,
-      unselectedItemColor: Colors.grey,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-    ),
-    body: _role == 'Courier'
-        ? (_courierWidgets.isNotEmpty ? _courierWidgets[_selectedIndex] : Container())
-        : (_customerWidgets.isNotEmpty ? _customerWidgets[_selectedIndex] : Container()),
-  );
-}
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        items: _role == 'Courier' ? courierTabs() : customerTabs(),
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+      body: _role == 'Courier'
+          ? (_courierWidgets.isNotEmpty
+              ? _courierWidgets[_selectedIndex]
+              : Container())
+          : (_customerWidgets.isNotEmpty
+              ? _customerWidgets[_selectedIndex]
+              : Container()),
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
