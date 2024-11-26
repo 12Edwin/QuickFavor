@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 class WavePainter extends CustomPainter {
   final BuildContext context;
   final double waveHeight;
+  final Color? color;
 
-  WavePainter({required this.context, required this.waveHeight});
+  WavePainter({required this.context, required this.waveHeight, this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Theme.of(context).primaryColor
+      ..color = color ?? Theme.of(context).primaryColor
       ..style = PaintingStyle.fill;
 
     final path = Path();

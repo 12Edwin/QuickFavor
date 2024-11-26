@@ -1,13 +1,13 @@
 import {FavorRepository} from "../repository/favor.repository";
 import {FavorEntity} from "../interface/favor.entity";
-import {existsCustomerById, toggleUserAccount} from "../../../auth/service/boundary";
+import {existsCourierById, existsCustomerById, toggleUserAccount} from "../../../auth/service/boundary";
 import {LocationEntity} from "../../../grpc/entity/location.entity";
 
 export class FavorService{
 
     constructor(private favorRepository: FavorRepository){}
 
-    async createFavor(payload: FavorEntity): Promise<boolean> {
+    async createFavor(payload: FavorEntity): Promise<string> {
         try {
             if (payload.collection_points.length > 3 || payload.products.length <= 0) throw new Error('Invalid fields');
             if (payload.products.length > 15 || payload.products.length <= 0) throw new Error('Invalid fields');
@@ -38,6 +38,15 @@ export class FavorService{
             if (newStatus === 'Finished' && (cost === null || receipt === null)) throw new Error('Invalid fields');
             if (newStatus === 'Finished' && !await this.favorRepository.thereIsTimeToFinish(id)) throw new Error('Time to finish is over');
             return this.favorRepository.updateFavorStatus(id, newStatus, cost, receipt);
+        }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async getDetailsFavor(no_order: string): Promise<Map<string, any>> {
+        try{
+            if (!await this.favorRepository.existsFavorByNo_order(no_order)) throw new Error('Favor not found');
+            return this.favorRepository.getDetailsFavor(no_order);
         }catch (error: any){
             throw new Error((error as Error).message)
         }
@@ -74,6 +83,15 @@ export class FavorService{
             if (!await this.favorRepository.existsFavorByNo_order(no_order)) throw new Error('Favor not found');
             return this.favorRepository.rejectFavor(no_order, courier_id);
         }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async readNotifications(no_courier: string): Promise<Promise<Map<string, any>[]>> {
+        try{
+            if (!await existsCourierById(no_courier)) throw new Error('Courier not found');
+            return this.favorRepository.readNotifications(no_courier);
+        }catch (error: any) {
             throw new Error((error as Error).message)
         }
     }

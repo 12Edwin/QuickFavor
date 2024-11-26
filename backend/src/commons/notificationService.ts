@@ -12,7 +12,7 @@ export class NotificationService {
 
       const fcmToken = rows[0]?.fcm_token;
       if (!fcmToken) {
-        throw new Error(`No FCM token found for driver ${driverId}`);
+        return;
       }
 
       const message = {
@@ -37,7 +37,6 @@ export class NotificationService {
       return response;
     } catch (error) {
       console.error('Error sending notification:', error);
-      throw error;
     }
   }
 }

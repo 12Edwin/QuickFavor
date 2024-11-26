@@ -1,58 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mobile_favor/config/alerts.dart';
+import 'package:mobile_favor/config/error_types.dart';
+import 'package:mobile_favor/kernel/widget/collection-picker.dart';
+import 'package:mobile_favor/navigation/customer/entity/order.entity.dart';
+import 'package:mobile_favor/navigation/customer/service/favor.service.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../config/utils.dart';
+import 'component/search_couriers.dart';
 
 class CreateOrder extends StatefulWidget {
-  const CreateOrder({super.key});
+  final double? lat;
+  final double? lng;
+  final String? address;
+
+  const CreateOrder({super.key, this.lat, this.lng, this.address});
 
   @override
   State<CreateOrder> createState() => _LoginState();
 }
 
 class _LoginState extends State<CreateOrder> {
-  final List<Map<String, dynamic>> productos = [
-    {
-      'id': 1,
-      'nombre': 'Aceite',
-      'cantidad': 1,
-      'descripcion': '1 Lt de aceite 123',
-    },
-  ];
+  final List<Products> products = [];
+  final _nameKey = GlobalKey<FormState>();
+  final _descriptionKey = GlobalKey<FormState>();
+  final TextEditingController _address1Controller = TextEditingController();
+  final TextEditingController _address2Controller = TextEditingController();
+  final TextEditingController _address3Controller = TextEditingController();
+  late LatLng? _coordinates1 = null;
+  LatLng? _coordinates2 = null;
+  LatLng? _coordinates3 = null;
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _obscureText = true;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.lat != null && widget.lng != null) {
+      _coordinates1 = LatLng(widget.lat!, widget.lng!);
+      _address1Controller.text = widget.address ?? '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          'Direcciones de Recolección',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Direcciones de Recolección'),
         actions: [
-          ElevatedButton(
-            onPressed: _onLogin,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).secondaryHeaderColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                vertical: 10,
-                horizontal: 20,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: ElevatedButton(
+              onPressed: _searchForCourier,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-            child: const Text(
-              'Pedir',
-              style: TextStyle(
-                fontSize: 16,
+              child: const Text(
+                'Pedir',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -78,21 +93,42 @@ class _LoginState extends State<CreateOrder> {
                   children: [
                     const SizedBox(height: 60),
                     _buildIconWithInput(
-                      hintText: 'San Antonio Smog Check',
-                      icon: Icons.check_circle,
-                      showEditIcon: true,
+                      hintText: 'Nueva Dirección',
+                      controller: _address1Controller,
+                      coordinates: _coordinates1,
+                      showClear: false,
+                      updateCoordinates: updateCoordinates1,
+                      icon: _address1Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     _buildIconWithInput(
                       hintText: 'Nueva Dirección',
-                      icon: Icons.add_circle,
-                      showEditIcon: false,
+                      controller: _address2Controller,
+                      coordinates: _coordinates2,
+                      showClear: true,
+                      clearFunction: () {
+                        setState(() {
+                          _address2Controller.clear();
+                          _coordinates2 = null;
+                        });
+                      },
+                      updateCoordinates: updateCoordinates2,
+                      icon: _address2Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     _buildIconWithInput(
                       hintText: 'Nueva Dirección',
-                      icon: Icons.add_circle,
-                      showEditIcon: false,
+                      controller: _address3Controller,
+                      coordinates: _coordinates3,
+                      showClear: true,
+                      clearFunction: () {
+                        setState(() {
+                          _address3Controller.clear();
+                          _coordinates3 = null;
+                        });
+                      },
+                      updateCoordinates: updateCoordinates3,
+                      icon: _address3Controller.text.isEmpty ? Icons.add_circle : Icons.check_circle,
                     ),
                     const SizedBox(height: 40),
                     Container(
@@ -156,7 +192,7 @@ class _LoginState extends State<CreateOrder> {
                           ),
                           const SizedBox(height: 10),
                           Expanded(
-                            child: productos.isEmpty
+                            child: products.isEmpty
                                 ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -177,9 +213,9 @@ class _LoginState extends State<CreateOrder> {
                                     ],
                                   )
                                 : ListView.builder(
-                                    itemCount: productos.length,
+                                    itemCount: products.length,
                                     itemBuilder: (context, index) {
-                                      final producto = productos[index];
+                                      final product = products[index];
                                       return Container(
                                         margin: const EdgeInsets.symmetric(
                                             vertical: 8.0),
@@ -203,7 +239,7 @@ class _LoginState extends State<CreateOrder> {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                producto['nombre'],
+                                                product.name,
                                                 style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
@@ -217,7 +253,7 @@ class _LoginState extends State<CreateOrder> {
                                               ),
                                               onPressed: () {
                                                 _showProductModal(context,
-                                                    producto: producto);
+                                                    producto: product);
                                               },
                                             ),
                                             IconButton(
@@ -227,7 +263,7 @@ class _LoginState extends State<CreateOrder> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  productos.removeAt(index);
+                                                  products.removeAt(index);
                                                 });
                                               },
                                             ),
@@ -253,7 +289,11 @@ class _LoginState extends State<CreateOrder> {
   Widget _buildIconWithInput({
     required String hintText,
     required IconData icon,
-    required bool showEditIcon,
+    required TextEditingController controller,
+    required LatLng? coordinates,
+    required bool showClear,
+    Function()? clearFunction,
+    required Function(LatLng) updateCoordinates,
     bool isPrimaryColor = false,
   }) {
     return Stack(
@@ -276,9 +316,14 @@ class _LoginState extends State<CreateOrder> {
           ),
           child: Row(
             children: [
-              const SizedBox(width: 60),
+              const SizedBox(width: 40),
               Expanded(
                 child: TextField(
+                  onTap: () {
+                    _pickCollectionLocation(coordinates, controller, updateCoordinates);
+                  },
+                  readOnly: true,
+                  controller: controller,
                   decoration: InputDecoration(
                     hintText: hintText,
                     border: InputBorder.none,
@@ -287,21 +332,15 @@ class _LoginState extends State<CreateOrder> {
                     ),
                   ),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: isPrimaryColor ? Colors.white : Colors.black,
                   ),
                 ),
               ),
-              if (showEditIcon)
+              if (showClear)
                 IconButton(
-                  icon: Icon(
-                    Icons.edit_note,
-                    color: Theme.of(context).secondaryHeaderColor,
-                    size: 24,
-                  ),
-                  onPressed: () {
-                    print("Edit button pressed for $hintText");
-                  },
+                  icon: const Icon(Icons.clear),
+                  onPressed: clearFunction,
                 ),
             ],
           ),
@@ -333,12 +372,12 @@ class _LoginState extends State<CreateOrder> {
   }
 
   void _showProductModal(BuildContext context,
-      {Map<String, dynamic>? producto}) {
+      {Products? producto}) {
     final TextEditingController nombreController =
-        TextEditingController(text: producto != null ? producto['nombre'] : '');
+        TextEditingController(text: producto != null ? producto.name : '');
     final TextEditingController descripcionController = TextEditingController(
-        text: producto != null ? producto['descripcion'] : '');
-    int cantidad = producto != null ? producto['cantidad'] : 1;
+        text: producto != null ? producto.description : '');
+    int cantidad = producto != null ? producto.amount : 1;
 
     showDialog(
       context: context,
@@ -361,15 +400,22 @@ class _LoginState extends State<CreateOrder> {
                     const Divider(thickness: 1, color: Colors.grey),
                     const SizedBox(height: 10),
                     // Input para el nombre del producto
-                    TextField(
-                      controller: nombreController,
-                      decoration: InputDecoration(
-                        hintText: 'Nombre del producto',
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
+                    Form(
+                      key: _nameKey,
+                      child: TextFormField(
+                        controller: nombreController,
+                        validator: validateName,
+                        onChanged: (value) {
+                          _nameKey.currentState!.validate();
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Nombre del producto',
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
@@ -380,9 +426,9 @@ class _LoginState extends State<CreateOrder> {
                       children: [
                         // Botón para disminuir cantidad
                         Container(
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey,
+                            color: Theme.of(context).primaryColor,
                           ),
                           child: IconButton(
                             icon: const Icon(Icons.remove, color: Colors.white),
@@ -409,9 +455,9 @@ class _LoginState extends State<CreateOrder> {
                         ),
                         // Botón para aumentar cantidad
                         Container(
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey,
+                            color: Theme.of(context).primaryColor,
                           ),
                           child: IconButton(
                             icon: const Icon(Icons.add, color: Colors.white),
@@ -426,15 +472,22 @@ class _LoginState extends State<CreateOrder> {
                     ),
                     const SizedBox(height: 10),
                     // Input para la descripción
-                    TextField(
-                      controller: descripcionController,
-                      decoration: InputDecoration(
-                        hintText: 'Descripción',
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
+                    Form(
+                      key: _descriptionKey,
+                      child: TextFormField(
+                        controller: descripcionController,
+                        validator: validateDescription,
+                        onChanged: (value) {
+                          _descriptionKey.currentState!.validate();
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Descripción',
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
@@ -459,32 +512,35 @@ class _LoginState extends State<CreateOrder> {
                     ),
                   ),
                   onPressed: () {
+                    if (!_nameKey.currentState!.validate() ||
+                        !_descriptionKey.currentState!.validate()) {
+                      showErrorAlert(context, 'Por favor, rellena los campos correctamente');
+                      return;
+                    }
                     setState(() {
                       if (producto != null) {
                         // Editar producto existente
-                        final index = productos
-                            .indexWhere((p) => p['id'] == producto['id']);
+                        final index = products
+                            .indexWhere((p) => p.id == producto.id);
                         if (index != -1) {
-                          productos[index] = {
-                            'id': producto['id'],
-                            'nombre': nombreController.text,
-                            'cantidad': cantidad,
-                            'descripcion': descripcionController.text,
-                          };
+                          products[index] = new Products(
+                              id: producto.id,
+                              name: nombreController.text,
+                              amount: cantidad,
+                              description: descripcionController.text
+                          );
                         }
                       } else {
                         // Agregar nuevo producto
-                        productos.add({
-                          'id': productos.length + 1,
-                          'nombre': nombreController.text,
-                          'cantidad': cantidad,
-                          'descripcion': descripcionController.text,
-                        });
+                        products.add(new Products(
+                            id: products.length + 1,
+                            name: nombreController.text,
+                            amount: cantidad,
+                            description: descripcionController.text
+                        ));
                       }
                     });
                     Navigator.pop(context);
-                    print(
-                        "${producto != null ? 'Producto editado' : 'Producto añadido'}: ${nombreController.text}");
                   },
                   child: Text(
                     producto != null ? 'Guardar cambios' : 'Agregar',
@@ -499,16 +555,108 @@ class _LoginState extends State<CreateOrder> {
     );
   }
 
-  void _onLogin() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_emailController.text == 'courier@gmail.com') {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('role', 'courier');
-      Navigator.pushNamed(context, '/navigation');
-    } else if (_emailController.text == 'customer@gmail.com') {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('role', 'customer');
-      Navigator.pushNamed(context, '/navigation');
+  String? validateDescription(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La descripción no puede estar vacía';
+    } else if (value.length < 10) {
+      return 'La descripción debe tener al menos 10 caracteres';
+    } else if (value.length > 200) {
+      return 'La descripción no puede tener más de 200 caracteres';
     }
+    return null;
   }
+
+  String? validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'El nombre no puede estar vacío';
+    } else if (value.length < 5) {
+      return 'El nombre debe tener al menos 5 caracteres';
+    } else if (value.length > 100) {
+      return 'El nombre no puede tener más de 100 caracteres';
+    }
+    return null;
+  }
+
+  Future<void> _searchForCourier() async {
+    if (_coordinates1 == null) {
+      showWarningAlert(context, 'Por favor, selecciona al menos una dirección de recolección');
+      return;
+    }
+    if (products.isEmpty) {
+      showWarningAlert(context, 'Por favor, agrega al menos un producto');
+      return;
+    }
+    final String? no_order = await getStorageNoOrder();
+    if (no_order != null) {
+      showWarningAlert(context, 'Ya tienes un pedido en curso');
+      return;
+    }
+
+    final LatLng customerCoordinates = await getLatLngFromStorageOrCurrent();
+    final String id_customer = await getStorageNoUser() ?? '';
+
+    final order = new CreateOrderEntity(
+      id_customer: id_customer,
+      products: products,
+      customer_direction: new CustomerDirection(
+        name: 'Dirección de entrega',
+        lat: customerCoordinates.latitude,
+        lng: customerCoordinates.longitude,
+      ),
+      collection_points: [
+        new CollectionPoints(
+          name: _address1Controller.text,
+          lat: _coordinates1!.latitude,
+          lng: _coordinates1!.longitude,
+        ),
+        if (_coordinates2 != null)
+          new CollectionPoints(
+            name: _address2Controller.text,
+            lat: _coordinates2!.latitude,
+            lng: _coordinates2!.longitude,
+          ),
+        if (_coordinates3 != null)
+          new CollectionPoints(
+            name: _address3Controller.text,
+            lat: _coordinates3!.latitude,
+            lng: _coordinates3!.longitude,
+          ),
+      ],
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchCouriers(order: order),
+      ),
+    );
+  }
+
+  void _pickCollectionLocation(LatLng? coordinates, TextEditingController controller, Function(LatLng) updateCoordinates) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CollectionPicker(
+        initialLat: coordinates?.latitude,
+        initialLng: coordinates?.longitude,
+        onLocationPicked: (double lat, double lng, String address) {
+          setState(() {
+            LatLng newCoordinates = LatLng(lat, lng);
+            updateCoordinates(newCoordinates);
+            controller.text = address;
+          });
+        },
+      ),
+    ),
+  );
+}
+
+void updateCoordinates1(LatLng coordinates) {
+  _coordinates1 = coordinates;
+}
+void updateCoordinates2(LatLng coordinates) {
+  _coordinates2 = coordinates;
+}
+void updateCoordinates3(LatLng coordinates) {
+  _coordinates3 = coordinates;
+}
 }

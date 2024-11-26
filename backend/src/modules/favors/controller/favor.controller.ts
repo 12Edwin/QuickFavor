@@ -20,9 +20,9 @@ const createFavor = async (req: Request, res: Response) => {
 
         const repository: FavorRepository = new FavorRepository();
         const service: FavorService = new FavorService(repository);
-        await service.createFavor(payload);
+        const no_order = await service.createFavor(payload);
 
-        const response: ResponseApi<any> = Response200({ message: 'Favor created successfully' });
+        const response: ResponseApi<any> = Response200({ no_order });
         res.status(response.code).json(response);
     } catch (e) {
       console.log(e)
@@ -53,25 +53,24 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive'
     });
-    let lastStatus: string | null = null;
 
     // Send status every 10 seconds
     const sendStatus = async () => {
       try {
-        const result = await service.getFavorStatus(id);
-        // Send only if status has changed
-        if (lastStatus !== result.get('status')) {
-          lastStatus = result.get('status');
+          const result = await service.getFavorStatus(id);
+          // Send only if status has changed
           const response = Response200(Object.fromEntries(result));
-          res.write(`data: ${JSON.stringify(response)}\n\n`);
+          res.write(`${JSON.stringify(response)}\n\n`);
 
           // If status is "FINISHED", close connection
-          if (result.get('status') === 'Finished') {
-            clearInterval(intervalId);
-            connectionManager.removeConnection(connectionId);
-            res.end();
+          if (result.get('status') === 'Finished' || result.get('status') === 'Canceled') {
+            setTimeout(() => {
+                clearInterval(intervalId);
+                connectionManager.removeConnection(connectionId);
+                res.end();
+            }, 500);
           }
-        }
+
       } catch (error) {
         console.error('Error fetching status:', error);
         // If error is critical, close connection
@@ -101,6 +100,7 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
       connectionManager.removeConnection(connectionId);
     });
   } catch (e) {
+      console.log(e)
     const error: ResponseApi<any> = validateError(e as Error);
     if (!res.headersSent) {
       res.status(error.code).json(error);
@@ -124,7 +124,7 @@ const updateCourierStatus = async (req: Request, res: Response) => {
     // Send the new status to all connections
     connections.forEach((connection) => {
         const response = Response200(Object.fromEntries(result));
-      connection.res.write(`data: ${JSON.stringify(response)}\n\n`);
+      connection.res.write(`${JSON.stringify(response)}\n\n`);
 
       // If status is "FINISHED", close connection
       if (newStatus === 'Finished') {
@@ -143,6 +143,23 @@ const updateCourierStatus = async (req: Request, res: Response) => {
     }
   }
 };
+
+const getDetailsFavor = async (req: Request, res: Response) => {
+    try {
+        const { no_order } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const favor = await service.getDetailsFavor(no_order);
+
+        const response: ResponseApi<any> = Response200(favor);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
 
 const acceptFavor = async (req: Request, res: Response) => {
     try {
@@ -198,6 +215,23 @@ const rejectFavor = async (req: Request, res: Response) => {
     }
 }
 
+const readNotifications = async (req: Request, res: Response) => {
+    try {
+        const { no_courier } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        await service.readNotifications(no_courier);
+
+        const response: ResponseApi<any> = Response200({ message: 'Notifications read successfully' });
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
 // Middleware to monitor active connections
 const monitorConnections = (req: Request, res: Response, next: Function) => {
     const activeConnections = connectionManager.getActiveConnections();
@@ -205,4 +239,4 @@ const monitorConnections = (req: Request, res: Response, next: Function) => {
     res.status(response.code).json(response);
 };
 
-export {createFavor, setupStatusSSE, monitorConnections, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor};
+export {createFavor, setupStatusSSE, monitorConnections, getDetailsFavor, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor, readNotifications};

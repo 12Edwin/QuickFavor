@@ -95,13 +95,18 @@ export async function searchDrivers(req: Request, res: Response): Promise<void> 
 
 export const findNearbyDrivers = async(lat: number, lng: number, radiusKm: number): Promise<DriverLocation[]> => {
     const [drivers] = await pool.query<RowDataPacket[]>(
-      `SELECT *,
-        ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
-        ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
-        FROM Places p LEFT JOIN Couriers c ON p.id_courier = c.no_courier
+      `SELECT 
+          ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
+          ST_Y(location) AS lat,  -- Cambiado: ST_Y para latitud
+          ST_X(location) AS lng,  -- Cambiado: ST_X para longitud
+          c.no_courier, 
+          c.fcm_token
+        FROM Places p 
+        LEFT JOIN Couriers c ON p.id_courier = c.no_courier
         WHERE ST_Distance_Sphere(location, ST_PointFromText(?)) <= ? * 1000
-        AND c.status = 'Available'
-        ORDER BY distance_km ASC LIMIT 20;`,
+          AND c.status = 'Available'
+        ORDER BY distance_km ASC 
+        LIMIT 20`,
       [`POINT(${lng} ${lat})`, `POINT(${lng} ${lat})`, radiusKm]
     );
 

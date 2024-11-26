@@ -238,12 +238,14 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () async {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
                               prefs.remove('token');
                               prefs.remove('no_user');
+                              prefs.remove('name');
+                              prefs.remove('lat');
+                              prefs.remove('lng');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(

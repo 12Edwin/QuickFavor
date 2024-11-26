@@ -4,7 +4,7 @@ import {Reset} from "../interface/Reset";
 import {Pageable, PaginationResult} from "../../commons/Pageable";
 import {UserFirebaseInterface} from "../interface/userFirebase.interface";
 import {Courier, Customer, User} from "../interface/User";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage} from "../../commons/config-SDK";
 
 export class AuthService {
@@ -35,7 +35,7 @@ export class AuthService {
             payload.INE_photo = INEPhotoUrl;
             if (platePhotoUrl) payload.plate_photo = platePhotoUrl;
 
-            return true
+            return await this.authRepository.updateUrlImages(uid, payload)
         } catch (error: any) {
             throw new Error((error as Error).message);
         }

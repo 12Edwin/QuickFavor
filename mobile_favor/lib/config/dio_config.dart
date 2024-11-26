@@ -8,7 +8,7 @@ class DioConfig {
     final dio = Dio(BaseOptions(
       baseUrl: 'https://backend-app-y3z1.onrender.com',
       connectTimeout: const Duration(milliseconds: 10000),
-      receiveTimeout: const Duration(milliseconds: 10000),
+      receiveTimeout: const Duration(milliseconds: 30000),
     ));
 
     dio.interceptors.add(InterceptorsWrapper(

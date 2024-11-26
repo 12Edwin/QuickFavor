@@ -19,6 +19,10 @@ class AuthService {
       await prefs.setString('no_user', data['user']['no_user']);
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('role', data['user']['role']);
+      await prefs.setString('name', data['user']['name']);
+      if(data['user']['location'] != null) await prefs.setDouble('lat', data['user']['location']['lat']);
+      if(data['user']['location'] != null) await prefs.setDouble('lng', data['user']['location']['lng']);
+      print(data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);

@@ -156,6 +156,10 @@ SELECT
     cr.no_courier,
     cr.license_plate,
     cr.vehicle_type,
+    `cr`.`model`  AS `model`,
+   `cr`.`color`  AS `color`,
+   `cr`.`plate_url`  AS `plate_url`,
+   `cr`.`face_url`  AS `face_url`,
     cr.status AS courier_status,
     p_cour.name AS courier_name,
     p_cour.surname AS courier_surname,
@@ -164,7 +168,7 @@ SELECT
     p_cour.phone AS courier_phone,
     pl.id AS place_id,
     pl.name AS place_name,
-    pl.location AS place_location,
+    ST_X(`pl`.`location`) AS place_lat, ST_Y(`pl`.`location`) AS place_lng,
     pl.created_at AS place_created_at
 FROM
     Orders o
@@ -187,6 +191,39 @@ insert into Couriers (id_person, vehicle_type, license_plate, status) values ('H
     WHERE ST_Distance_Sphere(location, ST_PointFromText(?)) <= ? * 1000
     AND c.status = 'Available'
     ORDER BY distance_km ASC LIMIT 20;*/
+
+    SELECT *,
+        ST_Distance_Sphere(location, ST_PointFromText('POINT(-99.19773425906897 18.851107008456665)')) / 1000 as distance_km,
+        ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
+        FROM Places p LEFT JOIN Couriers c ON p.id_courier = c.no_courier
+        WHERE ST_Distance_Sphere(location, ST_PointFromText('POINT(-99.19773425906897 18.851107008456665)')) <= 5 * 1000
+        AND c.status = 'Available'
+        ORDER BY distance_km ASC LIMIT 20;
+
+SELECT
+  ST_Distance_Sphere(location, ST_PointFromText('POINT(-99.19773425906897 18.851107008456665)')) / 1000 as distance_km,
+  ST_Y(location) AS lat,  -- Cambiado: ST_Y para latitud
+  ST_X(location) AS lng,  -- Cambiado: ST_X para longitud
+  c.no_courier,
+  c.fcm_token
+FROM Places p
+LEFT JOIN Couriers c ON p.id_courier = c.no_courier
+WHERE ST_Distance_Sphere(location, ST_PointFromText('POINT(-99.19773425906897 18.851107008456665)')) <= 5 * 1000
+  AND c.status = 'Available'
+ORDER BY distance_km ASC
+LIMIT 20;
+
+-- Primero verifiquemos qué datos tienes en la columna location
+SELECT
+    id,
+    ST_Y(location) AS lat,
+    ST_X(location) AS lng
+FROM Places
+WHERE id_order= 'ORD_22' and type= 'Home';
+
+UPDATE Places
+SET location = ST_PointFromText('POINT(-99.19773425906897 18.851107008456665)')
+WHERE id = 1;
 
     -- Activar el scheduler de eventos si no está activo
 SET GLOBAL event_scheduler = ON;

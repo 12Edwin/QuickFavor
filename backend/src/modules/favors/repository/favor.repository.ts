@@ -1,11 +1,11 @@
 import {FavorEntity} from "../interface/favor.entity";
 import pool from "../../../commons/connection-db";
-import {ResultSetHeader, RowDataPacket} from "mysql2";
+import {RowDataPacket} from "mysql2";
 import {LocationEntity} from "../../../grpc/entity/location.entity";
 
 export class FavorRepository{
 
-    async createFavor(payload: FavorEntity): Promise<boolean>{
+    async createFavor(payload: FavorEntity): Promise<string>{
         const connection = await pool.getConnection();
         try {
             connection.beginTransaction();
@@ -13,15 +13,15 @@ export class FavorRepository{
             const [rows] = await connection.query<RowDataPacket[]>(`SELECT no_order FROM Orders WHERE id_customer = ? ORDER BY created_at DESC LIMIT 1`, [payload.id_customer]);
             const id_order = rows[0].no_order;
 
-            await connection.query(`INSERT INTO Places (id_order, type, name, location) Values (?, ?, ?, ?)`, [id_order, "Home", payload.customer_direction.name, `POINT(${payload.customer_direction.lng} ${payload.customer_direction.lat})`]);
+            await connection.query(`INSERT INTO Places (id_order, type, name, location) VALUES (?, ?, ?, ST_GeomFromText(?))`, [id_order, "Home", payload.customer_direction.name, `POINT(${payload.customer_direction.lng} ${payload.customer_direction.lat})`]);
             for (const point of payload.collection_points) {
-                await connection.query(`INSERT INTO Places (id_order, type, name, location) Values (?, ?, ?, ?)`, [id_order, "Collection", point.name, `POINT(${point.lng} ${point.lat})`]);
+                await connection.query(`INSERT INTO Places (id_order, type, name, location) VALUES (?, ?, ?, ST_GeomFromText(?))`, [id_order, "Collection", point.name, `POINT(${point.lng} ${point.lat})`]);
             }
             for (const product of payload.products) {
                 await connection.query(`INSERT INTO Products (name, description, amount, id_order) Values (?, ?, ?, ?)`, [product.name, product.description, product.amount, id_order]);
             }
             connection.commit();
-            return true
+            return id_order;
         }catch (error: any){
             connection.rollback();
             throw new Error((error as Error).message)
@@ -32,10 +32,36 @@ export class FavorRepository{
 
     async getFavorStatus(id: string): Promise<Map<string, any>>{
         try {
-            const [result] = await pool.query('SELECT * FROM order_details WHERE no_order = ?;', [id])
+            const [result] = await pool.query('SELECT created_at as order_created_at, status FROM Orders WHERE no_order = ?;', [id])
             const rows = result as RowDataPacket[]
             return this.rowToMap(rows[0]);
         }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async getDetailsFavor (id: string): Promise<any> {
+        try {
+
+            const [result] = await pool.query('SELECT * FROM order_details WHERE no_order = ?;', [id])
+            const rows = result as RowDataPacket[]
+            const details = {
+                deliveryPoints: [] as any,
+                products: [] as any,
+                ...rows[0]
+            }
+            const [rowsDelivery] = await pool.query<RowDataPacket[]>(
+                'SELECT ST_X(location) as lng, ST_Y(location) as lat, name FROM Places WHERE type = "Collection" AND id_order = ?;',
+                [id]
+            );
+            details.deliveryPoints = rowsDelivery
+            const [rowsProduct] = await pool.query<RowDataPacket[]>(
+                'SELECT name, description, amount, created_at FROM Products WHERE id_order = ?;',
+                [id]
+            );
+            details.products = rowsProduct
+            return details
+        } catch (error: any) {
             throw new Error((error as Error).message)
         }
     }
@@ -93,9 +119,19 @@ export class FavorRepository{
         }
     }
 
+    async readNotifications(no_courier: string): Promise<Map<string, any>[]>{
+        try {
+            const [rowsNotifications] = await pool.query('SELECT * FROM Notifications WHERE courier_id = ? AND status = "Pending" AND type = "Order";', [no_courier])
+            const notifications = rowsNotifications as RowDataPacket[]
+            return notifications.map(notification => this.rowToMap(notification));
+        }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
     async existsFavorByNo_order(no_order: string): Promise<boolean>{
         try {
-            const [result] = await pool.query('SELECT rejected_orders, id_person FROM Couriers WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [no_order])
+            const [result] = await pool.query('SELECT no_order FROM Orders WHERE no_order = ?;', [no_order])
             const rows = result as RowDataPacket[]
             return rows.length > 0;
         }catch (error: any){
@@ -174,6 +210,18 @@ export class FavorRepository{
         }
     }
     return map;
+}
+
+    rowsToMap(rows: RowDataPacket[]): Map<string, any>[] {
+    return rows.map(row => {
+        const map = new Map<string, any>();
+        for (const key in row) {
+            if (row.hasOwnProperty(key)) {
+                map.set(key, row[key]);
+            }
+        }
+        return map;
+    });
 }
 }
 

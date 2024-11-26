@@ -4,6 +4,8 @@ import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
+import 'package:mobile_favor/navigation/customer/favor_progress_customer.dart';
+import 'package:mobile_favor/navigation/customer/order_details.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,21 +19,18 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   String _role = '';
+  String _noOrder = '';
   bool _thereIsFavor = false;
 
   late List<Widget> _courierWidgets = [];
-  final List<Widget> _customerWidgets = [
-    const MapCustomer(),
-    const CreateOrder(),
-    const Placeholder(),
-    const ProfileCustomer()
-  ];
+  late List<Widget> _customerWidgets = [];
 
   @override
   void initState() {
     super.initState();
     _getRole();
     initCourierWidgets();
+    initCustomerWidgets();
   }
 
   void _getRole() async {
@@ -44,9 +43,8 @@ class _NavigationState extends State<Navigation> {
   void initCourierWidgets() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _thereIsFavor = prefs.getBool('thereIsFavor') ?? false;
       _courierWidgets = [
-        _thereIsFavor ? const FavorProgressCourier() : const MapCourier(),
+        prefs.getString('no_order') != null ? const FavorProgressCourier() : const MapCourier(),
         const Placeholder(),
         const Placeholder(),
         const ProfileCourier()
@@ -54,21 +52,33 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        items: _role == 'Courier' ? courierTabs() : customerTabs(),
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-      body: _role == 'Courier'
-          ? _courierWidgets[_selectedIndex]
-          : _customerWidgets[_selectedIndex],
-    );
+  void initCustomerWidgets() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _customerWidgets = [
+        prefs.getString('no_order') != null ? const FavorProgressCustomer() : const MapCustomer(),
+        const CreateOrder(),
+        const Placeholder(),
+        const ProfileCustomer()
+      ];
+    });
   }
+
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    bottomNavigationBar: BottomNavigationBar(
+      items: _role == 'Courier' ? courierTabs() : customerTabs(),
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Colors.grey,
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+    ),
+    body: _role == 'Courier'
+        ? (_courierWidgets.isNotEmpty ? _courierWidgets[_selectedIndex] : Container())
+        : (_customerWidgets.isNotEmpty ? _customerWidgets[_selectedIndex] : Container()),
+  );
+}
 
   void _onItemTapped(int index) {
     setState(() {
