@@ -68,7 +68,7 @@ export class FavorRepository{
 
     async updateFavorStatus(id: string, newStatus: string, cost: number | null = null, receipt: string | null = null): Promise<boolean>{
         try {
-            await pool.query('UPDATE Orders SET status = ?, cost = ? WHERE no_order = ?;', [newStatus, cost, id])
+            await pool.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
             return true;
         }catch (error: any){
             throw new Error((error as Error).message)

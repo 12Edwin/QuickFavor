@@ -39,10 +39,6 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
     const fieldId = id;
 
     const existingConnection = connectionManager.getConnection(connectionId);
-    if (existingConnection) {
-      existingConnection.res.end();
-      connectionManager.removeConnection(connectionId);
-    }
 
     const repository: FavorRepository = new FavorRepository();
     const service: FavorService = new FavorService(repository);
@@ -58,6 +54,7 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
     const sendStatus = async () => {
       try {
           const result = await service.getFavorStatus(id);
+          console.log(result);
           // Send only if status has changed
           const response = Response200(Object.fromEntries(result));
           res.write(`${JSON.stringify(response)}\n\n`);
@@ -85,10 +82,12 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
 
     // Add connection to manager
     const intervalId = setInterval(sendStatus, 10000);
-    const connectionAdded = connectionManager.addConnection(connectionId, res, intervalId, fieldId);
+    if (!existingConnection) {
+        const connectionAdded = connectionManager.addConnection(connectionId, res, intervalId, fieldId);
 
-    if (!connectionAdded) {
-      throw new Error('Server is at maximum capacity');
+        if (!connectionAdded) {
+            throw new Error('Server is at maximum capacity');
+        }
     }
 
     // Send the initial status
@@ -127,7 +126,7 @@ const updateCourierStatus = async (req: Request, res: Response) => {
       connection.res.write(`${JSON.stringify(response)}\n\n`);
 
       // If status is "FINISHED", close connection
-      if (newStatus === 'Finished') {
+      if (newStatus === 'Finished' || newStatus === 'Canceled') {
         connectionManager.removeConnection(connection.connectionId);
         connection.res.end();
       }

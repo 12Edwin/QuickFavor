@@ -228,6 +228,7 @@ class OrderPreviewEntity {
   final String no_order;
   final String order_created_at;
   final String status;
+  final String? receipt_url;
   final double? cost;
   final String no_customer;
   final String customer_name;
@@ -259,6 +260,7 @@ class OrderPreviewEntity {
     required this.order_created_at,
     required this.status,
     this.cost,
+    this.receipt_url,
     required this.no_customer,
     required this.customer_name,
     required this.customer_surname,
@@ -291,6 +293,7 @@ class OrderPreviewEntity {
       order_created_at: json['order_created_at'],
       status: json['status'],
       cost: json['cost'],
+      receipt_url: json['receipt_url'],
       no_customer: json['no_customer'],
       customer_name: json['customer_name'],
       customer_surname: json['customer_surname'],
@@ -337,6 +340,9 @@ class OrderPreviewEntity {
 
     if (cost != null) {
       data['cost'] = cost;
+    }
+    if (receipt_url != null) {
+      data['receipt_url'] = receipt_url;
     }
     if (no_courier != null) {
       data['no_courier'] = no_courier;
@@ -443,5 +449,42 @@ class Prod {
       'amount': amount,
     };
     return data;
+  }
+}
+
+class ChangeStateEntity {
+  final String no_order;
+  final String newStatus;
+  final double? cost;
+  final String? receipt;
+
+  ChangeStateEntity({
+    required this.no_order,
+    required this.newStatus,
+    this.cost,
+    this.receipt,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'no_order': no_order,
+      'newStatus': newStatus,
+    };
+    if (cost != null) {
+      data['cost'] = cost;
+    }
+    if (receipt != null) {
+      data['receipt'] = receipt;
+    }
+    return data;
+  }
+
+  factory ChangeStateEntity.fromJson(Map<String, dynamic> json) {
+    return ChangeStateEntity(
+      no_order: json['no_order'],
+      newStatus: json['newStatus'],
+      cost: json['cost'],
+      receipt: json['receipt'],
+    );
   }
 }

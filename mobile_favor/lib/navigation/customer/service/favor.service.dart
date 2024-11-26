@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data' show Uint8List;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/navigation/customer/entity/location.entity.dart';
 import 'package:mobile_favor/navigation/customer/entity/order.entity.dart';
 import '../../../config/dio_config.dart';
 import '../../../config/error_response.dart';
@@ -103,4 +104,39 @@ Stream<SSEOrderMessage> favorStatus(String idFavor) async* {
     }
   }
 }
+
+Future<ResponseEntity> changeState(ChangeStateEntity state) async {
+    try {
+      final noOrder = state.no_order;
+      final response = await dio.put('/favor/status/$noOrder', data: state.toJson());
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
+    }
+  }
+
+  Future<ResponseEntity> updateLocation(UpdateLocationEntity location) async {
+    try {
+      final response = await dio.post('/location/new-location', data: location.toJson());
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
+    }
+  }
 }
