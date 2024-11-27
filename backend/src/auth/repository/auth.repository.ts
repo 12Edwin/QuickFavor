@@ -25,14 +25,17 @@ export class AuthRepository {
                 const userDB = await this.findUserByEmail(user.email || '');
                 let no_user = ''
                 let location = null
+                console.log(payload.token)
                 if (userDB.role === 'Courier'){
                     const [courier] = await pool.query('SELECT no_courier FROM Couriers WHERE id_person = ?', [user.uid]);
                     const rows = courier as RowDataPacket[]
                     no_user = rows[0].no_courier
+                    await pool.query('UPDATE Couriers SET fcm_token = ? WHERE no_courier = ?', [payload.token, no_user]);
                 }else{
                     const [customer] = await pool.query('SELECT no_customer FROM Customers WHERE id_person = ?', [user.uid]);
                     const rows = customer as RowDataPacket[]
                     no_user = rows[0].no_customer
+                    await pool.query('UPDATE Customers SET fcm_token = ? WHERE no_customer = ?', [payload.token, no_user]);
                     const [place] = await pool.query('SELECT ST_X(location) as lng, ST_Y(location) as lat FROM Places WHERE id_customer = ? AND type = "Home"', [no_user]);
                     const rowsPlace = place as RowDataPacket[]
                     location = {lat: rowsPlace[0].lat, lng: rowsPlace[0].lng}

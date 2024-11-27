@@ -243,6 +243,7 @@ class OrderPreviewEntity {
   final String? color;
   final String? plate_url;
   final String? face_url;
+  final int? rejected_orders;
   final String? courier_status;
   final String? courier_name;
   final String? courier_surname;
@@ -274,6 +275,7 @@ class OrderPreviewEntity {
     this.color,
     this.plate_url,
     this.face_url,
+    this.rejected_orders,
     this.courier_status,
     this.courier_name,
     this.courier_surname,
@@ -292,7 +294,7 @@ class OrderPreviewEntity {
       no_order: json['no_order'],
       order_created_at: json['order_created_at'],
       status: json['status'],
-      cost: json['cost'],
+      cost: json['cost'] != null ? num.parse(json['cost'].toString()).toDouble(): null,
       receipt_url: json['receipt_url'],
       no_customer: json['no_customer'],
       customer_name: json['customer_name'],
@@ -307,6 +309,7 @@ class OrderPreviewEntity {
       color: json['color'],
       plate_url: json['plate_url'],
       face_url: json['face_url'],
+      rejected_orders: json['rejected_orders'] != null ? num.parse(json['rejected_orders'].toString()).toInt(): 0,
       courier_status: json['courier_status'],
       courier_name: json['courier_name'],
       courier_surname: json['courier_surname'],
@@ -364,6 +367,9 @@ class OrderPreviewEntity {
     }
     if (face_url != null) {
       data['face_url'] = face_url;
+    }
+    if (rejected_orders != null) {
+      data['rejected_orders'] = rejected_orders;
     }
     if (courier_status != null) {
       data['courier_status'] = courier_status;

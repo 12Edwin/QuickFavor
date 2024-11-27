@@ -67,20 +67,37 @@ export class FavorRepository{
     }
 
     async updateFavorStatus(id: string, newStatus: string, cost: number | null = null, receipt: string | null = null): Promise<boolean>{
+        const connection = await pool.getConnection();
         try {
-            await pool.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
+            connection.beginTransaction();
+            await connection.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
+            if (newStatus === 'Finished' || newStatus === 'Canceled') {
+                await connection.query('UPDATE Couriers SET status = "Available" WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [id])
+            }
+            connection.commit();
             return true;
         }catch (error: any){
+            connection.rollback();
             throw new Error((error as Error).message)
+        }finally {
+            connection.release();
         }
     }
 
     async acceptFavor(no_order: string, uid: string): Promise<boolean>{
+        const connection = await pool.getConnection();
         try {
-            await pool.query('UPDATE Orders SET status = "In shopping", id_courier = ?, created_at = NOW() WHERE no_order = ?;', [uid, no_order])
+            await connection.beginTransaction();
+            await connection.query('UPDATE Couriers SET status = "Busy" WHERE no_courier = ?;', [uid])
+            await connection.query('UPDATE Orders SET status = "In shopping", id_courier = ?, created_at = NOW() WHERE no_order = ?;', [uid, no_order])
+            await connection.query('UPDATE Notifications SET status = "Read" WHERE order_id = ? AND type = "Order" AND customer_id IS NULL;', [no_order])
+            connection.commit();
             return true;
         }catch (error: any){
+            await connection.rollback();
             throw new Error((error as Error).message)
+        }finally {
+            connection.release();
         }
     }
 
@@ -89,7 +106,8 @@ export class FavorRepository{
         try {
             await connection.beginTransaction();
             await connection.query('UPDATE Orders SET status = "Canceled" WHERE no_order = ?;', [no_order])
-            await connection.query('UPDATE Couriers SET rejected_orders = rejected_orders + 1 WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [no_order])
+            await connection.query('UPDATE Couriers SET rejected_orders = rejected_orders + 1, status = "Available" WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [no_order])
+            await connection.query('UPDATE Notifications SET status = "Deleted" WHERE order_id = ? AND type = "Order" AND customer_id IS NULL;', [no_order])
             await connection.commit();
             return true;
         }catch (error: any){
@@ -119,11 +137,11 @@ export class FavorRepository{
         }
     }
 
-    async readNotifications(no_courier: string): Promise<Map<string, any>[]>{
+    async readNotifications(no_courier: string): Promise<any>{
         try {
-            const [rowsNotifications] = await pool.query('SELECT * FROM Notifications WHERE courier_id = ? AND status = "Pending" AND type = "Order";', [no_courier])
-            const notifications = rowsNotifications as RowDataPacket[]
-            return notifications.map(notification => this.rowToMap(notification));
+            const [rowsNotifications] = await pool.query('SELECT n.*, (SELECT count(id) from Products where id_order = n.order_id) as amount FROM Notifications n WHERE n.courier_id = ? AND n.status = "Pending" AND n.type = "Order";', [no_courier])
+            return  rowsNotifications as RowDataPacket[];
+
         }catch (error: any){
             throw new Error((error as Error).message)
         }

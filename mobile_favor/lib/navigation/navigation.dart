@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
+import 'package:mobile_favor/navigation/courier/notifications.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
 import 'package:mobile_favor/navigation/customer/favor_progress_customer.dart';
 import 'package:mobile_favor/navigation/customer/history_order.dart';
-import 'package:mobile_favor/navigation/customer/order_details.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Navigation extends StatefulWidget {
-  const Navigation({super.key});
+  final int? tap;
+  const Navigation({super.key, this.tap});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -29,6 +30,7 @@ class _NavigationState extends State<Navigation> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.tap ?? 0;
     _getRole();
     initCourierWidgets();
     initCustomerWidgets();
@@ -45,10 +47,8 @@ class _NavigationState extends State<Navigation> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _courierWidgets = [
-        prefs.getString('no_order') != null
-            ? const FavorProgressCourier()
-            : const MapCourier(),
-        const Placeholder(),
+        prefs.getString('no_order') != null ? const FavorProgressCourier() : const MapCourier(),
+        const Notifications(),
         const Placeholder(),
         const ProfileCourier()
       ];

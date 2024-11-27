@@ -22,6 +22,26 @@ Future<void> removeStorageNoOrder() async {
   prefs.remove('no_order');
 }
 
+Future<void> addStorageNoOrder(String ord) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('no_order', ord);
+}
+
+Future<void> toggleStorageAvailability(bool value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setBool('availability', value);
+}
+
+Future<bool> getStorageAvailability() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('availability') ?? false;
+}
+
+Future<void> removeStorageAvailability() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove('availability');
+}
+
 Future<LatLng> getLatLngFromStorageOrCurrent() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   double? lat = prefs.getDouble('lat');

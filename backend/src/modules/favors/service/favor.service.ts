@@ -106,7 +106,7 @@ export class FavorService{
         }
     }
 
-    async readNotifications(no_courier: string): Promise<Promise<Map<string, any>[]>> {
+    async readNotifications(no_courier: string): Promise<any> {
         try{
             if (!await existsCourierById(no_courier)) throw new Error('Courier not found');
             return this.favorRepository.readNotifications(no_courier);
