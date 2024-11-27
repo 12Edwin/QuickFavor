@@ -103,8 +103,8 @@
                   </div>
 
                   <!-- Mostrar solo imagen -->
-                  <div v-else-if="showImageOnly" class="text-center">
-                    <v-row class="text-center">
+                  <div v-else-if="showImageOnly" class="walkable-image">
+                    <v-row>
                       <img src="../../assets/walk.png" alt="Walking" width="300px">
                     </v-row>
                   </div>
@@ -171,7 +171,7 @@
                               type="file" 
                               id="file-upload" 
                               ref="fileInput" 
-                              @change="handleFileChange" 
+                              @change="handleRostroChange" 
                               class="custom-file-input" 
                             />
                             <span class="file-placeholder">Rostro</span>
@@ -188,7 +188,7 @@
                               type="file" 
                               id="file-upload" 
                               ref="fileInput" 
-                              @change="handleFileChange" 
+                              @change="handleIneChange" 
                               class="custom-file-input" 
                             />
                             <span class="file-placeholder">INE</span>
@@ -257,6 +257,7 @@
 <script lang="ts">
 import router from '@/router';
 import { defineComponent, ref } from 'vue';
+import { showErrorToast } from '@/kernel/alerts';
 
 export default defineComponent({
   name: "Register",
@@ -305,13 +306,45 @@ export default defineComponent({
     // Manejo del cambio de archivo
     const handleFileChange = (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const file = target?.files ? target.files[0] : null;  // Obtiene el archivo seleccionado
+      const file = target?.files ? target.files[0] : null; 
       if (file) {
-        form.value.licenciaFile = [file];  // Actualiza el modelo con el archivo
+        form.value.licenciaFile = [file];  
       } else {
-        form.value.licenciaFile = [];  // Si no se seleccionó archivo, asigna un array vacío
+        form.value.licenciaFile = []; 
       }
     };
+
+    // Manejo del cambio de archivo
+    const handleRostroChange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target?.files ? target.files[0] : null;  
+      if (file) {
+        form.value.rostroFile = [file]; 
+      } else {
+        form.value.rostroFile= [];  
+      }
+    };
+
+    const handleIneChange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const files = target?.files ? Array.from(target.files) : []; 
+
+      if (files.length > 2) {
+        showErrorToast("Solo se permiten 2 archivos maximo .");
+        return; 
+      }
+
+      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+      const invalidFiles = files.filter(file => !validTypes.includes(file.type));
+
+      if (invalidFiles.length > 0) {
+        showErrorToast("Solo se permiten archivos de tipo imagen (png, jpeg) o pdf.");
+        return; 
+      }
+
+      form.value.ineFile = files;
+    };
+
 
     const submitForm = () => {
       console.log("Formulario enviado", form.value);
@@ -355,7 +388,9 @@ export default defineComponent({
       goToInicio, 
       selectOption, 
       selectOptionClick,
-      handleFileChange  
+      handleFileChange,
+      handleRostroChange,
+      handleIneChange
     };
   }
 });
@@ -485,10 +520,10 @@ export default defineComponent({
 /* Step 2 */
 .icon-button-group {
   display: flex;
-  justify-content: center; 
-  gap: 16px;  /* Espacio entre los botones */
+  justify-content: center;
+  gap: 16px; /* Espacio entre los botones */
   margin-bottom: 16px;
-  flex-wrap: nowrap; 
+  flex-wrap: nowrap;
 }
 
 .icon-button-step2 {
@@ -497,12 +532,15 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 48px;  
-  height: 48px; 
+  width: 40px;
+  height: 40px;
+  border: 2px solid transparent; 
+  border-radius: 8px; 
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .icon-step-2 {
-  font-size: 24px;  
+  font-size: 20px;
   color: gray;
   background: none;
 }
@@ -511,14 +549,23 @@ export default defineComponent({
   color: #566981;
 }
 
-.icon-button-step2:selected {
-  background-color: #3A415A;
+.icon-button-step2.selected {
+  background-color: #3A415A; /* Fondo cuando está seleccionado */
+  border-radius: 50%;
 }
 
-.icon-button-step2:unselected {
-  background-color: gray;
+.icon-button-step2.selected .icon-step-2 {
+  color: white; /* Color del icono cuando está seleccionado */
 }
+
 /* Estilo adicional para los elementos de la columna */
+.walkable-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .icon-especial {
   position: absolute;
   left: 32px;
