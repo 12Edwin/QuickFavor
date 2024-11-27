@@ -14,6 +14,7 @@ class _ModalCourierState extends State<ModalCourier> {
   String phone = '';
   int _currentVehicleType = 0;
   Color _currentColor = Colors.blue;
+  final TextEditingController _photoController = TextEditingController();
 
   final List<Map<String, dynamic>> _vehicles = [
     {'icon': Icons.directions_car, 'name': 'car'},
@@ -63,8 +64,8 @@ class _ModalCourierState extends State<ModalCourier> {
           (index) => GestureDetector(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 5),
-              width: 32,
-              height: 32,
+              width: MediaQuery.of(context).size.width *0.08, 
+              height: MediaQuery.of(context).size.width * 0.08,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
@@ -96,8 +97,8 @@ class _ModalCourierState extends State<ModalCourier> {
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
+        left: MediaQuery.of(context).size.width * 0.04,
+        right: MediaQuery.of(context).size.width * 0.04,
         top: 16,
       ),
       child: SingleChildScrollView(
@@ -132,18 +133,23 @@ class _ModalCourierState extends State<ModalCourier> {
               children: [
                 if (['car', 'motorcycle', 'bike', 'scooter']
                     .contains(_vehicles[_currentVehicleType]['name']))
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.circle, color: _currentColor, size: 25),
-                    onPressed: _openColorPicker,
-                    label: const Text('Color'),
+                  Flexible(
+                    child: ElevatedButton.icon(
+                      icon: Icon(Icons.circle, color: _currentColor, size: 25),
+                      onPressed: _openColorPicker,
+                      label: const Text('Color'),
+                    ),
                   ),
                 if (['car', 'motorcycle']
                     .contains(_vehicles[_currentVehicleType]['name']))
-                  const PhotoPicker(
-                    label: 'Licencia',
-                    textDialog: 'Licencia de conducir',
-                    widthImg: 856,
-                    heightImg: 540,
+                  Flexible(
+                    child: PhotoPicker(
+                      label: 'Licencia',
+                      textDialog: 'Licencia de conducir',
+                      widthImg: 856,
+                      controller: _photoController,
+                      heightImg: 540,
+                    ),
                   ),
               ],
             ),
@@ -156,15 +162,19 @@ class _ModalCourierState extends State<ModalCourier> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancelar'),
+                Flexible(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancelar'),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Guardar'),
+                Flexible(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    child: const Text('Guardar'),
+                  ),
                 ),
               ],
             ),

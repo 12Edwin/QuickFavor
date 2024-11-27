@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
@@ -10,17 +9,24 @@ class PhotoPicker extends StatefulWidget {
   final String textDialog;
   final int widthImg;
   final int heightImg;
+  final TextEditingController controller;
 
-  const PhotoPicker({super.key, required this.label, required this.textDialog, required this.widthImg, required this.heightImg});
+  const PhotoPicker({
+    super.key,
+    required this.label,
+    required this.textDialog,
+    required this.widthImg,
+    required this.heightImg,
+    required this.controller,
+  });
 
   @override
   State<PhotoPicker> createState() => _PhotoPickerState();
 }
 
 class _PhotoPickerState extends State<PhotoPicker> {
-  String? _base64Image;
-  final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> _takePhoto(StateSetter setState) async {
     setState(() {
@@ -35,12 +41,13 @@ class _PhotoPickerState extends State<PhotoPicker> {
       if (image != null) {
         final img.Image resizedImage = img.copyResize(image, width: widget.widthImg, height: widget.heightImg);
         final List<int> compressedBytes = img.encodeJpg(resizedImage, quality: 50);
+        final String base64Image = base64Encode(compressedBytes);
         setState(() {
-          _base64Image = base64Encode(Uint8List.fromList(compressedBytes));
+          widget.controller.text = base64Image;
           _isLoading = false;
         });
       }
-    }else {
+    } else {
       setState(() {
         _isLoading = false;
       });
@@ -62,7 +69,6 @@ class _PhotoPickerState extends State<PhotoPicker> {
 
   void _showCameraDialog() {
     showDialog(
-
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -74,36 +80,36 @@ class _PhotoPickerState extends State<PhotoPicker> {
                   Text(widget.textDialog, style: TextStyle(fontSize: 20, color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold)),
                   if (_isLoading)
                     const CircularProgressIndicator(),
-                  if (_base64Image == null && !_isLoading)
-                     Column(
-                        children: [
-                          SizedBox(
-                            height: 200,
-                            width: double.infinity,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).scaffoldBackgroundColor,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Center(
-                                child: Icon(Icons.camera_alt, size: 100, color: Theme.of(context).secondaryHeaderColor,),
-                              ),
+                  if (widget.controller.text.isEmpty && !_isLoading)
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 200,
+                          width: double.infinity,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Center(
+                              child: Icon(Icons.camera_alt, size: 100, color: Theme.of(context).secondaryHeaderColor,),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                        ],
+                        ),
+                        const SizedBox(height: 10),
+                      ],
                     ),
-                    if (_base64Image == null && !_isLoading)
+                  if (widget.controller.text.isEmpty && !_isLoading)
                     ElevatedButton.icon(
                       onPressed: () => _takePhoto(newState),
                       label: const Text('Tomar foto'),
                       icon: const Icon(Icons.camera_alt),
                     ),
-                    if (_base64Image != null && !_isLoading)
+                  if (widget.controller.text.isNotEmpty && !_isLoading)
                     Column(
                       children: [
                         Image.memory(
-                          base64Decode(_base64Image!),
+                          base64Decode(widget.controller.text),
                           height: 200,
                         ),
                         ElevatedButton.icon(

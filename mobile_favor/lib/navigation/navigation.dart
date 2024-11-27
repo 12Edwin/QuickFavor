@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/modules/points/screens/map_courier.dart';
+import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
+import 'package:mobile_favor/navigation/customer/create_order.dart';
+import 'package:mobile_favor/navigation/customer/favor_progress_customer.dart';
+import 'package:mobile_favor/navigation/customer/history_order.dart';
+import 'package:mobile_favor/navigation/customer/order_details.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,55 +19,73 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
-  String _role = 'customer';
+  String _role = '';
+  String _noOrder = '';
   bool _thereIsFavor = false;
 
-  late List <Widget> _courierWidgets = [];
-  final List <Widget> _customerWidgets = [
-    const Placeholder(),
-    const Placeholder(),
-    const Placeholder(),
-    const ProfileCustomer()
-  ];
+  late List<Widget> _courierWidgets = [];
+  late List<Widget> _customerWidgets = [];
 
   @override
   void initState() {
     super.initState();
     _getRole();
     initCourierWidgets();
+    initCustomerWidgets();
   }
 
   void _getRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _role = prefs.getString('role') ?? 'customer';
+      _role = prefs.getString('role') ?? 'Customer';
     });
   }
 
   void initCourierWidgets() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  setState(() {
-    _thereIsFavor = prefs.getBool('thereIsFavor') ?? true;
-    _courierWidgets = [
-      _thereIsFavor ? const FavorProgressCourier() : const Placeholder(),
-      const Placeholder(),
-      const Placeholder(),
-      const ProfileCourier()
-    ];
-  });
-}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _courierWidgets = [
+        prefs.getString('no_order') != null
+            ? const FavorProgressCourier()
+            : const MapCourier(),
+        const Placeholder(),
+        const Placeholder(),
+        const ProfileCourier()
+      ];
+    });
+  }
+
+  void initCustomerWidgets() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _customerWidgets = [
+        prefs.getString('no_order') != null
+            ? const FavorProgressCustomer()
+            : const MapCustomer(),
+        const CreateOrder(),
+        const HistoryOrder(),
+        const ProfileCustomer()
+      ];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        items: _role == 'courier' ? courierTabs() : customerTabs(),
+        items: _role == 'Courier' ? courierTabs() : customerTabs(),
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      body: _role == 'courier' ? _courierWidgets[_selectedIndex] : _customerWidgets[_selectedIndex],
+      body: _role == 'Courier'
+          ? (_courierWidgets.isNotEmpty
+              ? _courierWidgets[_selectedIndex]
+              : Container())
+          : (_customerWidgets.isNotEmpty
+              ? _customerWidgets[_selectedIndex]
+              : Container()),
     );
   }
 
@@ -71,45 +95,26 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  List<BottomNavigationBarItem> courierTabs(){
+  List<BottomNavigationBarItem> courierTabs() {
     return [
       const BottomNavigationBarItem(
-        icon: Icon(Icons.location_on),
-        label: 'Lugares'
-      ),
+          icon: Icon(Icons.location_on), label: 'Lugares'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.notifications),
-        label: 'Favores'
-      ),
+          icon: Icon(Icons.notifications), label: 'Favores'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'Historial'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Perfil'
-      )
+          icon: Icon(Icons.history), label: 'Historial'),
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil')
     ];
   }
 
-  List<BottomNavigationBarItem> customerTabs(){
+  List<BottomNavigationBarItem> customerTabs() {
     return [
+      const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Locales'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.search),
-        label: 'Locales'
-      ),
+          icon: Icon(Icons.add_circle), label: 'Nuevo favor'),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.add_circle),
-        label: 'Nuevo favor'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'Historial'
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Perfil'
-      )
+          icon: Icon(Icons.history), label: 'Historial'),
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil')
     ];
   }
 }

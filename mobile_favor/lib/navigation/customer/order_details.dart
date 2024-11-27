@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OrderDetails extends StatefulWidget {
-  const OrderDetails({Key? key}) : super(key: key);
+  const OrderDetails(
+      {Key? key, required orderId, required fecha, required cantidad})
+      : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
@@ -22,7 +24,8 @@ class _OrderDetailsState extends State<OrderDetails> {
             children: [
               // Encabezado
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 decoration: const BoxDecoration(
                   color: Color(0xFF2D3E50),
                   borderRadius: BorderRadius.only(
@@ -111,8 +114,10 @@ class _OrderDetailsState extends State<OrderDetails> {
                     const SizedBox(height: 10),
                     // Sección del repartidor centrada con barra verde
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center, // Centrar horizontalmente
-                      crossAxisAlignment: CrossAxisAlignment.center, // Alinear verticalmente en el centro
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Centrar horizontalmente
+                      crossAxisAlignment: CrossAxisAlignment
+                          .center, // Alinear verticalmente en el centro
                       children: [
                         // Imagen del repartidor a la izquierda
                         CircleAvatar(
@@ -125,16 +130,17 @@ class _OrderDetailsState extends State<OrderDetails> {
                           ),
                         ),
                         const SizedBox(width: 16),
-    
+
                         // Barra divisoria verde
                         Container(
                           width: 2, // Ancho de la barra
                           height: 80, // Altura que coincida con el contenido
-                          color: const Color(0xFF91A4A3), // Color verde de la barra
+                          color: const Color(
+                              0xFF91A4A3), // Color verde de la barra
                         ),
-    
+
                         const SizedBox(width: 16),
-    
+
                         // Información del repartidor a la derecha
                         const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +220,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 radius: 30,
                                 backgroundColor: const Color(0xFFA5C3C3),
                                 child: Icon(
-                                  isFirstLocked ? Icons.visibility : Icons.block,
+                                  isFirstLocked
+                                      ? Icons.visibility
+                                      : Icons.block,
                                   size: 30,
                                   color: Colors.white,
                                 ),
@@ -507,7 +515,8 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   // Método para mostrar el modal con la información del producto
-  void showProductModal(BuildContext context, String title, String description, String quantity) {
+  void showProductModal(
+      BuildContext context, String title, String description, String quantity) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -561,7 +570,8 @@ class ProductItem extends StatelessWidget {
             children: [
               Text(
                 '$number. ',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

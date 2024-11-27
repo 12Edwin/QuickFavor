@@ -20,19 +20,21 @@ class _ProfileCourierState extends State<ProfileCourier> {
         appBar: AppBar(
           title: const Text('Perfil'),
           actions: [
-            ElevatedButton(
-                onPressed: () => print('guardar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  padding: const EdgeInsets.all(15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
+            Padding(
+              padding: EdgeInsets.only(right: screenWidth * 0.05),
+              child: ElevatedButton(
+                  onPressed: () => print('guardar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Guardar',
-                  style: TextStyle(color: Colors.black),
-                ))
+                  child: const Text(
+                    'Guardar',
+                    style: TextStyle(color: Colors.black),
+                  )),
+            )
           ],
         ),
         body: SingleChildScrollView(
@@ -192,20 +194,15 @@ class _ProfileCourierState extends State<ProfileCourier> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: SingleChildScrollView(
-                                      child: Container(
-                                        padding: const EdgeInsets.all(16.0),
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9,
-                                        constraints: BoxConstraints(
-                                          maxHeight: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.8,
-                                        ),
-                                        child: const ModalCourier(),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16.0),
+                                      width: screenWidth * 2,
+                                      constraints: BoxConstraints(
+                                        maxHeight:
+                                            MediaQuery.of(context).size.height *
+                                                0.8,
                                       ),
+                                      child: const ModalCourier(),
                                     ),
                                   );
                                 },
@@ -221,10 +218,14 @@ class _ProfileCourierState extends State<ProfileCourier> {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () async {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
+                              prefs.remove('token');
+                              prefs.remove('no_user');
+                              prefs.remove('name');
+                              prefs.remove('lat');
+                              prefs.remove('lng');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(
@@ -243,21 +244,16 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         'Repartidor a moto',
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Icon(
-                            Icons.motorcycle,
-                            size: 80,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'Yamaha YBR 125 ZR 2023 COLOR ROJO',
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontSize: 13),
-                          ),
-                        ],
+                      const Icon(
+                        Icons.motorcycle,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        'Yamaha YBR 125 ZR 2023 COLOR ROJO',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 13),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -281,6 +277,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
                               ),
                             ),
                           ),
+                          const Spacer(),
                           SizedBox(
                             height: 60,
                             child: Card(
