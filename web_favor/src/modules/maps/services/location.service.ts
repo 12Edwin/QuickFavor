@@ -7,7 +7,7 @@ export const updateLocation = async (request: LocationUpdateEntity): Promise <Re
         const response = await api.doPost("/location/new-location", request);
         return response.data;
     } catch (error: any) {
-        if (error.response.data.data !== undefined && error.response.data.data !== null) {
+        if (error.response.data.data !== undefined && error.response.data.data !== null && Array.isArray(error.response.data.data)) {
             return getErrorMessages(error.response.data)
         }
         return error.response.data;

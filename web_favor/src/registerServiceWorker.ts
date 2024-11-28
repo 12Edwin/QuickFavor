@@ -1,5 +1,6 @@
 import { register } from 'register-service-worker'
 import firebaseMessaging from './firebase'
+import {showInfoToast} from "@/kernel/alerts";
 
 const messaging = firebaseMessaging
 
@@ -62,26 +63,21 @@ async function requestPushPermission() {
 
 async function sendTokenToServer(token: any) {
   try {
-    await fetch('/api/push-tokens', {
-      method: 'POST',
-      body: JSON.stringify({ token }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    await localStorage.setItem('firebase-token', token)
   } catch (error) {
     console.error('Error sending token to server:', error);
   }
 }
 
-messaging.onMessage((payload: any) => {
+messaging.onMessage(async (payload: any) => {
   console.log('Received foreground message:', payload);
-  showPushNotification(payload);
+  await showPushNotification(payload);
 });
 
-function showPushNotification(payload: any) {
+async function showPushNotification(payload: any) {
   const { title, body, icon } = payload.notification;
-  if (title && body && icon) {
+  if (title && body) {
+    await showInfoToast(body);
     navigator.serviceWorker.getRegistration().then((registration) => {
       registration?.showNotification(title, {
         body,

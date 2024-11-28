@@ -56,7 +56,6 @@ export default defineComponent({
     
   },
   methods: {
-
     startTracking() {
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {

@@ -13,6 +13,15 @@ const getRoleNameByToken = async () => {
    }
 }
 
+export const getNo_order = async (): Promise<string | null> => {
+    try {
+        return await localStorage.getItem("no_order")
+    } catch (error) {
+        removeToken()
+        return null
+    }
+}
+
 const getNo_courierByToken = async (): Promise<string | null> => {
     try {
         return await localStorage.getItem("no_user")
@@ -20,6 +29,42 @@ const getNo_courierByToken = async (): Promise<string | null> => {
         removeToken()
         return null
     }
+}
+
+export const removeNo_order = async () => {
+    try {
+        localStorage.removeItem("no_order")
+    } catch (error) {
+        removeToken()
+    }
+}
+
+export const setNo_order = async (no_order: string) => {
+    try {
+        localStorage.setItem("no_order", no_order)
+    } catch (error) {
+        removeToken()
+    }
+}
+
+export const getCurrentLocation = async (): Promise<{ lat: number, lng: number } | null> => {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by your browser'));
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    reject(error);
+                }
+            );
+        }
+    });
 }
 
 export const getNamesByToken = async () => {
@@ -98,6 +143,7 @@ const getErrorMessages = (errorCode: string): string => {
         'Error network': 'No se ha podido establecer conexión con el servidor',
         'too many requests': 'Demasiadas solicitudes',
         'client not connected': 'Cliente no conectado',
+        'network error': 'Error de red',
         'default': 'Error interno del servidor',
     };
     return errorMessages[errorCode.toLowerCase()] || 'Ocurrió un error desconocido';
