@@ -56,14 +56,6 @@ export default defineComponent({
     
   },
   methods: {
-    async toggleTracking() {
-      this.isTracking = this.isChecked;
-      if (this.isTracking) {
-        this.startTracking();
-      } else {
-        this.stopTracking();
-      }
-    },
     startTracking() {
       this.updateLocation(); 
       this.locationInterval = setInterval(() => {
