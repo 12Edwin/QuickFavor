@@ -18,7 +18,7 @@
         <div class="banner-image"></div>
         <div class="avatar-container">
           <v-avatar size="170" class="profile-avatar">
-            <v-img :src="profile.avatar" alt="Profile"></v-img>
+            <v-img :src="profile.face_url" alt="Profile"></v-img>
           </v-avatar>
         </div>
       </div>
@@ -30,13 +30,13 @@
           <v-col cols="12" md="8">
             <div class="profile-info">
               <h2 class="profile-name">{{ profile.name }}</h2>
-              <span class="profile-role">{{ profile.role }}</span>
+              <span class="profile-role">Repartidor</span>
               <div class="profile-stats">
                 <span><i class="fas fa-phone"></i> {{ profile.phone }}</span>
                 <span><i class="fas fa-envelope"></i> {{ profile.email }}</span>
               </div>
               <div class="profile-stats">
-                <span><i class="fas fa-id-card"></i> {{ profile.idCard }}</span>
+                <span><i class="fas fa-id-card"></i> {{ profile.curp }}</span>
               </div>
             </div>
           </v-col>
@@ -47,28 +47,35 @@
               <v-card-title align="center" justify="center">Transporte</v-card-title>
               <v-card-text>
                 <!-- Mostrar transporte dinámicamente -->
-                <div v-if="showCar">
+                <div v-if="profile.vehicle_type == 'Carro' || profile.vehicle_type == 'Moto'">
                   <v-row align="center" justify="center">
+                    <div v-if="profile.vehicle_type == 'Carro'">
                     <div class="content-image">
                       <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
+                    </div>
+                    </div>
+                    <div v-if="profile.vehicle_type == 'Moto'">
+                      <div class="content-image">
+                      <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
+                    </div>
                     </div>
                   </v-row>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                    <input type="text" :value="vehicle.plate" class="register-input" disabled>
+                    <input type="text" :value="profile.license_plate" class="register-input" disabled>
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
-                    <input type="text" :value="vehicle.model" class="register-input" disabled>
+                    <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="vehicle.color" class="register-input" disabled>
+                    <input type="text" :value="profile.color" class="register-input" disabled>
                   </div>
                 </div>
 
                 <!-- Puedes agregar más opciones de transporte, como moto, bicicleta, etc., de forma similar -->
-                <div v-if="showMoto">
+                <!-- <div v-if="showMoto">
                   <v-row align="center" justify="center">
                     <div class="content-image">
                       <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
@@ -86,7 +93,7 @@
                     <v-icon class="fa-solid fa-circle icon"></v-icon>
                     <input type="text" :value="vehicleMoto.color" class="register-input" disabled>
                   </div>
-                </div>
+                </div> -->
               </v-card-text>
               <v-card-actions align="center" justify="center">
                 <v-btn @click="isModalVisible = true">Editar</v-btn>
@@ -101,53 +108,37 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import WaveComponent from "@/components/WaveComponent.vue";
 import Switch from "@/components/Switch.vue";
 import EditTrasnport from '../components/UpdateTrasnport.vue';
+import { getProfile } from '../services/profile';
 
 export default defineComponent({
   name: "Profile",
   components: { WaveComponent, Switch, EditTrasnport },
   setup() {
     const isModalVisible = ref(false);
-    const profile = ref({
-      name: 'Juan Rodrigo',
-      role: 'Repartidor',
-      phone: '777-234-4325',
-      email: 'correo@gmail.com',
-      idCard: 'OOAZ900824MTSRLL08',
-      avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s',
-    });
-
-    // Información del vehículo (se puede cambiar según el tipo de transporte)
-    const vehicle = ref({
-      plate: '123-ABC',
-      model: 'TSURU NISSAN',
-      color: 'ROJO',
-    });
-
-    // Información de la moto (puedes agregar más vehículos si lo necesitas)
-    const vehicleMoto = ref({
-      plate: '456-MOTO',
-      model: 'HONDA CRF',
-      color: 'NEGRO',
-    });
-
-    const showCar = ref(true);  
-    const showMoto = ref(false); 
+    const profile = ref({});
 
     const handleModalUpdate = (newVisibility: false) => {
       isModalVisible.value = newVisibility;
       console.log("Modal ");
     };
 
+    const getUserInfo = async () => {
+      const data = await getProfile();
+      if (data) {
+        profile.value = data.data || profile.value;  
+      }
+    };
+
+    onMounted(() => {
+      getUserInfo();
+    });
+
     return {
       profile,
-      vehicle,
-      vehicleMoto,
-      showCar,
-      showMoto,
       handleModalUpdate,
       isModalVisible
     };
