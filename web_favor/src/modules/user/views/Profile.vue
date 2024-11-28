@@ -75,7 +75,7 @@
                 </div>
 
                 <!-- Puedes agregar más opciones de transporte, como moto, bicicleta, etc., de forma similar -->
-                <!-- <div v-if="showMoto">
+                <div v-if="profile.vehicle_type == 'WalKable'">
                   <v-row align="center" justify="center">
                     <div class="content-image">
                       <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
@@ -93,7 +93,7 @@
                     <v-icon class="fa-solid fa-circle icon"></v-icon>
                     <input type="text" :value="vehicleMoto.color" class="register-input" disabled>
                   </div>
-                </div> -->
+                </div>
               </v-card-text>
               <v-card-actions align="center" justify="center">
                 <v-btn @click="isModalVisible = true">Editar</v-btn>

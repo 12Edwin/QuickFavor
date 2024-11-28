@@ -6,23 +6,25 @@ import { ProfileEntity } from "@/modules/user/entity/profile.entity";
 const CACHE_EXPIRATION_TIME = 10 * 60 * 1000;
 
 export const getProfile = async (): Promise<ResponseEntity> => {
-    const credential = localStorage.getItem("credential");
-    const cacheKey = `profile_h`;
-    console.log('cacheKey', credential);
+    const credential = localStorage.getItem("credential");;
+
+    if (!credential) {
+        return { error: true, message: 'No credential found in localStorage', code: 401, data: null };
+    }
 
     try {
-        const response = await api.doGet("/courier/profile/p7TgypeUYegbFs4xAsXYR099sW23" );
+        const response = await api.doGet("/courier/profile/" + credential);
         if (response?.data?.data) {
             const cacheData = {
                 data: response.data,
                 timestamp: new Date().getTime(), 
             };
-            localStorage.setItem(cacheKey, JSON.stringify(cacheData));  
+            localStorage.setItem(credential, JSON.stringify(cacheData));  
         }
 
         return response.data;
     } catch (error: any) {
-        const cachedData = localStorage.getItem(cacheKey);
+        const cachedData = localStorage.getItem(credential);
         
         if (cachedData) {
             const { data, timestamp } = JSON.parse(cachedData);
