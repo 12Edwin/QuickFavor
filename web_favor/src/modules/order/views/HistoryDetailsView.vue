@@ -884,8 +884,116 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
+  .history-container {
+    height: 88vh; /* Ocupa toda la altura de la pantalla */
+    overflow-y: auto; /* Permite desplazamiento vertical */
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre los elementos */
+    align-items: center; /* Centra los elementos horizontalmente */
+  }
+
+  /* Contenedor para la sección de título */
+  .title-container {
+    flex-shrink: 0; /* Mantiene el tamaño del contenedor de título fijo */
+    width: 400px;
+    display: flex;
+    justify-content: center; /* Centra el título y el botón de estado */
+  }
+
+  .header-container {
+    width: 100%; /* Asegura que abarque todo el ancho de la tabla */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra el texto horizontalmente */
+    background-color: #566981;
+    color: #ffffff;
+    border-radius: 4px 4px 0 0; /* Bordes redondeados en la parte superior */
+    height: 40px;
+    margin-top: 10px;
+  }
+
+  .header-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+    text-align: center;
+    width: 100%; /* Hace que el texto ocupe todo el ancho disponible */
+    margin: 0; /* Elimina el margen */
+  }
+
+  .v-table {
+    width: 100%; /* Hace que la tabla abarque el mismo ancho que el contenedor */
+    border-collapse: collapse; /* Opcional: ayuda a eliminar espacios entre las celdas */
+  }
+
+  .v-table th,
+  .v-table td {
+    text-align: center;
+    padding: 8px; /* Ajusta el espaciado si es necesario */
+  }
+
+  /* Contenedor para el contenido principal */
+  .content-container {
+    flex-direction: column; /* Muestra las secciones en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+    width: 100%;
+  }
+
+  /* Estilo para la sección izquierda */
+  .left-section {
+    flex-basis: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px; /* Añade espacio inferior para separación */
+    width: 100%;
+  }
+
+  /* Estilo para la sección de detalles */
+  .details-section {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido horizontalmente */
+    width: 100%;
+  }
+
+  /* Ajuste para la tabla de productos */
+  .v-table {
+    max-width: 100%;
+    overflow-y: auto;
+  }
+
+  /* Ajuste para el contenedor de sumario */
+  .summary-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido del sumario */
+    margin-top: 20px;
+    width: 100%;
+    height: 290px;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    color: #34344e;
+  }
+
+  /* Ajuste del botón de factura */
+  .summary-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 50px;
+  }
+
   .status-container {
-    flex-grow: 1;
+    flex-grow: 0;
     margin-left: 20px;
   }
 

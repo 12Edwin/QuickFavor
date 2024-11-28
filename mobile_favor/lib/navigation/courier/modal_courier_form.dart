@@ -14,6 +14,7 @@ class _ModalCourierState extends State<ModalCourier> {
   String phone = '';
   int _currentVehicleType = 0;
   Color _currentColor = Colors.blue;
+  final TextEditingController _photoController = TextEditingController();
 
   final List<Map<String, dynamic>> _vehicles = [
     {'icon': Icons.directions_car, 'name': 'car'},
@@ -141,11 +142,12 @@ class _ModalCourierState extends State<ModalCourier> {
                   ),
                 if (['car', 'motorcycle']
                     .contains(_vehicles[_currentVehicleType]['name']))
-                  const Flexible(
+                  Flexible(
                     child: PhotoPicker(
                       label: 'Licencia',
                       textDialog: 'Licencia de conducir',
                       widthImg: 856,
+                      controller: _photoController,
                       heightImg: 540,
                     ),
                   ),

@@ -26,19 +26,20 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
 const courier_register = async (req: Request, res: Response) => {
     try {
-        const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex } = req.body;
+        const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color } = req.body;
 
         const repository: AuthRepository = new AuthRepository();
         const service: AuthService = new AuthService(repository);
         const user: User = {email, password, name, surname, lastname,
             role: 'COURIER', sex, phone, CURP, vehicle_type, status: true,
-            license_plate, face_photo, INE_photo, plate_photo, state: 'Out of service'
+            license_plate, face_photo, INE_photo, plate_photo, state: 'Out of service', brand, model, color
         };
         await service.courier_register(user);
 
         const response: ResponseApi<String> = Response200('Check your email');
         res.status(response.code).json(response);
     } catch (e) {
+        console.log(e)
         const error: ResponseApi<any> = validateError(e as Error);
         res.status(error.code).json(error);
     }
@@ -46,12 +47,12 @@ const courier_register = async (req: Request, res: Response) => {
 
 const customer_register = async (req: Request, res: Response) => {
     try {
-        const { email, password, name, surname, lastname, direction, phone, sex, CURP } = req.body;
+        const { email, password, name, surname, lastname, direction, phone, sex, CURP, lat, lng } = req.body;
 
         const repository: AuthRepository = new AuthRepository();
         const service: AuthService = new AuthService(repository);
         const user: User & Customer = {email, password, name, surname, lastname, CURP,
-            role: 'CUSTOMER', sex, phone, direction, status: true,} as User & Customer;
+            role: 'CUSTOMER', sex, phone, direction, lat, lng, status: true,} as User & Customer;
         await service.customer_register(user);
 
         const response: ResponseApi<String> = Response200('Check your email');

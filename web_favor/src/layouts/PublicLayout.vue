@@ -9,7 +9,13 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: "PublicLayout",
+
+  data() {
+    return {
+    };
+  },
 });
+
 </script>
 
 <style scoped>

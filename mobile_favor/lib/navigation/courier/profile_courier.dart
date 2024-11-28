@@ -218,10 +218,15 @@ class _ProfileCourierState extends State<ProfileCourier> {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () async {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
+                              prefs.remove('token');
+                              prefs.remove('no_user');
+                              prefs.remove('name');
+                              prefs.remove('lat');
+                              prefs.remove('lng');
+                              prefs.remove('availability');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(

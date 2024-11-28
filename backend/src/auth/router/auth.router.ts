@@ -33,9 +33,11 @@ AuthRouter.post('/courier-register', [
     check('CURP', 'missing CURP').not().isEmpty(),
     check('CURP', 'invalid CURP').matches(/^[A-Z]{4}\d{6}[A-Z]{6}\d{2}$/),
     check('vehicle_type', 'missing vehicle type').not().isEmpty(),
-    check('vehicle_type', 'invalid vehicle type').isIn(['Carro', 'Moto', 'Bicicleta', 'Scouter', 'Caminando', 'Otro']),
-    check('license_plate', 'missing license plate').not().isEmpty(),
-    check('license_plate', 'invalid license plate').matches(/^[A-Z0-9-]+$/),
+    check('vehicle_type', 'invalid vehicle type').isIn(['Carro', 'Moto', 'Bicicleta', 'Scooter', 'Caminando', 'Otro']),
+    check('brand').optional().isLength({ min: 3 }),
+    check('model').optional().isLength({ min: 3 }),
+    check('color').optional().isLength({ min: 3 }),
+    check('license_plate', 'invalid license plate').optional().matches(/^[A-Z0-9]+-[A-Z0-9]+$/),
     check('face_photo', 'missing face photo').not().isEmpty(),
     check('face_photo', 'invalid face photo').isBase64(),
     check('INE_photo', 'missing INE photo').not().isEmpty(),
@@ -54,11 +56,11 @@ AuthRouter.post('/customer-register', [
     check('password', 'missing password').not().isEmpty(),
     check('password', 'password must be at least 6 characters').isLength({ min: 6 }),
     check('name')
-        .optional()
+        .notEmpty()
         .isLength({ min: 3 }).withMessage('name must be at least 3 characters')
         .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\u00fc\u00dc\s]+$/).withMessage('name must not contain numbers or special characters'),
     check('surname')
-        .optional()
+        .notEmpty()
         .isLength({ min: 3 }).withMessage('surname must be at least 3 characters')
         .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\u00fc\u00dc\s]+$/).withMessage('surname must not contain numbers or special characters'),
     check('lastname')
@@ -73,6 +75,10 @@ AuthRouter.post('/customer-register', [
     check('sex', 'invalid sex').isIn(['Masculino', 'Femenino']),
     check('direction', 'missing direction').not().isEmpty(),
     check('direction', 'invalid direction').isLength({ min: 3, max: 1000 }),
+    check('lat', 'missing latitude').not().isEmpty(),
+    check('lat', 'invalid latitude').isNumeric(),
+    check('lng', 'missing longitude').not().isEmpty(),
+    check('lng', 'invalid longitude').isNumeric(),
     validateMiddlewares
 ], customer_register);
 

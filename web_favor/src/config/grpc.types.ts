@@ -1,29 +1,30 @@
-export interface SearchDriversRequest {
-    no_order: string;
-    delivery_point: {
-        address: string;
-        lat: number;
-        lng: number;
-    };
+// src/types/delivery.ts
+export interface DeliveryPoint {
+    address: string;
+    lat: number;
+    lng: number;
 }
 
-export interface SearchDriversResponse {
-    no_courier: string;
-    courier_name: string;
+export interface Driver {
+    noCourier: string;
+    courierName: string;
     lat: number;
     lng: number;
     status: string;
 }
 
 export interface DriverLocation {
-    no_courier: string;
+    noCourier: string;
     lat: number;
     lng: number;
-    distance_km: number;
-    fcm_token?: string;
+    distanceKm: number;
+    fcmToken: string;
 }
 
-export interface UpdateDriverLocation {
-    success: boolean;
-    status: string;
+export interface SearchForm {
+    orderNo: string;
+    address: string;
+    lat: number;
+    lng: number;
+    radius: number;
 }

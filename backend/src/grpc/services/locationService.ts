@@ -90,6 +90,8 @@ export class DeliveryService {
       call.write({
         status: 'Timeout'
       } as any);
+        console.log('No drivers found');
+        return
     } catch (error) {
       console.error('Error in searchDrivers:', error);
       throw error;

@@ -3,6 +3,7 @@ import {User} from 'firebase/auth';
 export type LoginRequest = {
     email: string;
     password: string;
+    token?: string;
 }
 
 export type LoginResponse = {

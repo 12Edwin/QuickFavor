@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
+import 'package:mobile_favor/navigation/courier/notifications.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
+import 'package:mobile_favor/navigation/customer/create_order.dart';
+import 'package:mobile_favor/navigation/customer/favor_progress_customer.dart';
+import 'package:mobile_favor/navigation/customer/history_order.dart';
 import 'package:mobile_favor/navigation/customer/profile_customer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Navigation extends StatefulWidget {
-  const Navigation({super.key});
+  final int? tap;
+  const Navigation({super.key, this.tap});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -15,40 +20,51 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
-  String _role = 'customer';
+  String _role = '';
+  String _noOrder = '';
   bool _thereIsFavor = false;
 
   late List<Widget> _courierWidgets = [];
-  final List<Widget> _customerWidgets = [
-    const MapCustomer(),
-    const Placeholder(),
-    const Placeholder(),
-    const ProfileCustomer()
-  ];
+  late List<Widget> _customerWidgets = [];
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.tap ?? 0;
     _getRole();
     initCourierWidgets();
+    initCustomerWidgets();
   }
 
   void _getRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _role = prefs.getString('role') ?? 'customer';
+      _role = prefs.getString('role') ?? 'Customer';
     });
   }
 
   void initCourierWidgets() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _thereIsFavor = prefs.getBool('thereIsFavor') ?? false;
       _courierWidgets = [
-        _thereIsFavor ? const FavorProgressCourier() : const MapCourier(),
-        const Placeholder(),
+        prefs.getString('no_order') != null ? const FavorProgressCourier() : const MapCourier(),
+        const Notifications(),
         const Placeholder(),
         const ProfileCourier()
+      ];
+    });
+  }
+
+  void initCustomerWidgets() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _customerWidgets = [
+        prefs.getString('no_order') != null
+            ? const FavorProgressCustomer()
+            : const MapCustomer(),
+        const CreateOrder(),
+        const HistoryOrder(),
+        const ProfileCustomer()
       ];
     });
   }
@@ -57,15 +73,19 @@ class _NavigationState extends State<Navigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        items: _role == 'courier' ? courierTabs() : customerTabs(),
+        items: _role == 'Courier' ? courierTabs() : customerTabs(),
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      body: _role == 'courier'
-          ? _courierWidgets[_selectedIndex]
-          : _customerWidgets[_selectedIndex],
+      body: _role == 'Courier'
+          ? (_courierWidgets.isNotEmpty
+              ? _courierWidgets[_selectedIndex]
+              : Container())
+          : (_customerWidgets.isNotEmpty
+              ? _customerWidgets[_selectedIndex]
+              : Container()),
     );
   }
 
