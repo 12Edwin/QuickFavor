@@ -1,56 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:mobile_favor/config/error_types.dart';
-import 'package:mobile_favor/navigation/courier/service/courier.service.dart';
-import 'package:mobile_favor/navigation/courier/entity/notification.entity.dart';
+import 'order_details.dart'; // Asegúrate de importar esta vista
 
-import '../../config/alerts.dart';
-import '../../config/utils.dart';
-import 'notification_detail.dart';
-
-class Notifications extends StatefulWidget {
-  const Notifications({super.key});
+class HistoryOrderCourier extends StatefulWidget {
+  const HistoryOrderCourier({super.key});
 
   @override
-  State<Notifications> createState() => _NotificationsState();
+  State<HistoryOrderCourier> createState() => _HistoryOrderState();
 }
 
-class _NotificationsState extends State<Notifications> {
-  List<NotificationEntity> notifications = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchNotifications();
-  }
-
-  Future<void> _fetchNotifications() async {
-    final CourierService favorService = CourierService(context);
-    final String? courierId = await getStorageNoUser();
-    final response = await favorService.readNotifications(courierId ?? '');
-    if (response.error) {
-      showErrorAlert(context, getErrorMessages(response.message));
-      setState(() {
-        isLoading = false;
-      });
-      return;
-    }
-    setState(() {
-      notifications = (response.data as List)
-          .map((json) => NotificationEntity.fromJson(json))
-          .toList();
-      isLoading = false;
-    });
-  }
-
-  String _formatDate(String date) {
-    final DateTime parsedDate = DateTime.parse(date);
-    final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm');
-    return formatter.format(parsedDate);
-  }
-
-  List<Map<String, dynamic>> notification = [
+class _HistoryOrderState extends State<HistoryOrderCourier> {
+  // Lista de pedidos simulada
+  List<Map<String, dynamic>> historyOrder = [
     {
       'id': 'ORD01',
       'fecha': '05-07-2024 14:04:00',
@@ -69,7 +29,7 @@ class _NotificationsState extends State<Notifications> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones'),
+        title: const Text('Historial de pedidos'),
       ),
       body: Stack(
         children: [
@@ -92,7 +52,7 @@ class _NotificationsState extends State<Notifications> {
               const SizedBox(height: 10),
               // Imagen superior
               Image.asset(
-                './assets/notificationLogo.png',
+                './assets/history.webp',
                 width: 250,
                 height: 250,
                 fit: BoxFit.cover,
@@ -108,7 +68,7 @@ class _NotificationsState extends State<Notifications> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: notification.isEmpty
+                    child: historyOrder.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -132,10 +92,10 @@ class _NotificationsState extends State<Notifications> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: notification.length,
+                            itemCount: historyOrder.length,
                             padding: const EdgeInsets.all(10),
                             itemBuilder: (context, index) {
-                              final order = notification[index];
+                              final order = historyOrder[index];
                               return Card(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -190,9 +150,11 @@ class _NotificationsState extends State<Notifications> {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      NotificationDetail(
-                                                          order_id:
-                                                              order['id']),
+                                                      OrderDetailsCourier(
+                                                    orderId: order['id'],
+                                                    fecha: order['fecha'],
+                                                    cantidad: order['cantidad'],
+                                                  ),
                                                 ),
                                               );
                                             },
