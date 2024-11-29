@@ -23,13 +23,22 @@
         </div>
       </div>
 
+      <!-- Botón Editar Perfil -->
+      <v-btn 
+        class="edit-profile-btn" 
+        @click="handleModalUpdateUserInfo(true)"
+        rounded
+      >
+        Editar perfil
+      </v-btn>
+
       <!-- Contenido del Perfil -->
       <v-container class="profile-content">
         <v-row>
           <!-- Información Principal -->
           <v-col cols="12" md="8">
             <div class="profile-info">
-              <h2 class="profile-name">{{ profile.name }}</h2>
+              <h2 class="profile-name">{{ profile.name }} {{ profile.surname }}</h2>
               <span class="profile-role">Repartidor</span>
               <div class="profile-stats">
                 <span><i class="fas fa-phone"></i> {{ profile.phone }}</span>
@@ -46,7 +55,8 @@
             <v-card class="edit-card">
               <v-card-title align="center" justify="center">Transporte</v-card-title>
               <v-card-text>
-                <!-- Mostrar transporte dinámicamente -->
+
+                <!-- Carros y motos -->
                 <div v-if="profile.vehicle_type == 'Carro' || profile.vehicle_type == 'Moto'">
                   <v-row align="center" justify="center">
                     <div v-if="profile.vehicle_type == 'Carro'">
@@ -74,36 +84,59 @@
                   </div>
                 </div>
 
-                <!-- Puedes agregar más opciones de transporte, como moto, bicicleta, etc., de forma similar -->
-                <div v-if="profile.vehicle_type == 'WalKable'">
+                <!-- Bicicletas y Scooters -->
+                <div v-if="profile.vehicle_type == 'Bicicleta' || profile.vehicle_type == 'Scooter'">
                   <v-row align="center" justify="center">
+                    <div v-if="profile.vehicle_type == 'Bicleta'">
                     <div class="content-image">
-                      <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
+                      <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
+                    </div>
+                    </div>
+                    <div v-if="profile.vehicle_type == 'Scooter'">
+                      <div class="content-image">
+                      <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
+                    </div>
                     </div>
                   </v-row>
                   <div class="input-container">
-                    <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                    <input type="text" :value="vehicleMoto.plate" class="register-input" disabled>
-                  </div>
-                  <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
-                    <input type="text" :value="vehicleMoto.model" class="register-input" disabled>
+                    <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="vehicleMoto.color" class="register-input" disabled>
+                    <input type="text" :value="profile.color" class="register-input" disabled>
                   </div>
                 </div>
+
+                <!-- Para los caminantes -->
+                <div v-if="profile.vehicle_type == 'Caminando'">
+                  <v-row align="center" justify="center">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
+                    </div>
+                  </v-row>
+                </div>
+
+                <!-- Para los que tienen otro tipo de transporte -->
+                <div v-if="profile.vehicle_type == 'Otro'">
+                  <v-row align="center" justify="center">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
+                    </div>
+                  </v-row>
+                </div>
+
               </v-card-text>
               <v-card-actions align="center" justify="center">
-                <v-btn @click="isModalVisible = true">Editar</v-btn>
+                <v-btn @click="handleModalUpdate(true)">Editar</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
     </v-card>
-    <EditTrasnport :isModalVisible.sync="isModalVisible" />
+    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" />
+    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" />
   </div>
 </template>
 
@@ -112,18 +145,24 @@ import { defineComponent, ref, onMounted } from 'vue';
 import WaveComponent from "@/components/WaveComponent.vue";
 import Switch from "@/components/Switch.vue";
 import EditTrasnport from '../components/UpdateTrasnport.vue';
+import UpdateUserInfo from '../components/UpdateUserInfo.vue';
 import { getProfile } from '../services/profile';
+import { profile } from 'console';
 
 export default defineComponent({
   name: "Profile",
-  components: { WaveComponent, Switch, EditTrasnport },
+  components: { WaveComponent, Switch, EditTrasnport, UpdateUserInfo },
   setup() {
     const isModalVisible = ref(false);
+    const isModalVisibleUserInfo = ref(false);
     const profile = ref({});
 
-    const handleModalUpdate = (newVisibility: false) => {
+    const handleModalUpdate = (newVisibility: boolean) => {
       isModalVisible.value = newVisibility;
-      console.log("Modal ");
+    };
+
+    const handleModalUpdateUserInfo = (newVisibility: boolean) => {
+      isModalVisibleUserInfo.value = newVisibility;
     };
 
     const getUserInfo = async () => {
@@ -140,7 +179,9 @@ export default defineComponent({
     return {
       profile,
       handleModalUpdate,
-      isModalVisible
+      handleModalUpdateUserInfo,
+      isModalVisible,
+      isModalVisibleUserInfo
     };
   }
 });
@@ -213,6 +254,7 @@ export default defineComponent({
 }
 
 .profile-content {
+  margin-top: -64px;
   padding-top: 80px;
   margin-left: 42px;
 }
@@ -250,7 +292,7 @@ export default defineComponent({
 }
 
 .edit-card {
-  padding: 16px;
+  padding: 8px;
   margin-top: -64px;
 }
 
@@ -294,6 +336,22 @@ export default defineComponent({
     height: 40px;
   }
 
+  /* Estilo para el botón de editar perfil */
+.edit-profile-btn {
+  margin-top: 40px;
+  margin-left: 300px;
+  color: #fff; 
+  border-radius: 20px;
+  padding: 8px 24px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  transition: background-color 0.3s; /* Transición de color */
+}
+
+.edit-profile-btn:hover {
+  background-color: #4b5c68; /* Color de fondo cuando el mouse pasa por encima */
+}
+
+
 @media screen and (max-width: 768px) {
   .profile-avatar {
     width: 120px;
@@ -315,6 +373,22 @@ export default defineComponent({
   .edit-card {
     margin-top: 0px;
   }  
+  .edit-profile-btn {
+    font-size: 14px; /* Reducir el tamaño de fuente en pantallas más pequeñas */
+    padding: 6px 18px; /* Ajustar el relleno */
+    margin-top: 84px;
+    margin-left: 84px; /* Centrar el botón */
+  }
+
+  .profile-content {
+    margin-top: -56px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .details-card, .edit-card {
+    margin-left: -256px;
+  }
 }
 
 </style>

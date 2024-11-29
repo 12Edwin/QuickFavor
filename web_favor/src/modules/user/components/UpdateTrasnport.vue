@@ -127,7 +127,7 @@ export default {
   data() {
     return {
       localIsModalVisible: this.isModalVisible, // Usamos una variable local para el diálogo
-      selectOptionClick: null,
+      selectOptionClick: 2,
       showDescriptionOnly: false,
       showImageOnly: false,
       showModelOnly: false,
@@ -177,6 +177,7 @@ export default {
     },
     closeModal() {
       this.localIsModalVisible = false; // Cerrar el modal
+      this.$emit('update:isModalVisible', this.localIsModalVisible);
     }
   }
 };
@@ -316,6 +317,33 @@ export default {
   backdrop-filter: blur(10px);
   overflow: visible; 
   z-index: 1; 
+}
+
+.register-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px; /* Espacio para el ícono */
+  border: 1px solid #ccc;
+  border-radius: 32px;
+  outline: none;
+  transition: border-color 0.3s;
+  height: 40px;
+}
+
+.register-input:focus {
+  border-color: #3A415A;
+}
+.input-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+.icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%);
+  color: #566981;
 }
 
 </style>
