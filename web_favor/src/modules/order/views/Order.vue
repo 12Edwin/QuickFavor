@@ -1,116 +1,117 @@
 <template>
   <div class="back-container">
-    <WaveComponent />
+    <WaveComponent :wave-height="800"/>
   </div>
 
-  <!-- Header con fondo azul y iconos de Font Awesome -->
-  <div class="title-container">
-    <i class="fas fa-bell bell-icon"> O r d e n</i>
-    <div class="status-container">
-      <button
-        class="status-button"
-        :class="{ inactive: !isActive }"
-        @click="toggleStatus"
-      >
-        <div class="icon-circle" :class="{ 'inactive-icon': !isActive }">
-          <i :class="['fas', 'fa-power-off', isActive ? 'power-icon' : 'power-icon-inactive']"></i>
-        </div>
-        <span class="status-text">{{ isActive ? "Activo" : "Inactivo" }}</span>
-      </button>
+  <div class="container-detail">
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-cart-shopping fa-lg text-white" style="font-size: 36px;"></i>
+        <span class="ml-4 fas text-white">O r d e n</span>
+      </h2>
+      <Switch @onFalse="" @onTrue=""/>
     </div>
-  </div>
 
-  <!-- Contenedor de detalles en fondo blanco -->
-  <v-container class="details-container" fluid>
-    <h2 class="details-title">Detalles del pedido</h2>
-    <v-row justify="space-between" align="start">
-      <!-- Columna Izquierda -->
-      <v-col cols="4" class="left-column">
-        <v-row align="center">
-          <v-col cols="auto" class="profile-avatar">
-            <v-avatar size="120">
-              <img src="@/assets/profile.png" alt="User Avatar" />
-            </v-avatar>
+    <div class="details-container">
+      <div v-if="nothingToShow" class="no-orders-container">
+        <img src="@/assets/box.png" alt="No Orders" class="no-orders-image"/>
+        <p class="no-orders-text">No hay pedidos activos</p>
+      </div>
+      <div v-else>
+      <div v-if="loading" class="loader-container">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </div>
+      <div v-else>
+        <div class="d-flex w-100 justify-space-between flex-wrap ga-1 mb-3">
+          <h2 class="details-title">Detalles del pedido</h2>
+          <div class="ml-auto">
+            <div class="badge-style" :style="{'background-color': statusColor}">
+              {{statusText}}
+            </div>
+          </div>
+        </div>
+        <div class="w-100 d-flex justify-end mb-5">
+          <v-btn :disabled="status !== 'In shopping'" rounded class="cancel-button" color="red" @click="showConfirm('Canceled', 'Cancelado' )">
+            <span class="font-weight-bold" style="color: white"> Cancelar </span>
+          </v-btn>
+        </div>
+
+        <v-row justify="space-between">
+          <v-col xl="6" lg="6" md="12" sm="12">
+            <div class="d-flex justify-start">
+              <div class="profile-avatar">
+                <v-avatar size="120">
+                  <img alt="User Avatar" src="@/assets/profile.png"/>
+                </v-avatar>
+              </div>
+              <div class="ml-4">
+                <h2>{{ order?.customer_name }} {{ order?.customer_surname }}</h2>
+                <p class="user-role">Cliente</p>
+                <span class="info-row">
+                  <i class="fas fa-phone info-icon"></i>
+                  <span>{{ order?.customer_phone }}</span>
+                </span>
+                <br>
+                <v-btn class="info-row" rounded @click="showAddress({lat: order?.place_lat, lng: order?.place_lng, name: 'Ubicación'})">
+                  <i class="fas fa-eye info-icon"></i>
+                  <span>Ubicación</span>
+                </v-btn>
+              </div>
+            </div>
+
+            <div class="direction-buttons">
+              <div class="line-connector"></div>
+              <div
+                  v-for="(address, index) in order?.deliveryPoints || []"
+                  :key="index"
+                  class="direction-button"
+                  @click="()=> !address.isClosed ? showAddress(address) : null"
+              >
+                <i :class="['fas', address.isClosed ? 'fa-ban' : 'fa-eye', 'direction-icon']"></i>
+                <p v-if="address.active" class="address-name">{{ address.name }}</p>
+              </div>
+            </div>
           </v-col>
-          <v-col>
-            <h2>Juan Rodrigo</h2>
-            <p class="user-role">Cliente</p>
-            <v-row align="center" class="info-row">
-              <i class="fas fa-phone info-icon"></i>
-              <span>777-234-4325</span>
-            </v-row>
-            <v-row align="center" class="info-row">
-              <i class="fas fa-eye info-icon"></i>
-              <span>Ubicación</span>
-            </v-row>
+
+          <v-col xl="6" lg="6" md="12" sm="12" class="d-block" >
+            <div class="d-flex justify-center">
+              <div>
+                <div class="chat-container mx-auto" style="width: auto; max-width: 150px">
+                  <div class="icon-circle">
+                    <i class="fas fa-comment-dots chat-icon"></i>
+                  </div>
+                  <span class="chat-text">Chatear</span>
+                </div>
+
+                <div class="timer text-center"><p>{{ formattedTime }}</p></div>
+
+                <img alt="Caja" class="box-image position-static" src="@/assets/box.png"/>
+              </div>
+            </div>
           </v-col>
         </v-row>
 
-        <!-- Step Progress de Direcciones -->
-        <div class="direction-buttons">
-          <div class="line-connector"></div>
-          <div
-            v-for="(address, index) in addresses"
-            :key="index"
-            class="direction-button"
-            @click="toggleAddress(index)"
-          >
-            <i :class="['fas', address.active ? 'fa-eye' : 'fa-ban', 'direction-icon']"></i>
-            <p v-if="address.active" class="address-name">{{ address.name }}</p>
-          </div>
-        </div>
-      </v-col>
-
-      <!-- Columna del Medio -->
-      <v-col cols="4" class="center-column">
-        <!-- Botón de chatear -->
-       <div class="chat-container">
-         <div class="icon-circle">
-           <i class="fas fa-comment-dots chat-icon"></i> <!-- Cambiado a un icono de mensaje tipo messenger -->
-         </div>
-         <span class="chat-text">Chatear</span>
-       </div>
-
-
-
-        <!-- Temporizador -->
-        <div class="timer">{{ formattedTime }}</div>
-
-        <!-- Imagen de la caja -->
-        <img src="@/assets/box.png" alt="Caja" class="box-image" />
-      </v-col>
-
-      <!-- Columna Derecha -->
-      <v-col cols="4" class="right-column">
-        <!-- Barra de estado -->
-        <v-btn :color="statusColor" class="status-bar" rounded>{{ statusText }}</v-btn>
-        <!-- Botón de cancelar -->
-        <v-btn :disabled="status !== 'Proceso de compra'" color="#A9A9A9" class="cancel-button" @click="cancelOrder">
-          Cancelar
-        </v-btn>
-        <!-- Lista de productos -->
-        <div class="product-section-title">Productos</div>
+        <div class="h-100 w-100">
+          <div class="product-section-title">Productos</div>
           <v-card class="product-list" outlined>
             <v-list>
               <v-list-item
-                v-for="(product, index) in products"
-                :key="index"
-                class="product-item"
+                  v-for="(product, index) in order?.products || []"
+                  :key="index"
+                  class="product-item"
               >
                 <v-row align="center" no-gutters>
-                  <!-- Primera columna: Número del producto -->
-                  <v-col cols="1" class="product-number-column">
+                  <v-col cols="1">
                     <span class="product-number">{{ index + 1 }}.</span>
                   </v-col>
-                
-                  <!-- Segunda columna: Nombre y descripción del producto -->
-                  <v-col cols="8" class="product-info-column">
+
+                  <v-col class="product-info-column" cols="8">
                     <span class="product-name">{{ product.name }}</span>
-                    <p class="product-description">{{ product.detail }}</p>
+                    <p class="product-description">{{ product.description }}</p>
+                    <p class="product-amount">Cantidad: {{ product.amount }}</p>
                   </v-col>
-                
-                  <!-- Tercera columna: Icono del ojo -->
-                  <v-col cols="3" class="eye-icon-column">
+
+                  <v-col class="eye-icon-column" cols="3">
                     <i class="fas fa-eye eye-icon"></i>
                   </v-col>
                 </v-row>
@@ -118,135 +119,276 @@
             </v-list>
           </v-card>
 
-          <!-- Step Progress Component -->
           <div class="step-progress">
-              <!-- Primer círculo grande con estilo específico -->
-              <div class="step-item-large step-item-large-first">
-                <i class="fas fa-shopping-cart step-icon"></i>
-              </div>
+            <div class="step-item-large step-item-large-first">
+              <i class="fas fa-shopping-cart step-icon"></i>
+            </div>
 
-              <!-- Círculo pequeño -->
-              <div class="step-item-small">
-                <i class="fas fa-chevron-right step-icon"></i>
-              </div>
+            <div class="step-item-small hovered" @click="status == 'In shopping' ? showConfirm('In delivery', 'En entrega'): null">
+              <span>-</span>
+              <i class="fas fa-chevron-right step-icon"></i>
+            </div>
 
-              <!-- Segundo círculo grande -->
-              <div class="step-item-large">
-                <i class="fas fa-walking step-icon"></i>
-              </div>
+            <div class="step-item-large" :class="{'step-item-large-first': status == 'In delivery'}">
+              <i class="fas fa-walking step-icon"></i>
+            </div>
 
-              <!-- Círculo pequeño -->
-              <div class="step-item-small">
-                <i class="fas fa-chevron-right step-icon"></i>
-              </div>
+            <div class="step-item-small hovered" @click="status == 'In delivery' ? showConfirm('Finished', 'Completado'): null">
+              <span>-</span>
+              <i class="fas fa-chevron-right step-icon"></i>
+            </div>
 
-              <!-- Tercer círculo grande -->
-              <div class="step-item-large">
-                <i class="fas fa-dollar-sign step-icon"></i>
+            <div class="step-item-large">
+              <i class="fas fa-dollar-sign step-icon"></i>
+            </div>
+          </div>
+
+          <div class="w-100">
+            <v-progress-linear
+                :color="white"
+                height="15"
+                rounded
+                :active="true"
+                :striped="true"
+                :model-value="status === 'In shopping' ? 33 : status === 'In delivery' ? 66 : 100"
+            ></v-progress-linear>
+          </div>
+
+          <div class="buttons-container">
+            <div class="icon-button">
+              <div class="input-container">
+                <v-text-field
+                  v-model="cost"
+                  placeholder="Monto"
+                  type="number"
+                  outlined
+                  rounded
+                  :rules="[value => value > 0 || 'El monto debe ser al menos 100']"
+                />
+                <div class="icon-circle-large">
+                  <i class="fas fa-dollar-sign icon"></i>
+                </div>
               </div>
             </div>
 
-            <div class="buttons-container">
-  <div class="icon-button">
-    <div class="icon-circle-large">
-      <i class="fas fa-dollar-sign icon"></i>
-    </div>
-    <span class="button-text">Monto</span>
-  </div>
+            <TakePhoto label="Factura" @photo-taken="(value) => receipt = value"/>
+          </div>
 
-  <div class="icon-button">
-    <div class="icon-circle-large">
-      <i class="fas fa-file-invoice icon"></i>
+        </div>
+      </div>
     </div>
-    <span class="button-text">Factura</span>
+    </div>
   </div>
-</div>
-
-      </v-col>
-    </v-row>
-  </v-container>
+  <MapModal v-if="showMap" :lat="selectedAddress.lat" :lng="selectedAddress.lng" @close="()=> showMap = false"/>
+  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
 </template>
 
-
 <script lang="ts">
-import { defineComponent } from "vue";
+import {defineComponent} from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
-
-type Address = {
-  name: string;
-  active: boolean;
-};
-
-type Product = {
-  name: string;
-  detail: string;
-};
+import Switch from "@/components/Switch.vue";
+import {cancelOrder, getOrderDetails, getStreamAxios, updateOrderState} from "@/modules/order/services/order.service";
+import {
+  Delivery,
+  OrderPreviewEntity,
+  SSEOrderMessage,
+  UpdateStateOrderEntity
+} from "@/modules/order/entity/order.entity";
+import {showErrorToast, showPromiseToast, showWarningToast} from "@/kernel/alerts";
+import {getErrorMessages, getNo_order, removeNo_order} from "@/kernel/utils";
+import MapModal from "@/components/map_modal.vue";
+import router from "@/router";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+import {ResponseEntity} from "@/kernel/error-response";
+import TakePhoto from "@/components/take_photo.vue";
 
 export default defineComponent({
   name: "Order",
   components: {
+    TakePhoto,
+    Switch,
     WaveComponent,
+    MapModal,
+    ConfirmationModal
   },
   data() {
     return {
-      isActive: true, // Estado del botón de encendido
-      remainingTime: 2 * 60 * 60, // Temporizador inicial (en segundos)
-      addresses: [
-        { name: "San Antonio smog check", active: false },
-        { name: "Dirección 2", active: false },
-        { name: "Dirección 3", active: false },
-      ] as Address[],
-      products: [
-        { name: "1 Lt de aceite", detail: "Aceite 123 de litro" },
-        { name: "1 kg de jitomate", detail: "Jitomate maduro" },
-        { name: "1 kg de arroz", detail: "Arroz" },
-        { name: "3 cebollas", detail: "Cebollas moradas" },
-        { name: "3 paquetes de galletas Marías", detail: "Galletas" },
-      ] as Product[],
-      status: "Proceso de compra" as
-        | "Proceso de compra"
-        | "Proceso de entrega"
-        | "Favor cancelado",
+      statusToChange: '',
+      newStatus: '',
+      cost: 0,
+      receipt: '',
+      showConfirmation: false,
+      nothingToShow: false,
+      remainingTime: 3600,
+      order: null as OrderPreviewEntity | null,
+      status: "In shopping",
+      showMap: false,
+      selectedAddress: { lat: 0, lng: 0, name: '' } as Delivery,
+      loading: true
     };
   },
+
   computed: {
     formattedTime(): string {
       const hours = Math.floor(this.remainingTime / 3600);
       const minutes = Math.floor((this.remainingTime % 3600) / 60);
       const seconds = this.remainingTime % 60;
       return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-        2,
-        "0"
+          2,
+          "0"
       )}:${String(seconds).padStart(2, "0")}`;
-    },
-    statusText(): string {
-      return this.status;
     },
     statusColor(): string {
       switch (this.status) {
-        case "Proceso de compra":
+        case "In shopping":
           return "#FFA500";
-        case "Proceso de entrega":
+        case "In delivery":
           return "#B1C7D6";
-        case "Favor cancelado":
+        case "Canceled":
           return "#FF4E4E";
         default:
           return "#B1C7D6";
       }
     },
+    statusText(): string {
+      switch (this.status) {
+        case "In shopping":
+          return "En Compras";
+        case "In delivery":
+          return "En Entrega";
+        case "Canceled":
+          return "Cancelado";
+        default:
+          return "Completado";
+      }
+    }
   },
   methods: {
-    toggleStatus() {
-      this.isActive = !this.isActive;
-    },
-    toggleAddress(index: number) {
-      this.addresses[index].active = !this.addresses[index].active;
-    },
-    cancelOrder() {
-      if (this.status === "Proceso de compra") {
-        this.status = "Favor cancelado";
+
+    async connectToSSE() {
+      try {
+        const no_order = await getNo_order()
+        if (!no_order) {
+          this.nothingToShow = true;
+          return;
+        }
+        await getStreamAxios(no_order, this.updateStatus);
+      } catch (connectionError) {
+        console.log("Error de conexión:", connectionError);
       }
     },
+
+    async updateStatus(response: SSEOrderMessage){
+      console.log(response);
+      this.status = response.data.status
+      this.remainingTime = Math.max(0, 7200 - Math.floor((Date.now() - new Date(response.data.order_created_at).getTime()) / 1000));
+      if (this.status == 'Finished' || this.status == 'Canceled'){
+        this.loading = false;
+        await removeNo_order()
+        await router.push({name: "map"});
+      }
+    },
+
+    async getOrder(){
+      this.loading = true;
+      const no_order = await getNo_order()
+      if (!no_order) {
+        this.nothingToShow = true;
+        return;
+      }
+      const resp = await getOrderDetails(no_order);
+      console.log(resp);
+      if (resp.error){
+        showErrorToast(getErrorMessages(resp.message));
+      } else {
+        this.order = resp.data as OrderPreviewEntity;
+        if (!this.order?.deliveryPoints){
+          return;
+        }
+        for (let i = this.order?.deliveryPoints.length || 0; i < 3; i++){
+          this.order?.deliveryPoints.push({name: '', lat: 0, lng: 0, isClosed: true});
+        }
+      }
+      this.loading = false;
+    },
+
+    showConfirm(new_status: string, newStatusText: string){
+      if (new_status == 'Finished'){
+        if (this.cost < 1) return showWarningToast('El monto debe ser mayor a 0');
+        if (!this.receipt) return showWarningToast('Debes subir una foto de la factura');
+        if (this.receipt.includes('data:image/png;base64,')){
+          this.receipt = this.receipt.replace('data:image/png;base64,', '');
+        }
+      }
+      this.statusToChange = newStatusText;
+      this.newStatus = new_status;
+      this.showConfirmation = true;
+    },
+
+    async changeStatus(new_status: string){
+      this.showConfirmation = false;
+      const payload = {
+        newStatus: new_status,
+        no_order: await getNo_order()
+      } as UpdateStateOrderEntity
+
+      if (new_status == 'Canceled'){
+        let resp = {} as ResponseEntity;
+        const promise = new Promise(async (resolve, reject) => {
+          resp = await cancelOrder(payload);
+          if (resp.error){
+            reject(resp);
+          } else {
+            resolve(resp);
+          }
+        });
+
+        try {
+          await showPromiseToast(promise,
+              {
+                pending: "Cancelando orden...",
+                success: "Orden cancelada con éxito",
+                error: "Error al actualizar la orden"
+              }
+          )
+        } catch (e){}
+        if (resp.error) {
+          showErrorToast(getErrorMessages(resp.message));
+        }
+        return
+      }
+
+      if (new_status == 'Finished'){
+        payload.cost = this.cost;
+        payload.receipt = this.receipt;
+      }
+
+      let resp = {} as ResponseEntity;
+      const promise = new Promise(async (resolve, reject) => {
+        resp = await updateOrderState(payload);
+        if (resp.error){
+          reject(resp);
+        } else {
+          resolve(resp);
+        }
+      });
+      try {
+        await showPromiseToast(promise,
+            {
+              pending: "Actualizando estado de la orden...",
+              success: "Orden actualizada con éxito",
+              error: "Error al actualizar la orden"
+            }
+        )
+      } catch (e){}
+      if (resp.error) {
+        showErrorToast(getErrorMessages(resp.message));
+      }else {
+        this.showConfirmation = false;
+      }
+
+    },
+
     startCountdown() {
       if (this.remainingTime > 0) {
         setInterval(() => {
@@ -256,19 +398,23 @@ export default defineComponent({
         }, 1000);
       }
     },
-    openProductModal(product: Product) {
-      console.log("Abriendo modal para:", product);
-    },
+
+    showAddress(address: Delivery) {
+      this.selectedAddress = {lat: address.lat, lng: address.lng, name: address.name} as Delivery
+      console.log(this.selectedAddress);
+      this.showMap = true;
+    }
   },
   mounted() {
     this.startCountdown();
+    this.getOrder();
+    this.connectToSSE();
   },
+
 });
 </script>
 
-
 <style scoped>
-/* Contenedor principal */
 .back-container {
   width: 100%;
   overflow: hidden;
@@ -278,66 +424,48 @@ export default defineComponent({
   z-index: -1;
 }
 
-.order-container {
-  height: 100vh;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  background-color: #CBDAD5;
+.container-detail {
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
 
-/* Header con título y botón de estado */
-.title-container {
+.card-header {
   display: flex;
   align-items: center;
-  background-color: #566981; /* Fondo azul del encabezado */
-  padding: 1rem;
+  background-color: #566981;
+  padding: 1.5rem;
   border-radius: 10px;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-style {
+  color: white;
+  padding: 8px 16px;
+  border-radius: 32px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .bell-icon {
   color: #ffffff;
-  font-size: 20px; /* Tamaño del ícono */
-  font-weight: bold; /* Hace que el texto "Orden" sea audaz */
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Espacio entre el ícono y el texto */
-}
-
-.titlePrincipal {
-  font-size: 20px; /* Asegúrate de que el tamaño del texto sea consistente */
+  font-size: 20px;
   font-weight: bold;
-  color: #ffffff;
   display: flex;
   align-items: center;
-}
-
-
-.status-container {
-  display: flex;
-  align-items: center;
-}
-
-.status-button {
-  display: flex;
-  align-items: center;
-  background-color: #89a7b1;
-  border: none;
-  border-radius: 50px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
-}
-
-.status-button.inactive {
-  background-color: #f70b0b;
+  gap: 8px;
 }
 
 .icon-circle {
@@ -350,38 +478,24 @@ export default defineComponent({
   margin-right: 8px;
 }
 
-.power-icon {
-  color: #0066cc;
-  font-size: 18px;
-}
-
-.power-icon-inactive {
-  color: #f70b0b;
-  font-size: 18px;
-}
-
-.status-text {
-  color: white;
-  margin-left: 8px;
-}
-
-/* Contenedor de detalles del pedido */
 .details-container {
-  background-color: #FFFFFF;
-  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
   border-radius: 10px;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .details-title {
   color: #4A4A4A;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
-}
-
-/* Columna Izquierda (Perfil e Información del Usuario) */
-.left-column {
-  text-align: left;
 }
 
 .profile-avatar img {
@@ -416,23 +530,23 @@ export default defineComponent({
 /* Step Progress de Direcciones */
 .direction-buttons {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   margin-top: 1.5rem;
+  width: 100%;
 }
 
 .chat-container {
   display: flex;
   align-items: center;
-  background-color: white; /* Fondo blanco */
-  border: 2px solid #b1c7d6; /* Borde para diferenciar del fondo */
+  background-color: white;
+  border: 2px solid #b1c7d6;
   border-radius: 50px;
   padding: 8px 16px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  position: relative; /* Necesario para el efecto sobresaliente */
 }
 
 .line-connector {
@@ -475,25 +589,6 @@ export default defineComponent({
   margin-top: 1rem;
 }
 
-/* Columna del Medio */
-.center-column {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 2rem;
-}
-
-.chat-button {
-  display: flex;
-  align-items: center;
-  background-color: #E1E8F0;
-  color: #4A4A4A;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-}
-
 .chat-icon {
   color: #0066cc;
   font-size: 18px;
@@ -518,62 +613,6 @@ export default defineComponent({
   margin-top: 1rem;
 }
 
-/* Columna Derecha */
-.right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.status-bar {
-  background-color: #f9a825; /* Color de fondo naranja claro */
-  color: #ffffff; /* Color de texto blanco */
-  border-radius: 20px; /* Bordes redondeados */
-  padding: 6px 16px; /* Espaciado más pequeño */
-  font-size: 14px; /* Tamaño de fuente más pequeño */
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: none; /* Sin sombra */
-  width: 350px;
-  border: none;
-  margin-bottom: 20px; /* Espaciado entre el botón y la tabla */
-
-}
-
-.cancel-button {
-  background-color: #d32f2f; /* Color de fondo rojo */
-  color: #ffffff; /* Color de texto blanco */
-  border-radius: 20px; /* Bordes redondeados */
-  padding: 6px 16px; /* Espaciado más pequeño */
-  font-size: 14px; /* Tamaño de fuente más pequeño */
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: none; /* Sin sombra */
-  width: 200px;
-  border: none;
-  margin-top: 10px; /* Espaciado entre el botón de arriba */
-  margin-bottom: 20px; /* Separación entre el botón "Cancelar" y la tabla */
-  margin: 0 auto 20px auto; /* Centrado horizontal */
-
-
-}
-
-
-/* Título de la sección de productos */
-.product-section-title {
-  background-color: #566981;
-  color: white;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 8px 8px 0 0;
-  text-align: left;
-  font-size: 1.2rem;
-  margin-top: 8px;
-  width: 85%;
-}
-
 /* Contenedor principal de la lista de productos */
 .product-list {
   max-height: 350px;
@@ -591,24 +630,19 @@ export default defineComponent({
   padding: 12px;
   border-bottom: 1px solid #ccc;
   background-color: white;
+  opacity: 0.8;
+  backdrop-filter: blur(10px);
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin: 8px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Estilos para las columnas */
 .product-number {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #34344e;
-  text-align: center;
-}
-
-.product-info {
-  display: flex;
-  flex-direction: column;
-  color: #34344e;
-  padding-left: 8px;
+  text-align: left;
 }
 
 .product-name {
@@ -639,9 +673,11 @@ export default defineComponent({
 .step-progress {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin-top: 16px;
   padding: 10px;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 /* Estilo para los círculos grandes */
@@ -669,10 +705,22 @@ export default defineComponent({
 
 /* Estilo para los círculos pequeños */
 .step-item-small {
-  width: 40px;
+  height: 40px;
+  width: 60px;
+  background-color: #3A415A; /* Color base para círculos pequeños */
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #d2e1e6;
+}
+
+/* Estilo para los círculos pequeños */
+.step-item-small {
   height: 40px;
   background-color: #3A415A; /* Color base para círculos pequeños */
-  border-radius: 50%;
+  border-radius: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -687,42 +735,95 @@ export default defineComponent({
 
 .buttons-container {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-top: 16px;
+  padding: 10px;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .icon-button {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  background-color: white;
-  padding: 10px 15px;
-  border-radius: 25px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.icon-button:hover {
+  transform: scale(1.1);
 }
 
 .icon-circle-large {
-  width: 40px;
-  height: 40px;
-  background-color: #e6eef5;
+  width: 56px;
+  height: 56px;
+  background-color: #566981;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
-  border: 2px solid #b7cadb;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #d2e1e6;
 }
 
 .icon-circle-large .icon {
-  color: #4a8ada; /* Color del icono */
-  font-size: 1.2rem;
+  color: #ffffff;
+  font-size: 1.5rem; /* Ajusta el tamaño del icono */
 }
 
 .button-text {
+  margin-top: 8px;
   font-size: 1rem;
-  color: #4a4a4a;
-  font-weight: bold;
+  color: #4A4A4A;
 }
 
+.no-orders-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.no-orders-image {
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.no-orders-text {
+  font-size: 1.5rem;
+  color: #4A4A4A;
+}
+
+.hovered:hover {
+  transform: scale(1.2);
+  transition: all 0.3s;
+  cursor: pointer;
+  box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hovered {
+  transition: all 0.3s;
+  transform: scale(1);
+  cursor: pointer;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-container input {
+  flex: 1;
+  padding-right: 40px; /* Espacio para el icono */
+}
+
+.input-container .icon-circle-large {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
 </style>

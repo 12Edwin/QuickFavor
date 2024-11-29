@@ -28,6 +28,7 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
+  name: "ConfirmationModal",
   props: {
     isVisible: Boolean,
     isCompleted: Boolean,
@@ -75,7 +76,7 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 10000;
 }
 
 .m_modal-wrapper {

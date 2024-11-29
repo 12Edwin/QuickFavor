@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mobile_favor/config/alerts.dart';
+import 'package:mobile_favor/config/error_types.dart';
 import 'package:mobile_favor/kernel/widget/photo_picker.dart';
+import 'package:mobile_favor/modules/auth/service/auth_service.dart';
+import '../../kernel/widget/location-picker.dart';
+import 'entity/auth.entity.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -10,18 +17,207 @@ class Register extends StatefulWidget {
 }
 
 class _Register extends State<Register> {
+  final _nameKey = GlobalKey<FormState>();
+  final _surnameKey = GlobalKey<FormState>();
+  final _lastnameKey = GlobalKey<FormState>();
+  final _curpKey = GlobalKey<FormState>();
+  final _sexKey = GlobalKey<FormState>();
+  final _brandKey = GlobalKey<FormState>();
+  final _modelKey = GlobalKey<FormState>();
+  final _plateKey = GlobalKey<FormState>();
+  final _descriptionKey = GlobalKey<FormState>();
+  final _phoneKey = GlobalKey<FormState>();
+  final _emailKey = GlobalKey<FormState>();
+  final _passwordKey = GlobalKey<FormState>();
+  final _repeatPasswordKey = GlobalKey<FormState>();
   int _currentStep = 0;
   int _currentVehicleType = 0;
   String _userType = 'Cliente';
-  Color _currentColor = Colors.blue;
+  Color _currentColor = Colors.transparent;
   final List<Map<String, dynamic>> _vehicles = [
-    {'icon': Icons.directions_car, 'name': 'car'},
-    {'icon': Icons.motorcycle, 'name': 'motorcycle'},
-    {'icon': Icons.pedal_bike, 'name': 'bike'},
-    {'icon': Icons.electric_scooter, 'name': 'scooter'},
-    {'icon': Icons.directions_walk, 'name': 'walk'},
-    {'icon': Icons.more_horiz, 'name': 'other'},
+    {'icon': Icons.directions_car, 'name': 'car', 'id': 'Carro'},
+    {'icon': Icons.motorcycle, 'name': 'motorcycle', 'id': 'Motocicleta'},
+    {'icon': Icons.pedal_bike, 'name': 'bike', 'id': 'Bicicleta'},
+    {'icon': Icons.electric_scooter, 'name': 'scooter', 'id': 'Scooter'},
+    {'icon': Icons.directions_walk, 'name': 'walk', 'id': 'Caminando'},
+    {'icon': Icons.more_horiz, 'name': 'other', 'id': 'Otro'},
   ];
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _surnameController = TextEditingController();
+  final TextEditingController _lastnameController = TextEditingController();
+  final TextEditingController _curpController = TextEditingController();
+  final TextEditingController _sexController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _brandController = TextEditingController();
+  final TextEditingController _modelController = TextEditingController();
+  final TextEditingController _plateController = TextEditingController();
+  final TextEditingController _colorController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _licensePhotoController = TextEditingController();
+  final TextEditingController _facePhotoController = TextEditingController();
+  final TextEditingController _inePhotoController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repeatPasswordController = TextEditingController();
+  final TextEditingController _vehicleTypeController = TextEditingController();
+  final TextEditingController _latitudeController = TextEditingController();
+  final TextEditingController _longitudeController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  bool _isLoading = false;
+  Map<String, bool> validationForm = {};
+
+  @override
+  initState() {
+    super.initState();
+    _vehicleTypeController.text = _vehicles[0]['id'];
+    _sexController.text = 'Masculino';
+    validationForm['lastname'] = true;
+    validationForm['description'] = true;
+  }
+
+  bool _validateFields() {
+    if (_nameController.text.isEmpty ||
+        _surnameController.text.isEmpty ||
+        _curpController.text.isEmpty ||
+        _sexController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _facePhotoController.text.isEmpty ||
+        _inePhotoController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _repeatPasswordController.text.isEmpty ||
+        ([1,2].contains(_currentVehicleType) && _licensePhotoController.text.isEmpty) ||
+        !(validationForm['name'] ?? false) ||
+        !(validationForm['surname'] ?? false) ||
+        !(validationForm['lastname'] ?? false) ||
+        !(validationForm['curp'] ?? false) ||
+        !(validationForm['brand'] ?? false) ||
+        !(validationForm['model'] ?? false) ||
+        !(validationForm['plate'] ?? false) ||
+        !(validationForm['color'] ?? false) ||
+        !(validationForm['description'] ?? false) ||
+        !(validationForm['phone'] ?? false) ||
+        !(validationForm['email'] ?? false) ||
+        !(validationForm['password'] ?? false) ||
+        !(validationForm['repeatPassword'] ?? false)) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _register() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (_userType == 'Cliente') {
+      await _registerCustomer();
+    } else {
+      await _registerCourier();
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _registerCourier() async {
+    final courier = RegisterCourierEntity(
+        name: _nameController.text,
+        surname: _surnameController.text,
+        lastname: _lastnameController.text.isNotEmpty ? _lastnameController.text : null,
+        CURP: _curpController.text,
+        sex: _sexController.text,
+        phone: _phoneController.text,
+        brand: _brandController.text.isNotEmpty ? _brandController.text : null,
+        model: _modelController.text.isNotEmpty ? _modelController.text : null,
+        license_plate: _plateController.text.isNotEmpty ? _plateController.text : null,
+        color: _colorController.text.isNotEmpty ? _colorController.text : null,
+        plate_photo: _licensePhotoController.text.isNotEmpty ? _licensePhotoController.text : null,
+        face_photo: _facePhotoController.text,
+        INE_photo: _inePhotoController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        vehicle_type: _vehicleTypeController.text,
+      );
+    if (!_validateFields()) {
+      print(courier.toJson());
+      print(validationForm);
+      showErrorAlert(context, 'Llena los campos correctamente');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+    final AuthService authService = AuthService(context);
+    final response = await authService.registerCourier(courier);
+    print(response.message);
+    if (response.error){
+      showErrorAlert(context, getErrorMessages(response.message));
+    }else{
+      showSuccessAlert(context, 'Registro exitoso, Verifica tu correo electrónico');
+      Future.delayed(const Duration(seconds: 3));
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  bool _validateCustomerFields() {
+    if (_nameController.text.isEmpty ||
+        _surnameController.text.isEmpty ||
+        _curpController.text.isEmpty ||
+        _sexController.text.isEmpty ||
+        _addressController.text.isEmpty ||
+        _latitudeController.text.isEmpty ||
+        _longitudeController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _repeatPasswordController.text.isEmpty ||
+        !(validationForm['name'] ?? false) ||
+        !(validationForm['surname'] ?? false) ||
+        !(validationForm['lastname'] ?? false) ||
+        !(validationForm['curp'] ?? false) ||
+        !(validationForm['phone'] ?? false) ||
+        !(validationForm['email'] ?? false) ||
+        !(validationForm['password'] ?? false) ||
+        !(validationForm['repeatPassword'] ?? false)) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _registerCustomer() async {
+    final customer = RegisterCustomerEntity(
+        name: _nameController.text,
+        surname: _surnameController.text,
+        lastname: _lastnameController.text.isNotEmpty ? _lastnameController.text : null,
+        CURP: _curpController.text,
+        sex: _sexController.text,
+        direction: _addressController.text,
+        lat: _latitudeController.text.isNotEmpty ? double.parse(_latitudeController.text) : 0,
+        lng: _longitudeController.text.isNotEmpty ? double.parse(_longitudeController.text) : 0,
+        phone: _phoneController.text,
+        email: _emailController.text,
+        password: _passwordController.text);
+    if (!_validateCustomerFields()) {
+      print(validationForm);
+      showErrorAlert(context, 'Llena los campos correctamente');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+    print(customer.toJson());
+    final AuthService authService = AuthService(context);
+    final response = await authService.registerCustomer(customer);
+    print(response.message);
+    if (response.error) {
+      showErrorAlert(context, getErrorMessages(response.message));
+    } else {
+      showSuccessAlert(context, 'Registro exitoso. Verifica tu correo electrónico');
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +305,8 @@ class _Register extends State<Register> {
               onColorChanged: (Color color) {
                 setState(() {
                   _currentColor = color;
+                  validationForm['color'] = true;
+                  _colorController.text = '${color.red},${color.green},${color.blue}';
                 });
               },
             ),
@@ -218,29 +416,130 @@ class _Register extends State<Register> {
     }
   }
 
+  String? validateName(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    if(value.length < 5){
+      validationForm[id] = false;
+      return 'Campo muy corto';
+    }
+    if(value.length > 80){
+      validationForm[id] = false;
+      return 'Campo muy largo';
+    }
+    final pattern = RegExp(r"^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+$");
+    if (!pattern.hasMatch(value)) {
+      validationForm[id] = false;
+      return 'Campo no válido';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
+  String? validateOptionalName(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = true;
+      return null;
+    }
+    if(value.length < 3){
+      validationForm[id] = false;
+      return 'Campo muy corto';
+    }
+    if(value.length > 80){
+      validationForm[id] = false;
+      return 'Campo muy largo';
+    }
+    final pattern = RegExp(r"^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+$");
+    if (!pattern.hasMatch(value)) {
+      validationForm[id] = false;
+      return 'Campo no válido';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
   Widget _buildForm1() {
     return Column(
       children: [
-        _buildTextField(icon: Icons.person, hint: 'Nombre', type: 'text'),
-        _buildTextField(
-            icon: Icons.person, hint: 'Apellido paterno', type: 'text'),
-        _buildTextField(
-            icon: Icons.person, hint: 'Apellido materno', type: 'text'),
-        _buildTextField(icon: Icons.credit_card, hint: 'CURP', type: 'text'),
+        _buildTextField(id: 'name', icon: Icons.person, hint: 'Nombre', type: 'text', formKey: _nameKey, validator: validateName),
+        _buildTextField(id: 'surname', icon: Icons.person, hint: 'Apellido paterno', type: 'text', formKey: _surnameKey, validator: validateName),
+        _buildTextField(id: 'lastname', icon: Icons.person, hint: 'Apellido materno', type: 'text', formKey: _lastnameKey, validator: validateOptionalName),
+        _buildCurpField(),
         _buildDropdown(
             icon: Icons.wc,
             hint: 'Sexo',
-            items: ['Masculino', 'Femenino', 'Otro']),
+            items: ['Masculino', 'Femenino'],
+            controller: _sexController,
+            validator: validateSex,
+            formKey: _sexKey
+        ),
+
       ],
     );
+  }
+
+  String? validatePhone(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    final pattern = RegExp(r'^\d{10}$');
+    if (!pattern.hasMatch(value)) {
+      validationForm[id] = false;
+      return 'Campo no válido';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
+  String? validatePassword(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    if (value.length < 6) {
+      validationForm[id] = false;
+      return 'Campo no válido';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
+  String? validateRepeatedPassword(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    if (value != _passwordController.text) {
+      validationForm[id] = false;
+      return 'Las contraseñas no coinciden';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
+  String? validateEmail(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    final pattern = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!pattern.hasMatch(value)) {
+      validationForm[id] = false;
+      return 'Campo no válido';
+    }
+    validationForm[id] = true;
+    return null;
   }
 
   Widget _buildForm2() {
     return Column(
       children: [
         if (_userType == 'Repartidor')
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -248,30 +547,59 @@ class _Register extends State<Register> {
                     label: 'Rostro',
                     textDialog: 'Foto de su rostro',
                     widthImg: 200,
+                    controller: _facePhotoController,
                     heightImg: 200),
                 PhotoPicker(
                     label: 'INE',
                     textDialog: 'Foto de su INE',
                     widthImg: 856,
+                    controller: _inePhotoController,
                     heightImg: 540)
               ],
             ),
           )
         else
           _buildMapField(),
-        _buildTextField(icon: Icons.phone, hint: 'Teléfono', type: 'number'),
-        _buildTextField(icon: Icons.mail, hint: 'Correo', type: 'email'),
-        _buildTextField(icon: Icons.lock, hint: 'Contraseña', type: 'password'),
+        _buildTextField(id: 'phone', icon: Icons.phone, hint: 'Teléfono', type: 'number', formKey: _phoneKey, validator: validatePhone),
+        _buildTextField(id: 'email', icon: Icons.mail, hint: 'Correo', type: 'email', formKey: _emailKey, validator: validateEmail),
+        _buildTextField(id: 'password', icon: Icons.lock, hint: 'Contraseña', type: 'password', formKey: _passwordKey, validator: validatePassword),
         _buildTextField(
-            icon: Icons.lock, hint: 'Repetir contraseña', type: 'password'),
+            id:'repeatPassword', icon: Icons.lock, hint: 'Repetir contraseña', type: 'password', formKey: _repeatPasswordKey, validator: validateRepeatedPassword),
       ],
     );
+  }
+
+  String? validateCar(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    if (value.length < 3) {
+      validationForm[id] = false;
+      return 'El tamaño mínimo es de 3 caracteres';
+    }
+    validationForm[id] = true;
+    return null;
+  }
+
+  String? validateLicensePlate(String? value, String id) {
+    if (value == null || value.isEmpty) {
+      validationForm[id] = false;
+      return 'Campo obligatorio';
+    }
+    final pattern = RegExp(r'^[A-Z0-9]+-[A-Z0-9]+$');
+    if (!pattern.hasMatch(value)) {
+      validationForm[id] = false;
+      return 'Placas no válidas';
+    }
+    validationForm[id] = true;
+    return null;
   }
 
   Widget _buildForm_car() {
     return Column(
       children: [
-        _buildVehicleOptions(),
+        _buildVehicleOptions(_vehicleTypeController),
         const SizedBox(height: 16),
         Divider(
           color: Theme.of(context).secondaryHeaderColor,
@@ -282,20 +610,20 @@ class _Register extends State<Register> {
         const SizedBox(height: 16),
         (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name']))
             ? _buildTextField(
-                icon: Icons.car_crash, hint: 'Marca', type: 'text')
+                id: 'brand', icon: Icons.car_crash, hint: 'Marca', type: 'text', formKey: _brandKey, validator: validateCar)
             : const SizedBox.shrink(),
         (['car', 'motorcycle', 'bike', 'scooter']
                 .contains(_vehicles[_currentVehicleType]['name']))
             ? _buildTextField(
-                icon: Icons.description, hint: 'Modelo', type: 'text')
+                id: 'model', icon: Icons.description, hint: 'Modelo', type: 'text', formKey: _modelKey, validator: validateCar)
             : const SizedBox.shrink(),
         (['car', 'motorcycle'].contains(_vehicles[_currentVehicleType]['name']))
             ? _buildTextField(
-                icon: Icons.credit_card, hint: 'Placas', type: 'text')
+                id: 'plate', icon: Icons.credit_card, hint: 'Placas', type: 'text', formKey: _plateKey, validator: validateLicensePlate)
             : const SizedBox.shrink(),
         (['other'].contains(_vehicles[_currentVehicleType]['name']))
             ? _buildTextField(
-                icon: Icons.description, hint: 'Descripción', type: 'text')
+                id: 'description', icon: Icons.description, hint: 'Descripción', type: 'text', formKey: _descriptionKey, validator: validateCar)
             : const SizedBox.shrink(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,10 +637,11 @@ class _Register extends State<Register> {
               ),
             if (['car', 'motorcycle']
                 .contains(_vehicles[_currentVehicleType]['name']))
-              const PhotoPicker(
+              PhotoPicker(
                 label: 'Licencia',
                 textDialog: 'Liciencia de conducir',
                 widthImg: 856,
+                controller: _licensePhotoController,
                 heightImg: 540,
               ),
           ],
@@ -331,9 +660,21 @@ class _Register extends State<Register> {
       padding: const EdgeInsets.only(bottom: 10),
       child: TextFormField(
         readOnly: true,
-        onTap: () {
-          print("Abrir mapa");
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LocationPicker(
+                onLocationPicked: (LatLng location, String address) {
+                  _latitudeController.text = location.latitude.toString();
+                  _longitudeController.text = location.longitude.toString();
+                  _addressController.text = address;
+                },
+              ),
+            ),
+          );
         },
+        controller: _addressController,
         decoration: InputDecoration(
           prefixIcon:
               Icon(Icons.map, color: Theme.of(context).secondaryHeaderColor),
@@ -354,11 +695,20 @@ class _Register extends State<Register> {
     );
   }
 
-  Widget _buildTextField(
-      {required IconData icon, required String hint, required String type}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
+  Widget _buildTextField({
+  required String id,
+  required IconData icon,
+  required String hint,
+  required String type,
+  required GlobalKey<FormState> formKey,
+  required String? Function(String?, String) validator,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Form(
+      key: formKey,
+      child: TextFormField(
+        controller: _getController(hint),
         keyboardType: type == 'email'
             ? TextInputType.emailAddress
             : type == 'number'
@@ -387,44 +737,107 @@ class _Register extends State<Register> {
           contentPadding:
               const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
+        validator: (String? value) => validator(value, id),
+        onChanged: (value) {
+          formKey.currentState?.validate();
+        },
       ),
-    );
+    ),
+  );
+}
+
+  TextEditingController _getController(String hint) {
+    switch (hint) {
+      case 'Nombre':
+        return _nameController;
+      case 'Apellido paterno':
+        return _surnameController;
+      case 'Apellido materno':
+        return _lastnameController;
+      case 'CURP':
+        return _curpController;
+      case 'Sexo':
+        return _sexController;
+      case 'Teléfono':
+        return _phoneController;
+      case 'Correo':
+        return _emailController;
+      case 'Contraseña':
+        return _passwordController;
+      case 'Repetir contraseña':
+        return _repeatPasswordController;
+      case 'Marca':
+        return _brandController;
+      case 'Modelo':
+        return _modelController;
+      case 'Placas':
+        return _plateController;
+      case 'Color':
+        return _colorController;
+      case 'Descripción':
+        return _descriptionController;
+      default:
+        return TextEditingController();
+    }
   }
 
-  Widget _buildDropdown(
-      {required IconData icon,
-      required String hint,
-      required List<String> items}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-            labelStyle:
-                TextStyle(color: Theme.of(context).secondaryHeaderColor),
+  String? validateSex(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Campo obligatorio';
+    }
+    return null;
+  }
+
+  Widget _buildDropdown({
+  required IconData icon,
+  required String hint,
+  required List<String> items,
+  required TextEditingController controller,
+  required String? Function(String?) validator,
+  required GlobalKey<FormState> formKey,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Focus(
+      onFocusChange: (hasFocus) {
+        formKey.currentState?.validate();
+      },
+      child: Form(
+        key: _sexKey,
+        child: DropdownButtonFormField<String>(
+          value: items.contains(controller.text) ? controller.text : 'Masculino',
+          decoration: InputDecoration(
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(32),
               borderSide: BorderSide.none,
-            )),
-        hint: Row(
-          children: [
-            Icon(icon, color: Theme.of(context).secondaryHeaderColor),
-            const SizedBox(width: 10),
-            Text(hint),
-          ],
+            ),
+          ),
+          hint: Row(
+            children: [
+              Icon(icon, color: Theme.of(context).secondaryHeaderColor),
+              const SizedBox(width: 10),
+              Text(hint),
+            ],
+          ),
+          isExpanded: true,
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (value) {
+            controller.text = value!;
+          },
+          validator: validator,
         ),
-        isExpanded: true,
-        items: items.map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (value) {},
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildNavigationDots() {
     return Row(
@@ -444,99 +857,169 @@ class _Register extends State<Register> {
     );
   }
 
-  Widget _buildVehicleOptions() {
-    return _buildVehicleTypes(_vehicles);
+  Widget _buildVehicleOptions(TextEditingController controller) {
+    return _buildVehicleTypes(_vehicles, controller);
   }
 
-  Widget _buildVehicleTypes(List<Map<String, dynamic>> types) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        types.length,
-        (index) => GestureDetector(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 5),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 15,
-                  offset: Offset(0, 5),
-                ),
-              ],
-              color: _currentVehicleType == index
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey,
-            ),
-            child: Icon(types[index]['icon'], color: Colors.white),
+  Widget _buildVehicleTypes(List<Map<String, dynamic>> types, TextEditingController controller) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: List.generate(
+      types.length,
+      (index) => GestureDetector(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _currentVehicleType == index ? Colors.indigo : Colors.grey,
           ),
-          onTap: () {
-            setState(() {
-              _currentVehicleType = index;
-            });
+          child: Icon(types[index]['icon'], color: Colors.white),
+        ),
+        onTap: () {
+          setState(() {
+            _currentVehicleType = index;
+            controller.text = types[index]['id'];
+            _modelController.clear();
+            _brandController.clear();
+            _plateController.clear();
+            _descriptionController.clear();
+            _colorController.clear();
+            _licensePhotoController.clear();
+            _currentColor = Colors.transparent;
+          });
+          switch (index){
+          case 0 || 1:
+            validationForm['model'] = false;
+            validationForm['brand'] = false;
+            validationForm['plate'] = false;
+            validationForm['color'] = false;
+            validationForm['plate_photo'] = false;
+            validationForm['description'] = true;
+            break;
+          case 2 || 3:
+            validationForm['model'] = false;
+            validationForm['brand'] = true;
+            validationForm['plate'] = true;
+            validationForm['color'] = false;
+            validationForm['plate_photo'] = true;
+            validationForm['description'] = true;
+            break;
+          case 4:
+            validationForm['model'] = true;
+            validationForm['brand'] = true;
+            validationForm['plate'] = true;
+            validationForm['color'] = true;
+            validationForm['plate_photo'] = true;
+            validationForm['description'] = true;
+            break;
+          case 5:
+            validationForm['model'] = true;
+            validationForm['brand'] = true;
+            validationForm['plate'] = true;
+            validationForm['color'] = true;
+            validationForm['plate_photo'] = true;
+            validationForm['description'] = false;
+            break;
+          }
+        },
+      ),
+    ),
+  );
+}
+
+Widget _buildCurpField() {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+      child: Form(
+        key: _curpKey,
+        child: TextFormField(
+          controller: _curpController,
+          inputFormatters: [UpperCaseTextFormatter()],
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.credit_card, color: Theme.of(context).secondaryHeaderColor),
+            labelText: 'CURP',
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          ),
+          onChanged: (value) {
+            _curpKey.currentState?.validate();
+          },
+          validator: (String? value) {
+            if (value == null || value.isEmpty) {
+              validationForm['curp'] = false;
+              return 'CURP obligatoria';
+            }
+            final pattern = RegExp(r'^[A-Z]{4}\d{6}[A-Z]{6}\d{2}$');
+            if (!pattern.hasMatch(value)) {
+              validationForm['curp'] = false;
+              return 'CURP no válido';
+            }
+            validationForm['curp'] = true;
+            return null;
           },
         ),
       ),
-    );
-  }
+  );
+}
 
   Widget _buildNextButton() {
-    return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: _currentStep > 0
-                ? ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).secondaryHeaderColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                    ),
-                    child: const Text('Anterior'),
-                    onPressed: () {
-                      setState(() {
-                        if (_currentStep > 0) _currentStep--;
-                      });
-                    },
-                  )
-                : const SizedBox.shrink(),
-          ),
-          Expanded(
-            child: (_userType == 'Cliente' && _currentStep == 1) ||
-                    (_userType == 'Repartidor' && _currentStep == 2)
-                ? ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                    ),
-                    child: const Text('Registrar'),
-                    onPressed: () {},
-                  )
-                : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                    ),
-                    child: const Text('Siguiente'),
-                    onPressed: () {
-                      setState(() {
-                        if (_userType == 'Cliente' && _currentStep < 1)
-                          _currentStep++;
-                        if (_userType == 'Repartidor' && _currentStep < 2)
-                          _currentStep++;
-                      });
-                    },
-                  ),
-          )
-        ]));
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: _currentStep > 0
+              ? ElevatedButton(
+                  onPressed: _isLoading ? null : () {
+                    setState(() {
+                      _currentStep -= 1;
+                    });
+                  },
+                  child: const Text('Anterior'),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Expanded(
+          child: (_userType == 'Cliente' && _currentStep == 1) ||
+                  (_userType == 'Repartidor' && _currentStep == 2)
+              ? ElevatedButton(
+                  onPressed: _isLoading ? null : _register,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text('Registrar'),
+                )
+              : ElevatedButton(
+                  onPressed: _isLoading ? null : () {
+                    setState(() {
+                      _currentStep += 1;
+                    });
+                  },
+                  child: const Text('Siguiente'),
+                ),
+        ),
+      ],
+    ),
+  );
+}
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
   }
 }
