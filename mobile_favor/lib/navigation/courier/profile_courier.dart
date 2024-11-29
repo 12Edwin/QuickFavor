@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_favor/navigation/courier/entity/profile_courier.entity.dart';
 import 'package:mobile_favor/navigation/courier/modal_courier_form.dart';
+import 'package:mobile_favor/navigation/courier/service/profile_courier.service.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +15,34 @@ class ProfileCourier extends StatefulWidget {
 class _ProfileCourierState extends State<ProfileCourier> {
   String email = '';
   String phone = '';
+  ProfileCourierEntity? profileCourier;
+  late ProfileCourierService _profileCourierService;
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    _profileCourierService = ProfileCourierService(context);
+    _loadProfile();
+  }
+
+  void _loadProfile() async {
+    ProfileCourierEntity? profile =
+        await _profileCourierService.getProfileCourier();
+    print(profile);
+    if (profile != null) {
+      setState(() {
+        print("Perfil cargado");
+        profileCourier = profile;
+        phone = profile.phone!;
+        email = profile.email!;
+      });
+    } else {
+      // Manejo de error si no se obtiene el perfil
+      print('No se pudo cargar el perfil');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -80,9 +110,9 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Juan Rodrigo',
-                        style: TextStyle(
+                      Text(
+                        profileCourier?.name ?? 'Nombre',
+                        style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
@@ -218,7 +248,8 @@ class _ProfileCourierState extends State<ProfileCourier> {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () async {
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
                               prefs.remove('token');

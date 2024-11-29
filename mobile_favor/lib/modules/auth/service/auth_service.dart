@@ -17,23 +17,28 @@ class AuthService {
       String? firebaseToken = await FirebaseService.getFirebaseToken();
       print('Token: $firebaseToken');
       credentials.tokenFirebase = firebaseToken;
-      final response = await dio.post('/auth/login', data: credentials.toJson());
+      final response =
+          await dio.post('/auth/login', data: credentials.toJson());
       final data = response.data['data'];
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
       await prefs.setString('no_user', data['user']['no_user']);
+      await prefs.setString('uid', data['user']['uid']);
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('role', data['user']['role']);
       await prefs.setString('name', data['user']['name']);
-      if(data['user']['location'] != null) await prefs.setDouble('lat', data['user']['location']['lat']);
-      if(data['user']['location'] != null) await prefs.setDouble('lng', data['user']['location']['lng']);
+      if (data['user']['location'] != null)
+        await prefs.setDouble('lat', data['user']['location']['lat']);
+      if (data['user']['location'] != null)
+        await prefs.setDouble('lng', data['user']['location']['lng']);
       print(data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
-      ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);
+      ResponseEntity resp =
+          ResponseEntity.fromJson((error as DioError).response!.data);
       if (resp.data != null) {
         return getErrorMessages(resp);
-      }else {
+      } else {
         return resp;
       }
     }
@@ -41,29 +46,34 @@ class AuthService {
 
   Future<ResponseEntity> registerCourier(RegisterCourierEntity courier) async {
     try {
-      final response = await dio.post('/auth/courier-register', data: courier.toJson());
+      final response =
+          await dio.post('/auth/courier-register', data: courier.toJson());
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
-      ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);
+      ResponseEntity resp =
+          ResponseEntity.fromJson((error as DioError).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
-      }else {
+      } else {
         return resp;
       }
     }
   }
 
-  Future<ResponseEntity> registerCustomer(RegisterCustomerEntity customer) async {
+  Future<ResponseEntity> registerCustomer(
+      RegisterCustomerEntity customer) async {
     try {
-      final response = await dio.post('/auth/customer-register', data: customer.toJson());
+      final response =
+          await dio.post('/auth/customer-register', data: customer.toJson());
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
-      ResponseEntity resp = ResponseEntity.fromJson ((error as DioError).response!.data);
+      ResponseEntity resp =
+          ResponseEntity.fromJson((error as DioError).response!.data);
       if (resp.data != null) {
         return getErrorMessages(resp);
-      }else {
+      } else {
         return resp;
       }
     }
