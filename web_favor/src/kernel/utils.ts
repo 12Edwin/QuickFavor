@@ -69,10 +69,9 @@ export const getCurrentLocation = async (): Promise<{ lat: number, lng: number }
 
 export const getNamesByToken = async () => {
     try {
-        const decrypted = decrypt(getToken() || '');
-        const { sub } = jwtDecode(decrypted || '')
-        const { name } = await JSON.parse(sub || '')
-        return name
+        const tokenDecrypted = decrypt(getToken() || '');
+        const decode = jwtDecode(tokenDecrypted || '');
+        return (decode as any).name
     } catch (error) {
         removeToken()
     }

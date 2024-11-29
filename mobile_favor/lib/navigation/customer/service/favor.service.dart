@@ -156,4 +156,21 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
       }
     }
   }
+
+  Future<ResponseEntity> getListCustomerHistory(String customer_id) async {
+    try {
+      final response = await dio.get('/favor/history-customer/$customer_id');
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
+    }
+  }
 }

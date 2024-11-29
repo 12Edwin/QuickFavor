@@ -14,6 +14,10 @@
       <div v-if="loading" class="loader-container">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
       </div>
+      <div v-if="notifications.length === 0 && !loading" class="d-flex align-center flex-column pa-4 mb-3">
+        <img src="@/assets/empty2.png" width="200">
+        <v-card-title class="text-center">No hay notificaciones</v-card-title>
+      </div>
       <v-card v-else v-for="(notification, ind) in paginatedNotifications"
               :key="ind"
               class="notification-card">
@@ -32,13 +36,13 @@
           </div>
         </div>
       </v-card>
-      <v-row v-if="!loading" class="pt-2" justify="space-evenly">
+      <v-row v-if="!loading && notifications.length > 4" class="pt-2" justify="space-evenly">
         <v-btn :disabled="currentPage === 1" @click="prevPage">Anterior</v-btn>
         <v-btn :disabled="currentPage === totalPages" @click="nextPage">Siguiente</v-btn>
       </v-row>
     </v-card>
   </div>
-  <NotificationDetail :is-visible="showDetail" :id_order="current_ord" @onClose="()=> showDetail = false"/>
+  <NotificationDetail :is-visible="showDetail" :id_order="current_ord" @onClose="closeDetails"/>
 </template>
 
 <script lang="ts">
@@ -107,6 +111,11 @@ export default defineComponent({
     showNotificationDetail(ord: string) {
       this.current_ord = ord;
       this.showDetail = true;
+    },
+
+    closeDetails() {
+      this.loadNotifications()
+      this.showDetail = false;
     }
   },
   mounted() {

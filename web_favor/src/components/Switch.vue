@@ -1,14 +1,14 @@
 <template>
   <div class="switch-container">
     <div class="toggle">
-              <input type="checkbox" id="btn" v-model="isEnabled" @change="toggleSwitch" />
+              <input :disabled="isBusy" type="checkbox" id="btn" v-model="isEnabled" @change="toggleSwitch" />
               <label for="btn">
-                <span class="track"></span>
+                <span class="track" :class="{'busy': isBusy}"></span>
                 <span class="thumb">
                   <span class="icon_off"><v-icon icon="fa-solid fa-power-off"/> </span>
                 </span>
                 <span class="label-text" :class="{'on': isEnabled, 'off': !isEnabled}">
-                  {{ isEnabled ? 'Activo' : 'Inactivo' }}
+                  {{isBusy ? 'Pedido activo' : isEnabled ? 'Activo' : 'Inactivo' }}
                 </span>
               </label>
             </div>
@@ -16,15 +16,21 @@
 </template>
 
 <script lang="ts">
-import { getStatusCourier, setStatusCourier } from '@/kernel/utils';
+import {getErrorMessages, getNo_courierByToken, getNo_order, getStatusCourier, setStatusCourier} from '@/kernel/utils';
 import {defineComponent} from 'vue'
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {LocationUpdateEntity} from "@/modules/maps/entity/location.entity";
+import {updateLocation} from "@/modules/maps/services/location.service";
 
 export default defineComponent({
   name: "Switch",
 
   data() {
     return {
-      isEnabled: false
+      thereOrder: false,
+      isEnabled: false,
+      locationInterval: null as any,
+      thereConnection: true
     }
   },
 
@@ -32,22 +38,94 @@ export default defineComponent({
     this.toggleCheckedCourier();
   },
 
+  computed: {
+    isBusy(): boolean {
+      return this.thereOrder && this.isEnabled;
+    }
+  },
+
+  watch: {
+    async isEnabled(val) {
+      if (val) {
+        this.startTracking();
+        this.thereOrder = typeof (await getNo_order()) === 'string';
+        this.$emit('onTrue');
+      }else {
+        this.stopTracking();
+        this.$emit('onFalse');
+      }
+    }
+  },
+
   methods: {
     async toggleCheckedCourier() {
       let status = await getStatusCourier();
       this.isEnabled = (status === 'true');
     },
+
     toggleSwitch(event: Event) {
       this.isEnabled = (event.target as HTMLInputElement).checked;
       if (this.isEnabled) {
         setStatusCourier(true);
-        this.$emit('onTrue');
       }else {
         setStatusCourier(false);
-        this.$emit('onFalse');
+      }
+    },
+
+    startTracking() {
+      if (this.locationInterval) {
+        clearInterval(this.locationInterval);
+        this.locationInterval = null;
+      }
+      this.updateLocationService();
+      this.locationInterval = setInterval(() => {
+        this.updateLocationService();
+      }, 5000) as any;
+    },
+
+    stopTracking() {
+      if (this.locationInterval) {
+        clearInterval(this.locationInterval);
+        this.locationInterval = null;
+      }
+    },
+
+    async updateLocationService() {
+      if (!navigator.onLine) {
+        showErrorToast("No hay conexión a Internet.");
+        this.thereConnection = false;
+        return;
+      }
+      if (navigator.onLine && !this.thereConnection) {
+        this.thereConnection = true;
+        showSuccessToast("Conexión a Internet restablecida.");
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const no_courier = await getNo_courierByToken()
+          const request = {
+            no_courier,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          } as LocationUpdateEntity;
+          const res = await updateLocation(request);
+          if (res.error){
+            showErrorToast(getErrorMessages(res.message));
+          }
+        }, (error) => {
+          console.error("Error obtaining location: ", error);
+        });
+      } else {
+        showErrorToast("La geolocalización no está soportada por este navegador.");
       }
     }
+  },
+
+  beforeUnmount() {
+    this.stopTracking();
   }
+
 })
 </script>
 
@@ -126,6 +204,15 @@ export default defineComponent({
 
 .toggle input:checked + label {
   background-color: #89A7B1;
+}
+
+.busy {
+  background-color: #8a529c !important;
+}
+
+.toggle input:checked + label .busy {
+  background-color: #8a529c !important;
+  box-shadow: 0 4px 8px rgba(0, 128, 0, 0.3);
 }
 
 .toggle input:checked + label .track {

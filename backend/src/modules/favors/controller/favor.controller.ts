@@ -231,6 +231,40 @@ const readNotifications = async (req: Request, res: Response) => {
     }
 }
 
+const readCourierHistory = async (req: Request, res: Response) => {
+    try {
+        const { no_courier } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const result = await service.readCourierHistory(no_courier);
+
+        const response: ResponseApi<any> = Response200(result);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
+const readCustomerHistory = async (req: Request, res: Response) => {
+    try {
+        const { no_customer } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const result = await service.readCustomerHistory(no_customer);
+
+        const response: ResponseApi<any> = Response200(result);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
 // Middleware to monitor active connections
 const monitorConnections = (req: Request, res: Response, next: Function) => {
     const activeConnections = connectionManager.getActiveConnections();
@@ -238,4 +272,4 @@ const monitorConnections = (req: Request, res: Response, next: Function) => {
     res.status(response.code).json(response);
 };
 
-export {createFavor, setupStatusSSE, monitorConnections, getDetailsFavor, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor, readNotifications};
+export {createFavor, setupStatusSSE, monitorConnections, getDetailsFavor, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor, readNotifications, readCourierHistory, readCustomerHistory};
