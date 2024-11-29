@@ -233,7 +233,7 @@ class OrderPreviewEntity {
   final String no_customer;
   final String customer_name;
   final String customer_surname;
-  final String customer_lastname;
+  final String? customer_lastname;
   final String customer_email;
   final String customer_phone;
   final String? no_courier;

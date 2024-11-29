@@ -172,7 +172,7 @@ SELECT
     p_cour.phone AS courier_phone,
     pl.id AS place_id,
     pl.name AS place_name,
-    ST_X(`pl`.`location`) AS place_lat, ST_Y(`pl`.`location`) AS place_lng,
+    ST_X(`pl`.`location`) AS place_lng, ST_Y(`pl`.`location`) AS place_lat,
     pl.created_at AS place_created_at
 FROM
     Orders o
