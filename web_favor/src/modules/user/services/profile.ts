@@ -2,7 +2,7 @@ import api from '@/config/http-client-gateway';
 import { getErrorMessages, ResponseEntity } from "@/kernel/error-response";
 import { ProfileEntity } from "@/modules/user/entity/profile.entity";
 
-// Tiempo de expiración de caché en milisegundos (2 horas)
+// Tiempo de expiración de caché (2 horas)
 const CACHE_EXPIRATION_TIME = 2 * 60 * 60 * 1000; 
 
 const getCache = (credential: string) => {
