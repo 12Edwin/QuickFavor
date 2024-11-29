@@ -198,12 +198,12 @@ const cancelFavor = async (req: Request, res: Response) => {
 
 const rejectFavor = async (req: Request, res: Response) => {
     try {
-        const { no_order } = req.params;
+        const { id_order } = req.params;
         const { courier_id } = req.body;
 
         const repository: FavorRepository = new FavorRepository();
         const service: FavorService = new FavorService(repository);
-        await service.rejectFavor(no_order, courier_id);
+        await service.rejectFavor(id_order, courier_id);
 
         const response: ResponseApi<any> = Response200({ message: 'Favor rejected successfully' });
         res.status(response.code).json(response);
@@ -220,9 +220,9 @@ const readNotifications = async (req: Request, res: Response) => {
 
         const repository: FavorRepository = new FavorRepository();
         const service: FavorService = new FavorService(repository);
-        await service.readNotifications(no_courier);
+        const result = await service.readNotifications(no_courier);
 
-        const response: ResponseApi<any> = Response200({ message: 'Notifications read successfully' });
+        const response: ResponseApi<any> = Response200(result);
         res.status(response.code).json(response);
     } catch (e) {
         console.log(e)

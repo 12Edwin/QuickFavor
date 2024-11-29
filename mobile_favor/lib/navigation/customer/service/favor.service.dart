@@ -123,6 +123,23 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
     }
   }
 
+  Future<ResponseEntity> cancelFavor(String no_order) async {
+    try {
+      final response = await dio.put('/favor/cancel/$no_order');
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
+    }
+  }
+
   Future<ResponseEntity> updateLocation(UpdateLocationEntity location) async {
     try {
       final response = await dio.post('/location/new-location', data: location.toJson());

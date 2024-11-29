@@ -88,6 +88,17 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
   void _changeState(String state) async {
     final idFavor = await getStorageNoOrder() ?? '';
 
+    if (state.contains('Cancel')){
+      final response = await _favorService.cancelFavor(idFavor);
+      if (response.error) {
+        showErrorAlert(context, getErrorMessages(response.message));
+      } else {
+        await removeStorageNoOrder();
+        showSuccessAlert(context, 'Pedido cancelado correctamente');
+        Navigator.pushReplacementNamed(context, '/navigation');
+      }
+      return;
+    }
     if(state == 'Finished'){
       if(!_keyMount.currentState!.validate()) return showWarningAlert(context, 'Ingrese un monto válido');
       if(_receiptPhotoController.text.isEmpty) return showWarningAlert(context, 'Ingrese una foto de su factura');
@@ -181,9 +192,25 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            _formatDuration(_remainingTime),
-                            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children:[
+                              Text(
+                                _formatDuration(_remainingTime),
+                                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () => _status.contains('In shopping') ? confirmAndChangeState('Cancel', 'Cancelado'): null,
+                                icon: const Icon(Icons.cancel, color: Colors.white),
+                                label: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(32),
+                                  ),
+                                ),
+                              ),
+                            ]
                           ),
                           const SizedBox(height: 16),
                           if (_orderDetails != null) ...[
@@ -312,7 +339,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                                 children: [
                                   _buildStateButton(Icons.shopping_cart, true),
                                   GestureDetector(
-                                    onTap: () => confirmAndChangeState('In delivery', 'En camino'),
+                                    onTap: () => _status.contains('In shopping') ? confirmAndChangeState('In delivery', 'En camino') : null,
                                     child: AnimatedContainer(
                                       duration: const Duration(seconds: 1),
                                       width: 50,
@@ -326,7 +353,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                                   ),
                                   _buildStateButton(Icons.person_outline, _status.contains('In delivery')),
                                   GestureDetector(
-                                    onTap: () => confirmAndChangeState('Finished', 'Finalizado'),
+                                    onTap: () => _status.contains('In delivery') ? confirmAndChangeState('Finished', 'Finalizado') : null,
                                     child: AnimatedContainer(
                                       duration: const Duration(seconds: 1),
                                       width: 50,
@@ -411,7 +438,20 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Confirmación'),
-        content: Text('¿Estás seguro de que deseas cambiar el estado a $text?'),
+        content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('¿Estás seguro de que deseas cambiar el estado a $text?'),
+                  if ((_orderDetails?.rejected_orders ?? 0) >= 2 && state == 'Cancel')
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Ya has rechazado 2 pedidos, si rechazas este, se te penalizará',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
         actions: [
           TextButton(
             onPressed: () {

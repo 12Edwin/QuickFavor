@@ -587,7 +587,7 @@ class _Register extends State<Register> {
       validationForm[id] = false;
       return 'Campo obligatorio';
     }
-    final pattern = RegExp(r'^[A-Z0-9-]+$');
+    final pattern = RegExp(r'^[A-Z0-9]+-[A-Z0-9]+$');
     if (!pattern.hasMatch(value)) {
       validationForm[id] = false;
       return 'Placas no válidas';

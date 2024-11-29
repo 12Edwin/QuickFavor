@@ -264,7 +264,7 @@ class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
                                         style: const TextStyle(color: Colors.grey, fontSize: 11),
                                       ),
                                       const SizedBox(height: 8),
-                                      Row(
+                                      if (_orderDetails!.license_plate != null) Row(
                                         children: [
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

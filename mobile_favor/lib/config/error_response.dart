@@ -35,6 +35,7 @@ class ResponseEntity {
   });
 
   factory ResponseEntity.fromJson(Map<String, dynamic> json) {
+    print(json);
     return ResponseEntity(
       code: json['code'],
       error: json['error'],
@@ -45,7 +46,6 @@ class ResponseEntity {
 }
 
 ResponseEntity getErrorMessages(ResponseEntity response) {
-  print(response);
   final errors = (response.data as List)
       .map((error) => ErrorData.fromJson(error).msg)
       .toList();

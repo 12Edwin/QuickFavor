@@ -38,7 +38,7 @@ const setUpInterceptors = (client: any) => {
         },
         (error: any) => {
             if(!error.response){
-                return Promise.reject({response: {status: 502, message: 'Error network', data: null}});
+                return Promise.reject({response: {status: 502, message: 'Error network', data: {code: 502, message: 'Error network', data: null}}});
             }
             if(error.response.status){
                 switch(error.response.status){
@@ -48,7 +48,11 @@ const setUpInterceptors = (client: any) => {
                         Router.push({name: 'login'});
                         break;
                     case 403:
-                        showErrorToast('You are not authorized to access this resource');
+                        if(error.response.data.message === 'User disabled') {
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('no_user');
+                            Router.push({name: 'login'});
+                        }
                         break;
                 }
                 return Promise.reject(error);
@@ -61,8 +65,8 @@ const setUpInterceptors = (client: any) => {
 setUpInterceptors(AxiosClient)
 
 const axiosClientApi = {
-    doGet(url: any){
-        return AxiosClient.get(url)
+    doGet(url: any, config: any = {}){
+        return AxiosClient.get(url, config)
     },
     doPost(url: string, data: any){
         return AxiosClient.post(url, data)

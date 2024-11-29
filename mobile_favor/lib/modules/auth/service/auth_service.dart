@@ -5,6 +5,8 @@ import 'package:mobile_favor/config/error_response.dart';
 import 'package:mobile_favor/modules/auth/entity/auth.entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../config/firebase_service.dart';
+
 class AuthService {
   final Dio dio;
 
@@ -12,6 +14,9 @@ class AuthService {
 
   Future<ResponseEntity> login(LoginEntity credentials) async {
     try {
+      String? firebaseToken = await FirebaseService.getFirebaseToken();
+      print('Token: $firebaseToken');
+      credentials.tokenFirebase = firebaseToken;
       final response = await dio.post('/auth/login', data: credentials.toJson());
       final data = response.data['data'];
       SharedPreferences prefs = await SharedPreferences.getInstance();

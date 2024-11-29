@@ -19,7 +19,7 @@ create table Couriers(
     no_courier varchar(100) primary key,
     fcm_token varchar(255) null,
     rejected_orders int null default 0,
-    vehicle_type enum('Carro', 'Moto', 'Bicicleta',  'Scouter', 'Caminando', 'Otro') not null ,
+    vehicle_type enum('Carro', 'Moto', 'Bicicleta',  'Scooter', 'Caminando', 'Otro') not null ,
     status enum('Available', 'Busy', 'Out of service') not null,
     license_plate varchar(8),
     last_update timestamp default current_timestamp,
@@ -163,6 +163,7 @@ SELECT
    `cr`.`plate_url`  AS `plate_url`,
    `cr`.`face_url`  AS `face_url`,
     `cr`.`ine_url`  AS `ine_url`,
+    cr.rejected_orders,
     cr.status AS courier_status,
     p_cour.name AS courier_name,
     p_cour.surname AS courier_surname,
@@ -171,7 +172,7 @@ SELECT
     p_cour.phone AS courier_phone,
     pl.id AS place_id,
     pl.name AS place_name,
-    ST_X(`pl`.`location`) AS place_lat, ST_Y(`pl`.`location`) AS place_lng,
+    ST_X(`pl`.`location`) AS place_lng, ST_Y(`pl`.`location`) AS place_lat,
     pl.created_at AS place_created_at
 FROM
     Orders o
@@ -187,6 +188,7 @@ insert into Customers (no_customer, id_person) values ('CUST_1', 'ZmLSSDEHuFUv2x
 insert into  People (uid, email, name, curp, surname, role, lastname, phone, sex) values ('HUM8Nv7FfmZJd0JOJYEouqeWiK32', 'barragan11pro@gmail.com', 'Juan Rodrigo', 'BAJL980101HDFLRL09', 'Liconza', 'Courier','Nava', '1234567891', 'Masculino');
 insert into Couriers (id_person, vehicle_type, license_plate, status) values ('HUM8Nv7FfmZJd0JOJYEouqeWiK32', 'Carro', 'HUM-123', 'Available');
 
+SELECT n.*, (SELECT count(id) from Products where id_order = n.order_id) as amount FROM Notifications n WHERE n.courier_id = 'COUR_1' AND n.status = 'Pending' AND n.type = 'Order'
 /*SELECT *,
     ST_Distance_Sphere(location, ST_PointFromText(?)) / 1000 as distance_km,
     ST_X(location) AS lat, ST_Y(location) AS lng, c.no_courier, c.fcm_token
@@ -239,3 +241,7 @@ DO
   SET status = 'Out of service'
   WHERE status = 'Available'
   AND TIMESTAMPDIFF(SECOND, last_update, NOW()) > 60;
+
+
+SELECT  ST_X(location) AS lat, ST_Y(location) AS lng FROM Places WHERE id_courier = 'COUR_1' AND type = 'Courier';
+SELECT  current_timestamp;

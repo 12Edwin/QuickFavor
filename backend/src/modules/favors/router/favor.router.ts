@@ -63,7 +63,7 @@ FavorRouter.put('/status/:id',[
     check('id').isString().notEmpty(),
     check('newStatus').isIn(['Pending', 'In shopping', 'In delivery', 'Finished', 'Canceled']),
     check('cost').optional().isNumeric(),
-    check('cost').optional().isLength({min: 3, max: 10}),
+    check('cost').optional().isLength({min: 1, max: 10}),
     check('receipt').optional().isBase64(),
     validateMiddlewares
     ],
@@ -90,8 +90,8 @@ FavorRouter.put('/reject/:id_order',[
     checkRole(['Courier']),
     check('id_order').isString().notEmpty(),
     check('id_order').isLength({min: 3, max: 100}),
-    check('id_courier').isString().notEmpty(),
-    check('id_courier').isLength({min: 3, max: 100}),
+    check('courier_id').isString().notEmpty(),
+    check('courier_id').isLength({min: 3, max: 100}),
     validateMiddlewares
     ],
     rejectFavor

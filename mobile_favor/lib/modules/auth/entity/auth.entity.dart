@@ -1,23 +1,32 @@
 class LoginEntity {
   final String email;
   final String password;
+  String? token;
 
   LoginEntity({
     required this.email,
     required this.password,
+    this.token,
   });
 
+  set tokenFirebase(String? value) {
+    token = value;
+  }
+
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'email': email,
       'password': password,
     };
+    if (token != null) data['token'] = token;
+    return data;
   }
 
   factory LoginEntity.fromJson(Map<String, dynamic> json) {
     return LoginEntity(
       email: json['email'],
       password: json['password'],
+      token: json['token'],
     );
   }
 }

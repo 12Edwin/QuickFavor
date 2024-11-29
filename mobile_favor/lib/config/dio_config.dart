@@ -33,11 +33,12 @@ class DioConfig {
               requestOptions: error.requestOptions,
               statusCode: 502,
               statusMessage: 'Network error',
-              data: {'error': true, 'message': 'Network error', 'data': null},
+              data: {'error': true, 'message': 'Network error', 'data': null, 'code': 502},
             ),
           ));
         }
         if (error.response?.statusCode == 401) {
+          showErrorAlert(context, 'Sesión expirada');
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.remove('token');
           prefs.remove('no_user');

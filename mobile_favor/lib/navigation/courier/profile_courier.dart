@@ -226,6 +226,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
                               prefs.remove('name');
                               prefs.remove('lat');
                               prefs.remove('lng');
+                              prefs.remove('availability');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(

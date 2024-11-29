@@ -25,6 +25,17 @@ class _MapCourierState extends State<MapCourier> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    (() async {
+      final result = await getStorageAvailability();
+      setState(() {
+        _isActive = result;
+      });
+    })();
+  }
+
   void _startTimer() async {
     final FavorService _favorService = FavorService(context);
     final String? no_courier = await getStorageNoUser();
@@ -87,6 +98,7 @@ class _MapCourierState extends State<MapCourier> {
               onChanged: (value) {
                 setState(() {
                   _isActive = value;
+                  toggleStorageAvailability(value);
                   if (_isActive) {
                     _startTimer();
                   } else {

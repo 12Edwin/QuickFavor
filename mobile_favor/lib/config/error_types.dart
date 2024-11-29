@@ -1,6 +1,7 @@
 String getErrorMessages(String errorCode) {
   final Map<String, String> errorMessages = {
     'bad request': 'Solicitud incorrecta',
+    'network error': 'Error de red',
     'email already exists': 'El correo electrónico ya existe',
     'curp already exists': 'La CURP ya existe',
     'phone already exists': 'El teléfono ya existe',
