@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_favor/modules/points/screens/map_courier.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/favor_progress_courier.dart';
-import 'package:mobile_favor/navigation/courier/history_order.dart';
 import 'package:mobile_favor/navigation/courier/notifications.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
@@ -48,11 +47,9 @@ class _NavigationState extends State<Navigation> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _courierWidgets = [
-        prefs.getString('no_order') != null
-            ? const FavorProgressCourier()
-            : const MapCourier(),
+        prefs.getString('no_order') != null ? const FavorProgressCourier() : const MapCourier(),
         const Notifications(),
-        const HistoryOrderCourier(),
+        const Placeholder(),
         const ProfileCourier()
       ];
     });
