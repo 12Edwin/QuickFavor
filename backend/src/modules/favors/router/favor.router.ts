@@ -3,7 +3,7 @@ import {checkRole, validateJWT, validateMiddlewares} from "../../../commons/midd
 import {
     acceptFavor, cancelFavor,
     createFavor, getDetailsFavor,
-    monitorConnections, readNotifications, rejectFavor,
+    monitorConnections, readCourierHistory, readCustomerHistory, readNotifications, rejectFavor,
     setupStatusSSE,
     updateCourierStatus
 } from "../controller/favor.controller";
@@ -114,6 +114,22 @@ FavorRouter.get('/notification/:no_courier', [
     check('no_courier').isLength({min: 3, max: 100}),
     validateMiddlewares
 ], readNotifications);
+
+FavorRouter.get('/history-courier/:no_courier', [
+    validateJWT,
+    checkRole(['Courier']),
+    check('no_courier').isString().notEmpty(),
+    check('no_courier').isLength({min: 3, max: 100}),
+    validateMiddlewares
+], readCourierHistory);
+
+FavorRouter.get('/history-customer/:no_customer', [
+    validateJWT,
+    checkRole(['Customer']),
+    check('no_customer').isString().notEmpty(),
+    check('no_customer').isLength({min: 3, max: 100}),
+    validateMiddlewares
+], readCustomerHistory);
 
 FavorRouter.get('/connection', monitorConnections);
 

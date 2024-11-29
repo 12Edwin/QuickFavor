@@ -64,6 +64,7 @@ export class FavorService{
             if (!await this.favorRepository.existsFavorByNo_order(no_order)) throw new Error('Favor not found');
             if (!await this.favorRepository.isCourierAvailable(no_courier)) throw new Error('Courier not available');
             if (!await this.favorRepository.isCourierNearLocation(no_courier, location)) throw new Error('Courier not near location');
+            if (!await this.favorRepository.hasNotBeenAccepted(no_order)) throw new Error('Favor already accepted');
             if (!await this.favorRepository.thereIsTimeToAccept(no_order)) throw new Error('Time to accept is over');
 
             return await this.favorRepository.acceptFavor(no_order, no_courier);
@@ -110,6 +111,24 @@ export class FavorService{
         try{
             if (!await existsCourierById(no_courier)) throw new Error('Courier not found');
             return this.favorRepository.readNotifications(no_courier);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async readCourierHistory(no_courier: string): Promise<any> {
+        try{
+            if (!await existsCourierById(no_courier)) throw new Error('Courier not found');
+            return this.favorRepository.readCourierHistory(no_courier);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async readCustomerHistory(no_customer: string): Promise<any> {
+        try{
+            if (!await existsCustomerById(no_customer)) throw new Error('Customer not found');
+            return this.favorRepository.readCustomerHistory(no_customer);
         }catch (error: any) {
             throw new Error((error as Error).message)
         }

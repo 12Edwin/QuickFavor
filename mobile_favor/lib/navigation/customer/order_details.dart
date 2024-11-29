@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class OrderDetails extends StatefulWidget {
   const OrderDetails(
-      {Key? key, required orderId, required fecha, required cantidad})
+      {Key? key, required no_order})
       : super(key: key);
 
   @override
@@ -18,6 +18,11 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          backgroundColor: const Color(0xFF2D3E50),
+          automaticallyImplyLeading: false,
+          toolbarHeight: 15.0
+        ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -73,7 +78,6 @@ class _OrderDetailsState extends State<OrderDetails> {
               // Contenedor completo
               Container(
                 padding: const EdgeInsets.all(16.0),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),

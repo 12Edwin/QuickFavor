@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isVisible" max-width="800px" @open="getOrder">
+  <v-dialog v-model="showed" max-width="800px" @open="getOrder">
     <v-card class="modal-container">
       <v-card-title>
         <span class="headline">Detalles de la Notificación</span>
@@ -148,12 +148,19 @@ export default defineComponent({
   watch: {
     isVisible(val) {
       if (val) {
+        this.showed = true;
         this.getOrder()
+      }
+    },
+    showed(val) {
+      if (!val) {
+        this.$emit('onClose');
       }
     }
   },
   data() {
     return {
+      showed: false,
       statusToChange: '',
       newStatus: '',
       showConfirmation: false,
@@ -188,10 +195,15 @@ export default defineComponent({
           this.order?.deliveryPoints.push({ name: '', lat: 0, lng: 0, isClosed: true });
         }
       }
+      if (this.order?.status != 'Pending') {
+        await this.changeStatus('Reject');
+        this.close();
+      }
       this.startCountdown();
       this.loading = false;
     },
     close() {
+      this.showed = false;
       this.$emit('onClose');
     },
     showConfirm(new_status: string, newStatusText: string) {
@@ -245,9 +257,17 @@ export default defineComponent({
 
     startCountdown() {
       if (this.remainingTime > 0) {
-        setInterval(() => {
+        const intervalId = setInterval(() => {
+          if (!this.showed){
+            clearInterval(intervalId);
+          }
+
           if (this.remainingTime > 0) {
             this.remainingTime--;
+          }else{
+            this.changeStatus('Reject');
+            this.close();
+            clearInterval(intervalId)
           }
         }, 1000);
       }

@@ -43,16 +43,21 @@ export default defineComponent({
       isSidebarOpen: false, 
       menuItems: [
         { name: "map", text: "Mapa", icon: "fa-solid fa-location-dot" },
-        {
-          name: "notifications",
-          text: "Notificaciones",
-          icon: "fa-solid fa-bell",
-        },
+        { name: "notifications", text: "Notificaciones", icon: "fa-solid fa-bell" },
         { name: "order", text: "Favor", icon: "fa-solid fa-box" },
         { name: "history", text: "Historial", icon: "fa-solid fa-history" },
         { name: "profile", text: "Perfil", icon: "fa-solid fa-user" },
       ],
     };
+  },
+  watch: {
+    $route() {
+      this.selected = this.$route.path.split("/")[1];
+      const ind = this.menuItems.findIndex(
+          (item) => item.name === this.selected
+      );
+      this.setSelected(this.selected, ind);
+    },
   },
   methods: {
     toggleSidebar() {

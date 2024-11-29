@@ -44,6 +44,7 @@ create table Orders(
     no_order varchar(100) primary key,
     description text null,
     created_at timestamp not null default current_timestamp,
+    finished_at timestamp null,
     status enum('Pending', 'In shopping', 'In delivery', 'Finished', 'Canceled') not null,
     cost double null,
     receipt_url varchar(255) null,
@@ -52,8 +53,6 @@ create table Orders(
     foreign key (id_customer) references Customers(no_customer),
     foreign key (id_courier) references Couriers(no_courier)
 );
-
-Select * From People;
 
 create table Products(
     id int primary key auto_increment,
@@ -146,6 +145,7 @@ SELECT
     o.no_order,
     o.description,
     o.created_at AS order_created_at,
+    o.finished_at AS order_finished_at,
     o.status,
     o.cost,
     c.no_customer,
@@ -245,3 +245,6 @@ DO
 
 SELECT  ST_X(location) AS lat, ST_Y(location) AS lng FROM Places WHERE id_courier = 'COUR_1' AND type = 'Courier';
 SELECT  current_timestamp;
+
+
+SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_customer = 'CUST_1' AND status IN ('Canceled', 'Finished') ORDER BY created_at ASC;
