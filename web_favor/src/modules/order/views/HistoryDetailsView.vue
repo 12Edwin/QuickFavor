@@ -2,47 +2,29 @@
   <div class="back-container">
     <WaveComponent />
   </div>
-  <div class="history-container">
+  <div class="history-container" v-if="historyItem">
     <div class="title-container">
       <i class="fa-solid fa-bell bell-icon"></i>
-      <h1 class="titlePrincipal">Historial</h1>
-      <div class="status-container">
-        <button
-          class="status-button"
-          :class="{ inactive: !isActive }"
-          @click="toggleStatus"
-        >
-          <div class="icon-circle" :class="{ 'inactive-icon': !isActive }">
-            <i
-              class="fa-solid fa-power-off power-icon"
-              :class="{ 'inactive-icon': !isActive }"
-            ></i>
-          </div>
-          <span class="status-text">{{
-            isActive ? "Activo" : "Inactivo"
-          }}</span>
-        </button>
-      </div>
+      <h1 class="titlePrincipal">Detalles de la Orden</h1>
     </div>
 
     <div class="content-container">
-      <!-- Sección izquierda con el avatar y nombre -->
       <div class="left-section">
         <div class="left-content">
           <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
             <img
-              src="../../../assets/oldManUser.png"
+              :src="historyItem.face_url || '../../../assets/oldManUser.png'"
               alt="User Avatar"
               style="width: 100%; height: 100%; border-radius: 50%"
             />
           </v-avatar>
-          <p class="username">{{ historyItem.nombreCliente }}</p>
+          <p class="username">{{ historyItem.customer_name }}</p>
           <v-chip
-            :color="getChipColor(historyItem.estatus)"
+            :color="getChipColor(historyItem.status)"
             variant="flat"
             class="chip-style"
           >
-            <span style="color: white">{{ historyItem.estatus }}</span>
+            <span style="color: white">{{ historyItem.status }}</span>
           </v-chip>
           <v-divider
             class="chip-divider border-opacity-100"
@@ -50,24 +32,25 @@
             color="#A3BBBF"
           ></v-divider>
           <p class="completion-text">Completado en</p>
-          <p class="completion-status">{{ historyItem.tiempoCompletado }}</p>
+          <p class="completion-status">
+            {{ formatDate(historyItem.order_created_at) }}
+          </p>
         </div>
       </div>
 
-      <!-- Sección derecha con los detalles -->
       <div class="details-section">
         <div class="header-container">
           <div class="left-stripe"></div>
           <p class="header-text">Productos</p>
         </div>
 
-        <div v-if="historyItem.productos.length === 0" class="no-products">
+        <div v-if="historyItem.products.length === 0" class="no-products">
           <img
             src="../../../assets/carro-vacio.png"
             alt="No hay productos"
             class="no-products-image"
           />
-          <p class="no-products-text">Aún no hay productos en esta cuenta</p>
+          <p class="no-products-text">Aún no hay productos en esta orden</p>
         </div>
 
         <v-table v-else height="320px" fixed-header>
@@ -78,11 +61,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="producto in historyItem.productos"
-              :key="producto.nombre"
-            >
-              <td>{{ producto.nombre }}</td>
+            <tr v-for="producto in historyItem.products" :key="producto.name">
+              <td>{{ producto.name }}</td>
               <td>
                 <v-icon
                   @click="viewDetails(producto)"
@@ -97,12 +77,11 @@
         </v-table>
 
         <div class="summary-container">
-          <!-- Contenedor izquierdo para los datos -->
           <div class="summary-details">
-            <div v-if="historyItem.subtotal > 0">
+            <div v-if="historyItem.cost !== null">
               <div class="summary-item">
-                <span>Subtotal:</span>
-                <span class="summary-value">$ {{ historyItem.subtotal }}</span>
+                <span>Costo de la orden:</span>
+                <span class="summary-value">$ {{ historyItem.cost }}</span>
               </div>
               <div class="summary-item">
                 <span>Costo de servicio:</span>
@@ -111,7 +90,7 @@
               <div class="summary-item total">
                 <span>Total:</span>
                 <span class="summary-value total-value"
-                  >$ {{ historyItem.subtotal + 100 }}</span
+                  >$ {{ historyItem.cost + 100 }}</span
                 >
               </div>
             </div>
@@ -120,7 +99,6 @@
             </div>
           </div>
 
-          <!-- Contenedor derecho para el botón -->
           <div class="summary-button-container">
             <button class="summary-button">
               <div class="icon-circle-summary">
@@ -131,17 +109,25 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="data.length === 0" class="no-orders">
-      <img
-        src="../../../assets/empty2.png"
-        alt="No hay pedidos"
-        class="no-orders-image"
-      />
-      Aún no hay pedidos en esta cuenta
+      <!-- Mostrar la foto de la factura solo si el estado es "Finished" -->
+      <div
+        v-if="historyItem.status === 'Finished' && historyItem.receipt_url"
+        class="receipt-container"
+      >
+        <div class="header-container">
+          <div class="left-stripe"></div>
+          <p class="header-text">Factura</p>
+        </div>
+        <div class="receipt-image">
+          <img
+            :src="historyItem.receipt_url"
+            alt="Factura"
+            class="receipt-img"
+          />
+        </div>
+      </div>
     </div>
-    <div v-else></div>
 
     <v-dialog v-model="dialog" max-width="600" class="centered-dialog">
       <v-card>
@@ -149,14 +135,14 @@
         <v-card-text class="product-details">
           <div class="product-info">
             <div class="product-left">
-              <p class="product-name">{{ selectedProduct.nombre }}</p>
+              <p class="product-name">{{ selectedProduct.name }}</p>
               <div class="product-description">
-                <span>{{ selectedProduct.descripcion }}</span>
+                <span>{{ selectedProduct.description }}</span>
               </div>
             </div>
             <div class="product-right">
               <p class="product-quantity-title">Cantidad</p>
-              <p class="product-quantity">{{ selectedProduct.cantidad }}</p>
+              <p class="product-quantity">{{ selectedProduct.amount }}</p>
             </div>
           </div>
         </v-card-text>
@@ -166,242 +152,69 @@
       </v-card>
     </v-dialog>
   </div>
+
+  <!-- Mostrar loading si historyItem aún es null -->
+  <div v-else class="loading-container">
+    <p>Cargando detalles de la orden...</p>
+  </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, ref, onMounted } from "vue";
+import axios from "axios";
 import WaveComponent from "@/components/WaveComponent.vue";
-import { defineComponent, computed } from "vue";
-
-// Define el tipo para cada elemento en `data`
-interface Producto {
-  nombre: string;
-  descripcion: string;
-  cantidad: number;
-}
-
-interface HistorialItem {
-  nombreCliente: string;
-  numeroProductos: number;
-  fecha: string;
-  estatus: string;
-  tiempoCompletado: string;
-  subtotal: number;
-  productos: Producto[];
-}
 
 export default defineComponent({
   name: "HistoryDetailsView",
   components: { WaveComponent },
   props: {
     id: {
-      type: Number,
+      type: String, // El id debe ser un string como "ORD_26"
       required: true,
     },
   },
   data() {
     return {
-      isActive: true, // Variable para manejar el estado del botón
-      dialog: false,
-      selectedProduct: {} as Producto,
-      data: [
-        {
-          nombreCliente: "Jose",
-          numeroProductos: 10,
-          fecha: "29-10-2024",
-          estatus: "Proceso de Compra",
-          tiempoCompletado: "Aun no completado",
-          subtotal: 0,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Miguel",
-          numeroProductos: 12,
-          fecha: "28-10-2024",
-          estatus: "Finalizado",
-          tiempoCompletado: "120 min",
-          subtotal: 300,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Santiago",
-          numeroProductos: 5,
-          fecha: "27-10-2024",
-          estatus: "Proceso de entrega",
-          tiempoCompletado: "Aun no completado",
-          subtotal: 0,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Giovanni",
-          numeroProductos: 8,
-          fecha: "26-10-2024",
-          estatus: "Cancelado",
-          tiempoCompletado: "No completado",
-          subtotal: 0,
-          productos: [],
-        },
-      ] as HistorialItem[], // Define el tipo de `data` como un arreglo de `HistorialItem`
+      dialog: false, // Controla la visibilidad del diálogo de detalles del producto
+      selectedProduct: { name: "", description: "", amount: 0 }, // Almacena el producto seleccionado para ver los detalles
+      historyItem: null as any, // Almacena los detalles de la orden
     };
   },
+  mounted() {
+    this.fetchOrderDetails();
+  },
   methods: {
-    toggleStatus() {
-      this.isActive = !this.isActive;
+    async fetchOrderDetails() {
+      try {
+        const token = localStorage.getItem("token"); // Asegúrate de obtener el token correcto
+        if (!token) {
+          console.error("Token no encontrado en el localStorage.");
+          return;
+        }
+
+        const response = await axios.get(
+          `https://backend-app-y3z1.onrender.com/favor/details/${this.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.code === 200 && !response.data.error) {
+          this.historyItem = response.data.data; // Asignar los detalles de la orden a historyItem
+        } else {
+          console.error(
+            "Error al obtener los detalles de la orden:",
+            response.data.message
+          );
+        }
+      } catch (error) {
+        console.error("Error al hacer la solicitud al backend:", error);
+      }
     },
-    getChipColor(estatus: string) {
-      switch (estatus) {
+    getChipColor(status: string) {
+      switch (status) {
         case "Proceso de Compra":
           return "#fdab30";
         case "Proceso de entrega":
@@ -414,14 +227,12 @@ export default defineComponent({
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
       }
     },
-    viewDetails(producto: Producto) {
-      this.selectedProduct = producto;
+    viewDetails(product: any) {
+      this.selectedProduct = product;
       this.dialog = true;
     },
-  },
-  computed: {
-    historyItem(): HistorialItem {
-      return this.data[this.id];
+    formatDate(dateString: string) {
+      return new Date(dateString).toLocaleString();
     },
   },
 });
@@ -936,8 +747,8 @@ export default defineComponent({
 
   /* Contenedor para el contenido principal */
   .content-container {
-    flex-direction: column; /* Muestra las secciones en columna */
-    align-items: center; /* Centra los elementos horizontalmente */
+    flex-direction: column;
+    align-items: center;
     width: 100%;
   }
 
@@ -999,7 +810,7 @@ export default defineComponent({
 
   .status-button {
     width: 100%;
-    max-width: 200px; /* Define un ancho máximo solo en móviles */
+    max-width: 200px;
   }
 }
 </style>
