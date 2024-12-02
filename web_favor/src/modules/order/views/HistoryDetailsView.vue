@@ -3,11 +3,13 @@
     <WaveComponent />
   </div>
   <div class="history-container" v-if="historyItem">
-    <div class="title-container">
-      <i class="fa-solid fa-bell bell-icon"></i>
-      <h1 class="titlePrincipal">Detalles de la Orden</h1>
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px"></i>
+        <span class="ml-4 fas text-white">D E T A L L E S</span> <span class="ml-4 fas text-white">D E </span> <span class="ml-4 fas text-white">H I S T O R I A L </span>
+      </h2>
+      <Switch @onFalse="toggleStatus" @onTrue="toggleStatus" />
     </div>
-
     <div class="content-container">
       <div class="left-section">
         <div class="left-content">
@@ -100,13 +102,31 @@
           </div>
 
           <div class="summary-button-container">
-            <button class="summary-button" @click="viewReceipt">
+            <button class="summary-button">
               <div class="icon-circle-summary">
                 <i class="fa-solid fa-eye"></i>
               </div>
               Factura
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Mostrar la foto de la factura solo si el estado es "Finished" -->
+      <div
+        v-if="historyItem.status === 'Finished' && historyItem.receipt_url"
+        class="receipt-container"
+      >
+        <div class="header-container">
+          <div class="left-stripe"></div>
+          <p class="header-text">Factura</p>
+        </div>
+        <div class="receipt-image">
+          <img
+            :src="historyItem.receipt_url"
+            alt="Factura"
+            class="receipt-img"
+          />
         </div>
       </div>
     </div>
@@ -130,22 +150,6 @@
         </v-card-text>
         <v-card-actions>
           <v-btn class="ms-auto" @click="dialog = false">Cerrar</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="receiptDialog" max-width="800" class="centered-dialog">
-      <v-card>
-        <v-card-title>Factura</v-card-title>
-        <v-card-text class="receipt-container">
-          <img
-            :src="historyItem?.receipt_url"
-            alt="Factura"
-            class="receipt-img"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-btn class="ms-auto" @click="receiptDialog = false">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -173,8 +177,8 @@ export default defineComponent({
   },
   data() {
     return {
+      isActive: true, // Variable para manejar el estado del botón
       dialog: false, // Controla la visibilidad del diálogo de detalles del producto
-      receiptDialog: false, // Añadir aquí la propiedad para el modal
       selectedProduct: { name: "", description: "", amount: 0 }, // Almacena el producto seleccionado para ver los detalles
       historyItem: null as any, // Almacena los detalles de la orden
     };
@@ -183,6 +187,9 @@ export default defineComponent({
     this.fetchOrderDetails();
   },
   methods: {
+    toggleStatus() {
+      this.isActive = !this.isActive;
+    },
     async fetchOrderDetails() {
       try {
         const token = localStorage.getItem("token"); // Asegúrate de obtener el token correcto
@@ -226,14 +233,6 @@ export default defineComponent({
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
       }
     },
-    viewReceipt() {
-      if (this.historyItem?.receipt_url) {
-        this.receiptDialog = true;
-      } else {
-        console.error("No hay factura disponible para esta orden.");
-      }
-    },
-
     viewDetails(product: any) {
       this.selectedProduct = product;
       this.dialog = true;
@@ -256,27 +255,36 @@ export default defineComponent({
 }
 
 .history-container {
-  height: 88vh;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  position: static;
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
 
-.receipt-container {
+.card-header {
   display: flex;
-  justify-content: center;
   align-items: center;
+  background-color: #566981;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.receipt-img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Contenedor principal para la sección izquierda y derecha */
 .content-container {
+  background-color: rgba(255, 255, 255, 0.4);
   display: flex;
   gap: 20px;
   align-items: flex-start; /* Alinea los elementos al inicio verticalmente */
