@@ -135,8 +135,8 @@
         </v-row>
       </v-container>
     </v-card>
-    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" />
-    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" />
+    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" :profile="profile"  />
+    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" :profile="profile"  />
   </div>
 </template>
 
@@ -147,7 +147,6 @@ import Switch from "@/components/Switch.vue";
 import EditTrasnport from '../components/UpdateTrasnport.vue';
 import UpdateUserInfo from '../components/UpdateUserInfo.vue';
 import { getProfile } from '../services/profile';
-import { profile } from 'console';
 
 export default defineComponent({
   name: "Profile",
@@ -166,9 +165,13 @@ export default defineComponent({
     };
 
     const getUserInfo = async () => {
-      const data = await getProfile();
-      if (data) {
-        profile.value = data.data || profile.value;  
+      try {
+        const data = await getProfile();
+        if (data) {
+          profile.value = data.data || profile.value;  
+        }
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -186,7 +189,6 @@ export default defineComponent({
   }
 });
 </script>
-
 
 <style scoped>
 .back-container {
@@ -382,6 +384,39 @@ export default defineComponent({
 
   .profile-content {
     margin-top: -56px;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .edit-card {
+    margin-top: 16px;
+  }  
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-name {
+    font-size: 28px;
+  }
+
+  .profile-role {
+    font-size: 18px;
+  }
+
+  .profile-stats {
+    font-size: 16px;
+  }
+
+  .edit-profile-btn {
+    font-size: 16px; /* Aumentar el tamaño de fuente en pantallas más grandes */
+    padding: 8px 24px; /* Ajustar el relleno */
+    margin-top: 40px;
+    margin-left: 300px; 
+  }
+
+  .profile-content {
+    margin-top: -64px;
   }
 }
 

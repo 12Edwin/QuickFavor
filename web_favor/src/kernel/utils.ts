@@ -144,6 +144,7 @@ const getErrorMessages = (errorCode: string): string => {
         'client not connected': 'Cliente no conectado',
         'network error': 'Error de red',
         'default': 'Error interno del servidor',
+        "lastname must be at least 3 characters": "El apellido debe tener al menos 3 caracteres",
     };
     return errorMessages[errorCode.toLowerCase()] || 'Ocurrió un error desconocido';
 };
@@ -209,6 +210,24 @@ const setStatusCourier = async (status: any) => {
     }
 }
 
+function convertirImagenABase64(archivo: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+  
+      reader.onloadend = () => {
+        if (reader.result) {
+          resolve(reader.result as string); // Resultado en base64
+        }
+      };
+  
+      reader.onerror = (error) => {
+        reject("Error al leer el archivo: " + error);
+      };
+  
+      reader.readAsDataURL(archivo); // Lee el archivo y lo convierte a base64
+    });
+  }  
+
 
 export {
     getRoleNameByToken,
@@ -223,4 +242,5 @@ export {
     getIconByStatus,
     filterByName,
     getColorByStatus,
+    convertirImagenABase64
 }

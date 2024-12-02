@@ -22,6 +22,9 @@
               :zoom="15"
             />
           </div>
+          <v-alert v-if="!thereConnection" type="error" dismissible>
+            No hay conexión a internet. Los mapas no se pueden cargar.
+          </v-alert>
         </v-card>
       </v-col>
     </v-row>
@@ -31,7 +34,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WaveComponent from '@/components/WaveComponent.vue';
-import { GoogleMap } from 'vue3-google-map';
+import { GoogleMap, Marker } from 'vue3-google-map';
 import Switch from '@/components/Switch.vue';
 
 export default defineComponent({
@@ -39,20 +42,43 @@ export default defineComponent({
   components: { WaveComponent, GoogleMap, Switch },
   data() {
     return {
-      center: { lat: 19.42847, lng: -99.12766 },
+      center: { lat: 19.42847, lng: -99.12766 }, // Default location
       isChecked: false,
       userIcon: require('@/assets/location/assistant_navigation.svg'),
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
       marker: null as google.maps.Marker | null,
-      thereConnection: true
+      thereConnection: true, // Flag to manage connectivity
     };
   },
   mounted() {
-    
+    this.checkConnection();
+    window.addEventListener('online', this.checkConnection);
+    window.addEventListener('offline', this.checkConnection);
+
+    // Try to load the last known location if available
+    const savedLocation = localStorage.getItem('lastLocation');
+    if (savedLocation) {
+      this.center = JSON.parse(savedLocation);
+    }
+  },
+  beforeUnmount() {
+    this.stopTracking();
+    window.removeEventListener('online', this.checkConnection);
+    window.removeEventListener('offline', this.checkConnection);
   },
   methods: {
+    checkConnection() {
+      this.thereConnection = navigator.onLine;
+      if (!this.thereConnection) {
+        this.showNoConnectionMap();  // Optional: load a static fallback map or image
+      }
+    },
     startTracking() {
+      if (!this.thereConnection) {
+        console.warn('No connection. Tracking will not start.');
+        return;
+      }
       if (this.locationInterval) {
         clearInterval(this.locationInterval);
         this.locationInterval = null;
@@ -74,39 +100,47 @@ export default defineComponent({
     },
     updateLocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          this.center = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          this.updateMarker();
-        }, (error) => {
-          console.error("Error obtaining location: ", error);
-        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            this.center = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            this.updateMarker();
+            // Save the last known location in localStorage
+            localStorage.setItem('lastLocation', JSON.stringify(this.center));
+          },
+          (error) => {
+            console.error("Error obtaining location: ", error);
+          }
+        );
       } else {
         console.error("Geolocation is not supported by this browser.");
       }
     },
     updateMarker() {
-      const mapInstance = this.$refs.mapInstance as any;
-
-      if (!this.marker) {
-        this.marker = new google.maps.Marker({
-          position: this.center,
-          map: mapInstance.map,
-          icon: {
-            url: this.userIcon,
-            scaledSize: new google.maps.Size(40, 40)
-          }
-        });
-      } else {
-        this.marker.setPosition(this.center);
+      try {
+        const mapInstance = this.$refs.mapInstance as any;
+        if (!this.marker) {
+          this.marker = new google.maps.Marker({
+            position: this.center,
+            map: mapInstance.map,
+            icon: {
+              url: this.userIcon,
+              scaledSize: new google.maps.Size(40, 40)
+            }
+          });
+        } else {
+          this.marker.setPosition(this.center);
+        }
+      } catch (error) {
+        console.error("Error updating marker: ", error);
       }
     },
-  },
-
-  beforeUnmount() {
-    this.stopTracking(); 
+    showNoConnectionMap() {
+      // Optional: Replace this with a static image or map fallback
+      console.log('Showing static map or fallback');
+    }
   }
 });
 </script>

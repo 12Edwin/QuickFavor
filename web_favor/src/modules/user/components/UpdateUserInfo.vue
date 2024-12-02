@@ -7,67 +7,108 @@
           <div>
             <div class="input-container">
                 <v-icon class="fa-solid fa-phone icon"></v-icon>
-                <input type="tel" v-model="form.telefono" placeholder="Teléfono" class="register-input" required>
+                <input type="tel" v-model="form.phone" placeholder="Teléfono" class="register-input" required>
                 </div>
 
                 <!-- Correo -->
                 <div class="input-container">
                 <v-icon class="fa-solid fa-envelope icon"></v-icon>
-                <input type="text" v-model="form.correo" placeholder="Correo electronico" class="register-input" required>
+                <input type="text" v-model="form.email" placeholder="Correo electronico" class="register-input" required>
                 </div>
           </div>
         </v-card-text>
   
         <v-card-actions>
-            <v-btn color="secondary" @click="SaveInfo">Guardar</v-btn>
+            <v-btn color="secondary" @click="openModal">Guardar</v-btn>
           <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <ConfirmationModal :is-visible="showModal" @cancel="closeModal" @confirm="saveInfo" :is-completed="false" message="¿Estás seguro o segura de actualizar tú información?"/>
   </template>
   
   <script>
-  export default {
-    props: {
-      isModalVisibleUserInfo: {
-        type: Boolean,
-        required: true
-      }
+import { updateProfile } from '../services/profile';
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {getErrorMessages} from "@/kernel/utils";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+
+export default {
+  props: {
+    isModalVisibleUserInfo: {
+      type: Boolean,
+      required: true,
     },
-    data() {
-      return {
-        localIsModalVisible: this.isModalVisibleUserInfo, // Usamos una variable local para el diálogo
-        selectOptionClick: 2,
-        showDescriptionOnly: false,
-        showImageOnly: false,
-        showModelOnly: false,
-        form: {
-            telefono: '',
-            correo: ''
-        }
-      };
+    profile: {
+      type: Object,
+      required: true,
     },
-    watch: {
-      isModalVisibleUserInfo(newValue) {
-        this.localIsModalVisible = newValue;
+  },
+  components: {ConfirmationModal },
+  data() {
+    return {
+      localIsModalVisible: this.isModalVisibleUserInfo,
+      showModal: false,
+      form: {
+        phone: '',
+        email: '',
       },
-      localIsModalVisible(newValue) {
-        this.$emit('update:isModalVisibleUserInfo', newValue);
+    };
+  },
+  computed: {
+    computedProfile() {
+      if (this.profile) {
+        return this.profile;
+      }
+      return {};
+    }
+  },
+  watch: {
+    isModalVisibleUserInfo(newValue) {
+      this.localIsModalVisible = newValue;
+    },
+    localIsModalVisible(newValue) {
+      this.$emit('update:isModalVisibleUserInfo', newValue);
+    },
+    profile: {
+      handler(newProfile) {
+        if (newProfile) {
+          this.form.phone = newProfile.phone || '';
+          this.form.email = newProfile.email || '';
+        }
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    openModal() {
+      this.showModal = true;
+    },
+    async saveInfo() {
+      this.profile.phone = this.form.phone;
+      this.profile.email = this.form.email;
+      try {
+        const result = await updateProfile(this.profile);
+        console.log(result);
+        if (result.error) {
+          showErrorToast(getErrorMessages(result.message));
+          return;       
+        }
+        showSuccessToast('Información actualizada correctamente');
+        this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);  
+      } catch (error) {
+        showErrorToast(getErrorMessages(error.message))
+        console.error(error);
       }
     },
-    methods: {
-        SaveInfo() {
-            console.log(this.form);
-            this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);
-        },
-      
-      closeModal() {
-        this.localIsModalVisible = false; // Cerrar el modal
-        this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);
-      }
-    }
-  };
-  </script>
+    closeModal() {
+      this.showModal = false;
+      this.localIsModalVisible = false; 
+    },
+  },
+};
+</script>
+
   
   <style scoped>
   .icon-button-group {

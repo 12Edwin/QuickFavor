@@ -71,3 +71,23 @@ export const getProfile = async (): Promise<ResponseEntity> => {
     return { error: true, message: 'Unknown error occurred', code: 500, data: null };
   }
 };
+
+
+export const updateProfile = async (profile: ProfileEntity): Promise<ResponseEntity> => {
+  const credential = localStorage.getItem("credential");
+
+  if (!credential) {
+    return { error: true, message: 'No credential found in localStorage', code: 401, data: null };
+  }
+
+  try {
+    const response = await api.doPut(`courier/profile/`, profile);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      return getErrorMessages(error.response.data);
+    }
+
+    return { error: true, message: 'Unknown error occurred', code: 500, data: null };
+  }
+}

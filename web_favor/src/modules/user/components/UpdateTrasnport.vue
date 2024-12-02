@@ -48,7 +48,7 @@
         <div v-if="showDescriptionOnly">
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.descripcion" placeholder="Descripción" class="register-input" required>
+            <input type="text" v-model="form.description" placeholder="Descripción" class="register-input" required>
           </div>
         </div>
 
@@ -63,7 +63,7 @@
         <div v-else-if="showModelOnly">
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
+            <input type="text" v-model="form.model" placeholder="Modelo" class="register-input" required>
           </div>
         </div>
 
@@ -71,11 +71,11 @@
         <div v-else>
           <div class="input-container">
             <v-icon class="fa-solid fa-address-card icon"></v-icon>
-            <input type="text" v-model="form.matricula" placeholder="Matrícula" class="register-input" required>
+            <input type="text" v-model="form.license_plate" placeholder="Matrícula" class="register-input" required>
           </div>
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
+            <input type="text" v-model="form.model" placeholder="Modelo" class="register-input" required>
           </div>
           <!-- Selector de Color y Licencia -->
           <v-row align="start" no-gutters>
@@ -110,20 +110,32 @@
       </v-card-text>
 
       <v-card-actions>
+        <v-btn color="secondary" @click="openModal">Guardar</v-btn>
         <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <ConfirmationModal :is-visible="showModal" @cancel="closeModal" @confirm="saveTrasport" :is-completed="false" message="¿Estás seguro o segura de actualizar la info. de tú medio de transporte?"/>
 </template>
 
 <script>
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {getErrorMessages, convertirImagenABase64} from "@/kernel/utils";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+import { updateProfile } from '../services/profile';
+
 export default {
   props: {
     isModalVisible: {
       type: Boolean,
       required: true
-    }
+    },
+    profile: {
+      type: Object,
+      required: true
+    } 
   },
+  components: {ConfirmationModal },
   data() {
     return {
       localIsModalVisible: this.isModalVisible, // Usamos una variable local para el diálogo
@@ -131,14 +143,24 @@ export default {
       showDescriptionOnly: false,
       showImageOnly: false,
       showModelOnly: false,
+      showModal: false,
       form: {
-        descripcion: '',
-        matricula: '',
-        modelo: '',
+        description: '',
+        license_plate: '',
+        model: '',
         color: '#000000',
-        licencia: null
+        plate_url: null,
+        vehicle_type: '',
       }
     };
+  },
+  computed: {
+    computedProfile() {
+      if (this.profile) {
+        return this.profile;
+      }
+      return {};
+    }
   },
   watch: {
     isModalVisible(newValue) {
@@ -146,7 +168,40 @@ export default {
     },
     localIsModalVisible(newValue) {
       this.$emit('update:isModalVisible', newValue);
-    }
+    },
+    profile: {
+      handler(newProfile) {
+        if (newProfile) {
+          this.form.description = newProfile.description || '';
+          this.form.license_plate = newProfile.license_plate || '';
+          this.form.model = newProfile.model || '';
+          this.form.color = newProfile.color || '';
+          this.form.vehicle_type = newProfile.vehicle_type || '';
+
+          switch (newProfile.vehicle_type) {
+            case 'Carro':
+              this.selectOption(1);
+              break;
+            case 'Moto':
+              this.selectOption(2);
+              break;
+            case 'Bicicleta':
+              this.selectOption(3);
+              break;
+            case 'Scooter':
+              this.selectOption(4);
+              break;
+            case 'Caminando':
+              this.selectOption(5);
+              break;
+            case 'Otro':
+              this.selectOption(6);
+              break;
+          }
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
     selectOption(option) {
@@ -169,16 +224,66 @@ export default {
         this.showImageOnly = false;
       }
     },
-    handleFileChange(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.form.licencia = file;
-      }
+     // Manejo del cambio de archivo
+     async handleFileChange (event) {
+        const target = event.target;
+        const file = target?.files ? target.files[0] : null;
+
+        if (file) {
+          try {
+            const base64 = await convertirImagenABase64(file); // Convertir imagen a Base64
+            this.form.plate_url = base64; // Almacenar el resultado en la referencia reactiva
+          } catch (error) {
+            console.error("Error al convertir la imagen:", error);
+          }
+        } else {
+          // Si no hay archivo, limpiar la propiedad
+          base64Image.value = null;
+        }
+      },
+    openModal() {
+      this.showModal = true;
     },
     closeModal() {
       this.localIsModalVisible = false; // Cerrar el modal
-      this.$emit('update:isModalVisible', this.localIsModalVisible);
-    }
+      this.showModal = false; // Cerrar el modal de confirmación
+    },
+    async saveTrasport() {
+      if (this.form.description) {
+        this.profile.description = this.form.description;
+      }
+      if (this.form.license_plate) {
+        this.profile.license_plate = this.form.license_plate;
+      }
+      if (this.form.model) {
+        this.profile.model = this.form.model;
+      }
+      if (this.form.color) {
+        this.profile.color = this.form.color;
+      }
+      if (this.form.vehicle_type) {
+        this.profile.vehicle_type = this.form.vehicle_type;
+      }
+      if (this.form.plate_url) {
+        this.profile.plate_url = this.form.plate_url;
+      }
+
+
+      try {
+        const result = await updateProfile(this.profile);
+        console.log(result);
+        if (result.error) {
+          showErrorToast(getErrorMessages(result.message));
+          return;       
+        }
+        showSuccessToast('Información actualizada correctamente');
+        this.$emit('update:isModalVisible', this.localIsModalVisible);  
+      } catch (error) {
+        showErrorToast(getErrorMessages(error.message))
+        console.error(error);
+      }
+    },
+
   }
 };
 </script>
