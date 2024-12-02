@@ -22,9 +22,6 @@
               :zoom="15"
             />
           </div>
-          <v-alert v-if="!thereConnection" type="error" dismissible>
-            No hay conexión a internet. Los mapas no se pueden cargar.
-          </v-alert>
         </v-card>
       </v-col>
     </v-row>
@@ -71,7 +68,7 @@ export default defineComponent({
     checkConnection() {
       this.thereConnection = navigator.onLine;
       if (!this.thereConnection) {
-        this.showNoConnectionMap();  // Optional: load a static fallback map or image
+        this.showNoConnectionMap();  
       }
     },
     startTracking() {
