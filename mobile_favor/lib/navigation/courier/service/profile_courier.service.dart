@@ -28,13 +28,11 @@ class ProfileCourierService {
         print('UID no encontrado en SharedPreferences');
         return null; // Si el UID no está disponible, retorna null
       }
-
-      print('UID: $uid');
       final response = await dio.get('/courier/profile/$uid');
 
       if (response.statusCode == 200) {
-        print('Perfil obtenido con éxito');
-        return ProfileCourierEntity.fromJson(response.data);
+        print('response' + response.data.toString());
+        return ProfileCourierEntity.fromJson(response.data['data']);
       } else {
         print('Error al obtener los datos del perfil: ${response.statusCode}');
         return null;
@@ -42,44 +40,6 @@ class ProfileCourierService {
     } catch (e) {
       print('Error en la llamada a la API: $e');
       return null;
-    }
-  }
-
-  Future<ProfileCourierEntity?> getProfileCustomer(String uid) async {
-    try {
-      final response = await dio.get('/courier/profile/$uid');
-
-      if (response.statusCode == 200) {
-        print(response.data);
-        return ProfileCourierEntity.fromJson(response.data);
-      } else {
-        print('Error al obtener los datos del perfil: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      print('Error en la llamada a la API: $e');
-      return null;
-    }
-  }
-
-  // Método para actualizar el perfil de un usuario (si es necesario)
-  Future<bool> updateProfile(ProfileCourierEntity profile) async {
-    try {
-      final data = profile.toJson();
-      final response = await dio.put(
-        '/profiles/${profile.uid}',
-        data: json.encode(data),
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Error al actualizar el perfil: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error al hacer la solicitud de actualización: $e');
-      return false;
     }
   }
 }

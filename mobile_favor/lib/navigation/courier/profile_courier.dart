@@ -27,19 +27,20 @@ class _ProfileCourierState extends State<ProfileCourier> {
   }
 
   void _loadProfile() async {
-    ProfileCourierEntity? profile =
-        await _profileCourierService.getProfileCourier();
-    print(profile);
-    if (profile != null) {
-      setState(() {
-        print("Perfil cargado");
-        profileCourier = profile;
-        phone = profile.phone!;
-        email = profile.email!;
-      });
-    } else {
-      // Manejo de error si no se obtiene el perfil
-      print('No se pudo cargar el perfil');
+    try {
+      ProfileCourierEntity? profile =
+          await _profileCourierService.getProfileCourier();
+      if (profile != null) {
+        setState(() {
+          profileCourier = profile;
+          phone = profile.phone ?? '';
+          email = profile.email ?? '';
+        });
+      } else {
+        print('No se pudo cargar el perfil');
+      }
+    } catch (e) {
+      print('Error al cargar el perfil: $e');
     }
   }
 
@@ -111,24 +112,25 @@ class _ProfileCourierState extends State<ProfileCourier> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        profileCourier?.name ?? 'Nombre',
+                        '${profileCourier?.name ?? ''} ${profileCourier?.surname ?? ''} ${profileCourier?.lastname ?? ''}',
                         style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                      const Row(
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.phone,
                             size: 16,
                             color: Colors.white,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            '777-234-4325',
-                            style: TextStyle(color: Colors.white),
+                            profileCourier?.phone ?? '',
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
@@ -138,35 +140,39 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         ),
                         elevation: 2,
                         color: Colors.white.withOpacity(0.8),
-                        child: const Padding(
-                          padding: EdgeInsets.all(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Repartidor',
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               Row(
                                 children: [
-                                  Expanded(child: Text('CURP:')),
-                                  Expanded(child: Text('OOAZ900824MTSRLL08')),
+                                  const Expanded(child: Text('CURP:')),
+                                  Expanded(
+                                    child: Text(profileCourier?.curp ?? ''),
+                                  ),
                                 ],
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               Row(
                                 children: [
-                                  Expanded(child: Text('SEXO:')),
-                                  Expanded(child: Text('Masculino')),
+                                  const Expanded(child: Text('SEXO:')),
+                                  Expanded(
+                                      child: Text(profileCourier?.sex ?? '')),
                                 ],
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               Row(
                                 children: [
-                                  Expanded(child: Text('COREREO:')),
-                                  Expanded(child: Text('correo@gmail.com')),
+                                  const Expanded(child: Text('CORREO:')),
+                                  Expanded(
+                                      child: Text(profileCourier?.email ?? '')),
                                 ],
                               )
                             ],
@@ -177,7 +183,10 @@ class _ProfileCourierState extends State<ProfileCourier> {
                       TextFormField(
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.phone),
-                          label: const Text('Nuevo teléfono'),
+                          labelText:
+                              'Nuevo teléfono', // Título que aparece cuando el campo no está vacío
+                          hintText: profileCourier?.phone ??
+                              '', // Placeholder cuando el campo está vacío
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -196,7 +205,10 @@ class _ProfileCourierState extends State<ProfileCourier> {
                       TextFormField(
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.email),
-                          label: const Text('Nuevo correo'),
+                          labelText:
+                              'Nuevo Correo', // Título que aparece cuando el campo no está vacío
+                          hintText: profileCourier?.email ??
+                              '', // Placeholder cuando el campo está vacío
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -251,6 +263,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
                               SharedPreferences prefs =
                                   await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
+                              prefs.remove('uid');
                               prefs.remove('role');
                               prefs.remove('token');
                               prefs.remove('no_user');
@@ -272,9 +285,10 @@ class _ProfileCourierState extends State<ProfileCourier> {
                           ),
                         ],
                       ),
-                      const Text(
-                        'Repartidor a moto',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      Text(
+                        profileCourier?.vehicleType ?? '',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       const Icon(
                         Icons.motorcycle,
@@ -282,7 +296,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         color: Colors.white,
                       ),
                       Text(
-                        'Yamaha YBR 125 ZR 2023 COLOR ROJO',
+                        '${profileCourier?.licensePlate ?? ''} ',
                         style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 13),

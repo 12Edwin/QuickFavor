@@ -1,5 +1,4 @@
 class ProfileCourierEntity {
-  final String? uid;
   final String? name;
   final String? surname;
   final String? lastname;
@@ -8,24 +7,17 @@ class ProfileCourierEntity {
   final String? sex;
   final String? role;
   final String? phone;
-  final DateTime? createdAt;
-  final String? noCourier;
-  final String? fcmToken;
-  final int? rejectedOrders;
   final String? vehicleType;
   final String? status;
   final String? licensePlate;
-  final DateTime? lastUpdate;
-  final String? idPerson;
   final String? faceUrl;
   final String? ineUrl;
   final String? plateUrl;
-  final String? brand;
-  final String? model;
-  final String? color;
+  final int? rejectedOrders;
+  final String? fcmToken;
+  final String? uid;
 
   ProfileCourierEntity({
-    this.uid,
     this.name,
     this.surname,
     this.lastname,
@@ -34,27 +26,20 @@ class ProfileCourierEntity {
     this.sex,
     this.role,
     this.phone,
-    this.createdAt,
-    this.noCourier,
-    this.fcmToken,
-    this.rejectedOrders,
     this.vehicleType,
     this.status,
     this.licensePlate,
-    this.lastUpdate,
-    this.idPerson,
     this.faceUrl,
     this.ineUrl,
     this.plateUrl,
-    this.brand,
-    this.model,
-    this.color,
+    this.rejectedOrders,
+    this.fcmToken,
+    this.uid,
   });
 
-  // Factory constructor to create an instance from JSON data
+  // Método para convertir de JSON a ProfileCourierEntity
   factory ProfileCourierEntity.fromJson(Map<String, dynamic> json) {
     return ProfileCourierEntity(
-      uid: json['uid'],
       name: json['name'],
       surname: json['surname'],
       lastname: json['lastname'],
@@ -63,32 +48,26 @@ class ProfileCourierEntity {
       sex: json['sex'],
       role: json['role'],
       phone: json['phone'],
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
-      noCourier: json['no_courier'],
-      fcmToken: json['fcm_token'],
-      rejectedOrders: json['rejected_orders'],
       vehicleType: json['vehicle_type'],
       status: json['status'],
       licensePlate: json['license_plate'],
-      lastUpdate: json['last_update'] != null
-          ? DateTime.parse(json['last_update'])
-          : null,
-      idPerson: json['id_person'],
       faceUrl: json['face_url'],
       ineUrl: json['ine_url'],
       plateUrl: json['plate_url'],
-      brand: json['brand'],
-      model: json['model'],
-      color: json['color'],
+      rejectedOrders: json['rejected_orders'],
+      fcmToken: json['fcm_token'],
+      uid: json['uid'],
     );
   }
 
-  // Method to convert the instance to a Map (for example, to send as JSON)
+  // Sobrescribir el método toString para mejorar la visualización en los logs
+  @override
+  String toString() {
+    return 'ProfileCourierEntity(name: $name, surname: $surname, email: $email, phone: $phone, vehicleType: $vehicleType, status: $status)';
+  }
+
   Map<String, dynamic> toJson() {
     return {
-      'uid': uid,
       'name': name,
       'surname': surname,
       'lastname': lastname,
@@ -97,21 +76,15 @@ class ProfileCourierEntity {
       'sex': sex,
       'role': role,
       'phone': phone,
-      'created_at': createdAt?.toIso8601String(),
-      'no_courier': noCourier,
-      'fcm_token': fcmToken,
-      'rejected_orders': rejectedOrders,
       'vehicle_type': vehicleType,
       'status': status,
       'license_plate': licensePlate,
-      'last_update': lastUpdate?.toIso8601String(),
-      'id_person': idPerson,
       'face_url': faceUrl,
       'ine_url': ineUrl,
       'plate_url': plateUrl,
-      'brand': brand,
-      'model': model,
-      'color': color,
+      'rejected_orders': rejectedOrders,
+      'fcm_token': fcmToken,
+      'uid': uid,
     };
   }
 }
