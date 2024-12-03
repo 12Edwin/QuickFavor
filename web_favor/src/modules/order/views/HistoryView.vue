@@ -5,13 +5,13 @@
   <div class="history-container">
     <div class="card-header d-flex align-center justify-space-between">
       <h2 class="header-title">
-        <i class="fas fa-history fa-lg text-white" style="font-size: 36px;"></i>
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px"></i>
         <span class="ml-4 fas text-white">H i s t o r i a l</span>
       </h2>
-      <Switch @onFalse="" @onTrue=""/>
+      <Switch @onFalse="toggleStatus" @onTrue="toggleStatus" />
     </div>
     <div class="details-container">
-      <div v-if="data.length === 0" class="no-orders">
+      <div v-if="history.length === 0" class="no-orders">
         <img
           src="../../../assets/empty2.png"
           alt="No hay pedidos"
@@ -20,267 +20,141 @@
         Aún no hay pedidos en esta cuenta
       </div>
       <div class="h-100" v-else>
-        <div class="h-100" v-for="(item, index) in data" :key="index">
+        <div
+          class="h-100"
+          v-for="(item, index) in paginatedHistory"
+          :key="item.no_order"
+        >
           <v-card class="white-card d-flex h-100 w-100">
             <div class="left-strip"></div>
             <div class="d-flex w-100 justify-space-between flex-wrap ga-2 pa-2">
               <div class="d-flex mx-2 flex-column justify-center mr-auto">
-                <v-card-title class="px-0">{{ item.numeroProductos }} productos</v-card-title>
-                <p class="date ma-0 py-1">{{ item.fecha }}</p>
+                <v-card-title class="px-0"
+                  >{{ item.products }} productos</v-card-title
+                >
+                <p class="date ma-0 py-1">{{ formatDate(item.created_at) }}</p>
               </div>
               <div class="d-flex justify-center mx-2 align-center">
-                <v-chip :color="getChipColor(item.estatus)" variant="flat" class="chip-style">
-                  <span style="color: white">{{ item.estatus }}</span>
+                <v-chip
+                  :color="getChipColor(item.status)"
+                  variant="flat"
+                  class="chip-style"
+                >
+                  <span style="color: white">{{ item.status }}</span>
                 </v-chip>
               </div>
               <div class="my-auto ml-auto">
                 <v-btn class="rounded-pill">
-                <router-link
-                  :to="{ name: 'historyDetails', params: { id: index } }"
-                  class="icon-link">
-                  <i class="fa-solid fa-eye icon-style"></i>
-                </router-link>
+                  <router-link
+                    :to="{
+                      name: 'historyDetails',
+                      params: { id: item.no_order },
+                    }"
+                    class="icon-link"
+                  >
+                    <i class="fa-solid fa-eye icon-style"></i>
+                  </router-link>
                 </v-btn>
               </div>
             </div>
           </v-card>
         </div>
-        </div>
-
-        <!-- Componente de paginación debajo de las cards -->
-        <v-pagination
-          :length="3"
-          :show-arrows="true"
-          rounded="circle"
-          class="pagination-style"
-        ></v-pagination>
       </div>
+
+      <!-- Componente de paginación debajo de las cards -->
+      <v-pagination
+        v-if="totalPages > 1"
+        v-model="currentPage"
+        :length="totalPages"
+        :show-arrows="true"
+        rounded="circle"
+        class="pagination-style"
+      ></v-pagination>
     </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
 import Switch from "@/components/Switch.vue";
+import { getOrderHistory } from "../services/history.service";
+import { HistoryOrder } from "../entity/history.entity";
+import { getProfile } from "@/modules/user/services/profile";
 
 export default defineComponent({
   name: "HistoryView",
-  components: {Switch, WaveComponent },
+  components: { Switch, WaveComponent },
   data() {
     return {
       isActive: true, // Variable para manejar el estado del botón
-
-      data: [
-        {
-          nombreCliente: "Jose",
-          numeroProductos: 10,
-          fecha: "29-10-2024",
-          estatus: "Proceso de Compra",
-          tiempoCompletado: "Aun no completado",
-          subtotal: 0,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Miguel",
-          numeroProductos: 12,
-          fecha: "28-10-2024",
-          estatus: "Finalizado",
-          tiempoCompletado: "120 min",
-          subtotal: 300,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Santiago",
-          numeroProductos: 5,
-          fecha: "27-10-2024",
-          estatus: "Proceso de entrega",
-          tiempoCompletado: "Aun no completado",
-          subtotal: 0,
-          productos: [
-            {
-              nombre: "1 litro aceite",
-              descripcion: "Aceite 123 de litro",
-              cantidad: 1,
-            },
-            {
-              nombre: "2 kg arroz",
-              descripcion: "Arroz blanco 2 kg",
-              cantidad: 2,
-            },
-            {
-              nombre: "500 g pasta",
-              descripcion: "Pasta integral 500 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "3 litros leche",
-              descripcion: "Leche entera 3 litros",
-              cantidad: 3,
-            },
-            {
-              nombre: "1 kg azúcar",
-              descripcion: "Azúcar blanca 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "250 g café",
-              descripcion: "Café molido 250 g",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 kg frijoles",
-              descripcion: "Frijoles negros 1 kg",
-              cantidad: 1,
-            },
-            {
-              nombre: "1 paquete tortillas",
-              descripcion: "Tortillas de maíz",
-              cantidad: 1,
-            },
-            {
-              nombre: "500 ml jugo",
-              descripcion: "Jugo de naranja 500 ml",
-              cantidad: 1,
-            },
-            {
-              nombre: "750 ml salsa",
-              descripcion: "Salsa de tomate 750 ml",
-              cantidad: 1,
-            },
-          ],
-        },
-        {
-          nombreCliente: "Giovanni",
-          numeroProductos: 8,
-          fecha: "26-10-2024",
-          estatus: "Cancelado",
-          tiempoCompletado: "No completado",
-          subtotal: 0,
-          productos: [],
-        },
-      ],
+      history: [] as HistoryOrder[], // Datos del historial de órdenes
+      currentPage: 1, // Página actual para la paginación
+      perPage: 5, // Número de elementos por página
+      courierId: "", // Nuevo campo para almacenar el courierId
     };
+  },
+  computed: {
+    // Datos paginados para mostrar solo una parte del historial
+    paginatedHistory(): HistoryOrder[] {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.history.slice(start, end);
+    },
+    totalPages(): number {
+      return Math.ceil(this.history.length / this.perPage); // Anotamos el tipo explícito como 'number'
+    },
   },
   methods: {
     toggleStatus() {
       this.isActive = !this.isActive;
     },
+
+    async getHistory() {
+      try {
+        const response = await getOrderHistory(); // No necesitas pasar el courierId
+        if (response.code === 200) {
+          this.history = response.data; // Asignamos los datos del historial
+        } else {
+          console.error("Error en la respuesta:", response.message);
+        }
+      } catch (error) {
+        console.error("Error al obtener el historial de pedidos:", error);
+      }
+    },
+
     getChipColor(estatus: string) {
       switch (estatus) {
-        case "Proceso de Compra":
+        case "Pending":
           return "#fdab30";
-        case "Proceso de entrega":
+        case "In delivery":
           return "#89a7b1";
-        case "Finalizado":
+        case "In shopping":
+          return "#89a7b1";
+        case "Finished":
           return "#3a415a";
-        case "Cancelado":
+        case "Canceled":
           return "#f70b0b";
         default:
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
       }
     },
+
+    formatDate(dateString: string) {
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      };
+      const date = new Date(dateString);
+      return date.toLocaleDateString("es-MX", options);
+    },
+  },
+  mounted() {
+    this.getHistory(); // Llamamos a la función al cargar el componente
   },
 });
 </script>
@@ -321,7 +195,7 @@ export default defineComponent({
   align-items: center;
   gap: 8px;
 }
-.details-container{
+.details-container {
   background-color: rgba(255, 255, 255, 0.4);
   padding: 2rem;
   border-radius: 10px;
@@ -391,8 +265,6 @@ export default defineComponent({
   margin-bottom: 20px;
   padding: 0;
 }
-
-
 
 .card-content {
   display: flex;

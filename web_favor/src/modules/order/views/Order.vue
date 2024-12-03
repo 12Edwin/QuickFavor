@@ -14,7 +14,7 @@
 
     <div class="details-container">
       <div v-if="nothingToShow" class="no-orders-container">
-        <img src="@/assets/box.png" alt="No Orders" class="no-orders-image"/>
+        <img src="@/assets/empty2.png" width="200" alt="No Orders" class="no-orders-image"/>
         <p class="no-orders-text">No hay pedidos activos</p>
       </div>
       <div v-else>
@@ -180,7 +180,7 @@
     </div>
   </div>
   <MapModal v-if="showMap" :lat="selectedAddress.lat" :lng="selectedAddress.lng" @close="()=> showMap = false"/>
-  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
+  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="newStatus == 'Canceled' ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
 </template>
 
 <script lang="ts">

@@ -38,6 +38,7 @@ AuthRouter.post('/courier-register', [
     check('model').optional().isLength({ min: 3 }),
     check('color').optional().isLength({ min: 3 }),
     check('license_plate', 'invalid license plate').optional().matches(/^[A-Z0-9]+-[A-Z0-9]+$/),
+    check('description').optional().isLength({ min: 3 }),
     check('face_photo', 'missing face photo').not().isEmpty(),
     check('face_photo', 'invalid face photo').isBase64(),
     check('INE_photo', 'missing INE photo').not().isEmpty(),

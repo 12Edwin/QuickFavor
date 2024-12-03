@@ -4,7 +4,7 @@
       <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
         <div class="header-layout">
-          <span class="text-light text mr-3 font-weight-bold mr-3">Juan Rodrígo</span>
+          <span class="text-light text mr-3 font-weight-bold mr-3">{{ name }}</span>
           <span @click="handleSessionModal" class="text-light text mr-3 font-weight-bold pa-2 px-5 cursor-pointer rounded-pill bg-blue-grey-lighten-4"> <i class="fas fa-sign-out-alt"></i> </span>
         </div>
         <div class="content-body">
@@ -20,6 +20,7 @@
 import { defineComponent } from 'vue';
 import SideBar from "@/components/SideBar.vue";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+import {getNamesByToken} from "@/kernel/utils";
 
 export default defineComponent({
   name: "PrivateLayout",
@@ -27,11 +28,15 @@ export default defineComponent({
   data() {
     return {
       showModal: false,
-      isSidebarOpen: false
+      isSidebarOpen: false,
+      name: ''
     };
   },
 
   methods:{
+    async getStorageName(){
+      this.name = await getNamesByToken()
+    },
     handleSessionModal(){
       this.showModal = !this.showModal;
     },
@@ -39,6 +44,9 @@ export default defineComponent({
       localStorage.removeItem('token');
       this.$router.push({name: 'login'});
     }
+  },
+  mounted(){
+    this.getStorageName()
   }
 });
 </script>

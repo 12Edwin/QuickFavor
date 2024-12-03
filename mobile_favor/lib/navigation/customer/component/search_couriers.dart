@@ -25,7 +25,7 @@ class _SearchCouriersState extends State<SearchCouriers> {
   bool isSearching = true;
   late Timer _timer;
   int _countdown = 600; // 10 minutes in seconds
-  late Stream<SSEMessage> sseStream;
+  late StreamSubscription<SSEMessage> _sseSubscription;
   SSEMessage? sseMessage;
 
   @override
@@ -71,12 +71,11 @@ class _SearchCouriersState extends State<SearchCouriers> {
     final service = FavorService(context);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    sseStream = service.listenToSSE(SearchCourierEntity(
+    _sseSubscription = service.listenToSSE(SearchCourierEntity(
       no_order: noOrder,
       delivery_point: DeliveryPoint(lat: widget.order.customer_direction.lat, lng: widget.order.customer_direction.lng),
       distance_km: 5,
-    ));
-    sseStream.listen((message) {
+    )).listen((message) {
       setState(() {
         sseMessage = message;
         if (message.data.status == 'In shopping') {
@@ -116,12 +115,14 @@ class _SearchCouriersState extends State<SearchCouriers> {
       _isCancelled = true;
     });
     _timer.cancel();
+    _sseSubscription.cancel();
     Navigator.of(context).pop();
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _sseSubscription.cancel();
     super.dispose();
   }
 

@@ -446,7 +446,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                     const Padding(
                       padding: EdgeInsets.only(top: 8.0),
                       child: Text(
-                        'Ya has rechazado 2 pedidos, si rechazas este, se te penalizará',
+                        'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará',
                         style: TextStyle(color: Colors.red),
                       ),
                     ),

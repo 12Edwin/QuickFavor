@@ -2,7 +2,7 @@ import api from '@/config/http-client-gateway';
 import { getErrorMessages, ResponseEntity } from "@/kernel/error-response";
 import { ProfileEntity } from "@/modules/user/entity/profile.entity";
 
-// Tiempo de expiración de caché en milisegundos (2 horas)
+// Tiempo de expiración de caché (2 horas)
 const CACHE_EXPIRATION_TIME = 2 * 60 * 60 * 1000; 
 
 const getCache = (credential: string) => {
@@ -37,12 +37,6 @@ export const getProfile = async (): Promise<ResponseEntity> => {
     return { error: true, message: 'No credential found in localStorage', code: 401, data: null };
   }
 
-  // Intenta recuperar los datos del caché
-  const cachedData = getCache(credential);
-
-  if (cachedData && isCacheValid(cachedData.timestamp)) {
-    return cachedData.data;
-  }
 
   // Si el caché no es válido o no existe, intenta hacer la solicitud a la API
   try {
@@ -54,6 +48,13 @@ export const getProfile = async (): Promise<ResponseEntity> => {
 
     return response.data;
   } catch (error: any) {
+    // Intenta recuperar los datos del caché
+    const cachedData = getCache(credential);
+
+    if (cachedData && isCacheValid(cachedData.timestamp)) {
+      return cachedData.data;
+    }
+
     if (cachedData) {
       // Si hay datos en el caché pero no se puede conectar, se retorna el caché si es válido
       if (isCacheValid(cachedData.timestamp)) {
@@ -71,3 +72,42 @@ export const getProfile = async (): Promise<ResponseEntity> => {
     return { error: true, message: 'Unknown error occurred', code: 500, data: null };
   }
 };
+
+
+export const updateProfile = async (profile: ProfileEntity): Promise<ResponseEntity> => {
+  const credential = localStorage.getItem("credential");
+
+  if (!credential) {
+    return { error: true, message: 'No credential found in localStorage', code: 401, data: null };
+  }
+
+  try {
+    const response = await api.doPut(`courier/profile/`, profile);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      return getErrorMessages(error.response.data);
+    }
+
+    return { error: true, message: 'Unknown error occurred', code: 500, data: null };
+  }
+}
+
+export const updateTransport = async (profile: ProfileEntity): Promise<ResponseEntity> => {
+  const credential = localStorage.getItem("credential");
+
+  if (!credential) {
+    return { error: true, message: 'No credential found in localStorage', code: 401, data: null };
+  }
+
+  try {
+    const response = await api.doPut(`courier/vehicle`, profile);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      return getErrorMessages(error.response.data);
+    }
+
+    return { error: true, message: 'Unknown error occurred', code: 500, data: null };
+  }
+}

@@ -24,10 +24,10 @@ const getCourierProfile = async (req: Request, res: Response): Promise<void> => 
 
 const editCourierProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { user, ...profileData } = req.body;
+        const { user, phone } = req.body;
         const repository: CourierRepository = new CourierRepository();
         const service: CourierService = new CourierService(repository);
-        await service.editCourierProfile(user.uid, profileData);
+        await service.editCourierProfile(user.uid, phone);
 
         const response: ResponseApi<string> = Response200('Profile updated successfully');
         res.status(response.code).json(response);
@@ -36,6 +36,21 @@ const editCourierProfile = async (req: Request, res: Response): Promise<void> =>
         res.status(error.code).json(error);
     }
 };
+
+const editVehicleCourier = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { user, vehicle_type, license_plate, plate_photo, brand, model, color, description } = req.body;
+        const repository: CourierRepository = new CourierRepository();
+        const service: CourierService = new CourierService(repository);
+        await service.editVehicleCourier(user.uid, vehicle_type, license_plate, plate_photo, brand, model, color, description);
+
+        const response: ResponseApi<string> = Response200('Vehicle updated successfully');
+        res.status(response.code).json(response);
+    } catch (e) {
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
 
 const changeCourierStatus = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -56,5 +71,6 @@ const changeCourierStatus = async (req: Request, res: Response): Promise<void> =
 export {
     getCourierProfile,
     editCourierProfile,
-    changeCourierStatus
+    changeCourierStatus,
+    editVehicleCourier
 };

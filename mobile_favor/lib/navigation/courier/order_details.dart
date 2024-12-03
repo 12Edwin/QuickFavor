@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class OrderDetails extends StatefulWidget {
-  const OrderDetails(
-      {Key? key, required no_order})
+class OrderDetailsCourier extends StatefulWidget {
+  const OrderDetailsCourier(
+      {Key? key, required orderId, required fecha, required cantidad})
       : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
 }
 
-class _OrderDetailsState extends State<OrderDetails> {
+class _OrderDetailsState extends State<OrderDetailsCourier> {
   bool isProductsExpanded = false; // Control para expandir/comprimir productos
   bool isFirstLocked = false;
   bool isSecondLocked = true;
@@ -18,11 +18,6 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: const Color(0xFF2D3E50),
-          automaticallyImplyLeading: false,
-          toolbarHeight: 15.0
-        ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -78,6 +73,7 @@ class _OrderDetailsState extends State<OrderDetails> {
               // Contenedor completo
               Container(
                 padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -150,7 +146,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Juan Rodrigo',
+                              'Miguel Ohara',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -158,7 +154,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                               ),
                             ),
                             Text(
-                              'Repartidor',
+                              'Cliente',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF91A4A3),
