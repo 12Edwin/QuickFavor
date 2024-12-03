@@ -33,6 +33,7 @@ services:
     build:
       context: ./web_favor
       dockerfile: Dockerfile
+      target: prod
     restart: always
     ports:
       - 3001:80
