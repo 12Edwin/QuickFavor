@@ -30,31 +30,46 @@ class FavorService {
   }
 
   Stream<SSEMessage> listenToSSE(SearchCourierEntity data) async* {
-  final response = await dio.post(
-    '/location/search',
-    data: data.toJson(),
-    options: Options(
-      responseType: ResponseType.stream,
-    ),
-  );
+  const int maxRetries = 3;
+  int retryCount = 0;
 
-  List<int> buffer = [];
-  await for (final chunk in response.data.stream) {
-    buffer.addAll(chunk);
-    String text = utf8.decode(buffer);
-    buffer.clear();
+  while (retryCount < maxRetries) {
+    try {
+      final response = await dio.post(
+        '/location/search',
+        data: data.toJson(),
+        options: Options(
+          responseType: ResponseType.stream,
+        ),
+      );
 
-    for (final line in LineSplitter.split(text)) {
-      if (line.isNotEmpty) {
-        print('Línea recibida: $line');
-        try {
-          final jsonData = jsonDecode(line);
-          yield SSEMessage.fromJson(jsonData);
-        } catch (e) {
-          print('Error decodificando JSON: $e');
-          continue;
+      List<int> buffer = [];
+      await for (final chunk in response.data.stream) {
+        buffer.addAll(chunk);
+        String text = utf8.decode(buffer);
+        buffer.clear();
+
+        for (final line in LineSplitter.split(text)) {
+          if (line.isNotEmpty) {
+            print('Línea recibida: $line');
+            try {
+              final jsonData = jsonDecode(line);
+              yield SSEMessage.fromJson(jsonData);
+            } catch (e) {
+              print('Error decodificando JSON: $e');
+              continue;
+            }
+          }
         }
       }
+      break; // Exit the loop if successful
+    } catch (e) {
+      retryCount++;
+      print('Error en la conexión, intento $retryCount de $maxRetries: $e');
+      if (retryCount >= maxRetries) {
+        rethrow; // Re-throw the error if max retries reached
+      }
+      await Future.delayed(const Duration(seconds: 2)); // Wait before retrying
     }
   }
 }

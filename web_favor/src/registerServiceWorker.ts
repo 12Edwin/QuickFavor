@@ -4,7 +4,7 @@ import {showInfoToast} from "@/kernel/alerts";
 
 const messaging = firebaseMessaging
 
-if (true) {
+if ('serviceWorker' in navigator) {
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready() {
       console.log(
@@ -41,7 +41,7 @@ if (true) {
       console.error('Error during service worker registration:', error)
       showServiceWorkerErrorMessage(error)
     }
-  })
+  });
 }
 
 async function requestPushPermission() {

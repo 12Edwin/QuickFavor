@@ -70,7 +70,7 @@ export class AuthRepository {
     async courier_register(payload: UserType & Courier): Promise<string> {
         let connection: PoolConnection | null = null;
         try {
-            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color } = payload;
+            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color, description } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -94,8 +94,8 @@ export class AuthRepository {
 
 
             await connection.query(
-                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status, face_url, ine_url, plate_url, brand, model, color) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                [userRecord.uid, vehicle_type, license_plate, 'Out of service', face_photo, INE_photo, plate_photo, brand, model, color]
+                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status, face_url, ine_url, plate_url, brand, model, color, description) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                [userRecord.uid, vehicle_type, license_plate, 'Out of service', face_photo, INE_photo, plate_photo, brand, model, color, description]
             );
 
             await connection.commit();

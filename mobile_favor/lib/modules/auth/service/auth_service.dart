@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_favor/config/dio_config.dart';
@@ -20,6 +22,7 @@ class AuthService {
       final response =
           await dio.post('/auth/login', data: credentials.toJson());
       final data = response.data['data'];
+      print(data);
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
       await prefs.setString('no_user', data['user']['no_user']);
@@ -28,12 +31,13 @@ class AuthService {
       await prefs.setString('role', data['user']['role']);
       await prefs.setString('name', data['user']['name']);
       if (data['user']['location'] != null)
-        await prefs.setDouble('lat', data['user']['location']['lat']);
+        await prefs.setDouble('lat', num.parse(data['user']['location']['lat'].toString()).toDouble());
       if (data['user']['location'] != null)
-        await prefs.setDouble('lng', data['user']['location']['lng']);
-      print(data);
+        await prefs.setDouble('lng', num.parse(data['user']['location']['lng'].toString()).toDouble());
+
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
+      print(error);
       ResponseEntity resp =
           ResponseEntity.fromJson((error as DioError).response!.data);
       if (resp.data != null) {
