@@ -9,12 +9,6 @@
                 <v-icon class="fa-solid fa-phone icon"></v-icon>
                 <input type="tel" v-model="form.phone" placeholder="Teléfono" class="register-input" required>
                 </div>
-
-                <!-- Correo -->
-                <div class="input-container">
-                <v-icon class="fa-solid fa-envelope icon"></v-icon>
-                <input type="text" v-model="form.email" placeholder="Correo electronico" class="register-input" required>
-                </div>
           </div>
         </v-card-text>
   
@@ -51,7 +45,6 @@ export default {
       showModal: false,
       form: {
         phone: '',
-        email: '',
       },
     };
   },
@@ -74,7 +67,6 @@ export default {
       handler(newProfile) {
         if (newProfile) {
           this.form.phone = newProfile.phone || '';
-          this.form.email = newProfile.email || '';
         }
       },
       immediate: true,
@@ -86,14 +78,15 @@ export default {
     },
     async saveInfo() {
       this.profile.phone = this.form.phone;
-      this.profile.email = this.form.email;
       try {
-        const result = await updateProfile(this.profile);
+        const result = await updateProfile(this.form);
         console.log(result);
         if (result.error) {
           showErrorToast(getErrorMessages(result.message));
           return;       
         }
+        this.showModal = false;
+        this.localIsModalVisible = false;
         showSuccessToast('Información actualizada correctamente');
         this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);  
       } catch (error) {
