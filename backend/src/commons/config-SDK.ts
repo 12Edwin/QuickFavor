@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from "firebase/storage";
 import {getFirestore} from "firebase-admin/firestore";
-const serviceAccount = require('../../node-users-c60ae-firebase-adminsdk-98z1q-41232234ad.json');
+const serviceAccount = require('../../node-users-c60ae-firebase-adminsdk-98z1q-cbdda3a09a.json');
 
  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
