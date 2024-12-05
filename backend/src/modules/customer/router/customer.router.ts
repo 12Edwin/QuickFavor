@@ -7,7 +7,7 @@ const CustomerRouter = Router();
 
 CustomerRouter.get('/profile/:uid', [
     validateJWT,
-    checkRole(['Courier']),
+    checkRole(['Customer']),
     check('uid').isString().notEmpty(),
     check('uid').isLength({min: 5, max: 50}),
     validateMiddlewares
