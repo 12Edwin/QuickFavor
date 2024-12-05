@@ -8,7 +8,8 @@ import 'package:mobile_favor/navigation/customer/entity/location.entity.dart';
 import 'package:mobile_favor/navigation/customer/service/favor.service.dart';
 
 class MapCourier extends StatefulWidget {
-  const MapCourier({super.key});
+  final Function(bool) onSwitchChanged;
+  const MapCourier({super.key, required this.onSwitchChanged});
 
   @override
   _MapCourierState createState() => _MapCourierState();
@@ -37,22 +38,11 @@ class _MapCourierState extends State<MapCourier> {
   }
 
   void _startTimer() async {
-    final FavorService _favorService = FavorService(context);
-    final String? no_courier = await getStorageNoUser();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
       Position position = await _getCurrentLocation();
       setState(() {
         _currentPosition = position;
       });
-      UpdateLocationEntity location = UpdateLocationEntity(
-        no_courier: no_courier ?? '',
-        lat: position.latitude,
-        lng: position.longitude,
-      );
-      final result = await _favorService.updateLocation(location);
-      if (result.error) {
-        showErrorAlert(context, 'Ocurrió un error al actualizar la ubicación');
-      }
     });
   }
 
@@ -98,7 +88,7 @@ class _MapCourierState extends State<MapCourier> {
               onChanged: (value) {
                 setState(() {
                   _isActive = value;
-                  toggleStorageAvailability(value);
+                  widget.onSwitchChanged(value);
                   if (_isActive) {
                     _startTimer();
                   } else {

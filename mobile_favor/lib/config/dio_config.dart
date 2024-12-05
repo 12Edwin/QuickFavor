@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DioConfig {
   static Dio createDio(BuildContext context) {
     final dio = Dio(BaseOptions(
-      baseUrl: 'https://backend-app-y3z1.onrender.com',
+      baseUrl: 'http://54.243.28.11:3000',
       connectTimeout: const Duration(milliseconds: 10000),
       receiveTimeout: const Duration(milliseconds: 30000),
     ));
@@ -19,6 +19,7 @@ class DioConfig {
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
+        print(options.uri);
         return handler.next(options);
       },
       onResponse: (response, handler) {

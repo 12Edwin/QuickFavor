@@ -3,7 +3,7 @@ import {FavorEntity} from "../interface/favor.entity";
 import {existsCourierById, existsCustomerById, toggleUserAccount} from "../../../auth/service/boundary";
 import {LocationEntity} from "../../../grpc/entity/location.entity";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
-import {storage} from "../../../commons/config-SDK";
+import {db, storage} from "../../../commons/config-SDK";
 
 export class FavorService{
 
@@ -67,11 +67,27 @@ export class FavorService{
             if (!await this.favorRepository.hasNotBeenAccepted(no_order)) throw new Error('Favor already accepted');
             if (!await this.favorRepository.thereIsTimeToAccept(no_order)) throw new Error('Time to accept is over');
 
-            return await this.favorRepository.acceptFavor(no_order, no_courier);
+            await this.favorRepository.acceptFavor(no_order, no_courier);
+            await this.createChatDocument(no_order);
+            return true;
         }catch (error: any){
             throw new Error((error as Error).message)
         }
     }
+
+    async createChatDocument (id: string): Promise<void> {
+      try {
+        const chatRef = db.collection('chats').doc(id);
+        await chatRef.set({
+          available: true,
+          messages: []
+        });
+        console.log(`Document with ID ${id} created successfully.`);
+      } catch (error) {
+        console.error('Error creating document:', error);
+        throw new Error('Error creating document');
+      }
+    };
 
     async uploadImage(base64Image: string, imageName: string): Promise<string> {
         const buffer = Buffer.from(base64Image, 'base64');
