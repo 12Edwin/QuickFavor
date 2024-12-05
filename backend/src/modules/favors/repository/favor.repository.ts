@@ -71,6 +71,9 @@ export class FavorRepository{
         try {
             connection.beginTransaction();
             await connection.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
+            if (newStatus === 'Finished'){
+                await connection.query('UPDATE Orders SET finished_at = current_timestamp WHERE no_order = ?;', [id])
+            }
             if (newStatus === 'Finished' || newStatus === 'Canceled') {
                 await connection.query('UPDATE Couriers SET status = "Available" WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [id])
             }
