@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_favor/navigation/courier/modal_courier_form.dart';
-import 'package:mobile_favor/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileCustomer extends StatefulWidget {
@@ -242,6 +241,12 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                                   await SharedPreferences.getInstance();
                               prefs.remove('isLoggedIn');
                               prefs.remove('role');
+                              prefs.remove('token');
+                              prefs.remove('no_user');
+                              prefs.remove('name');
+                              prefs.remove('uid');
+                              prefs.remove('lat');
+                              prefs.remove('lng');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(

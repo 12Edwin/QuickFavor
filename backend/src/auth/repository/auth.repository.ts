@@ -23,11 +23,30 @@ export class AuthRepository {
                 const token = conf_token.token;
                 const encryptedToken = encrypt(token);
                 const userDB = await this.findUserByEmail(user.email || '');
+                let no_user = ''
+                let location = null
+                console.log(payload.token)
+                if (userDB.role === 'Courier'){
+                    const [courier] = await pool.query('SELECT no_courier FROM Couriers WHERE id_person = ?', [user.uid]);
+                    const rows = courier as RowDataPacket[]
+                    no_user = rows[0].no_courier
+                    await pool.query('UPDATE Couriers SET fcm_token = ? WHERE no_courier = ?', [payload.token, no_user]);
+                }else{
+                    const [customer] = await pool.query('SELECT no_customer FROM Customers WHERE id_person = ?', [user.uid]);
+                    const rows = customer as RowDataPacket[]
+                    no_user = rows[0].no_customer
+                    await pool.query('UPDATE Customers SET fcm_token = ? WHERE no_customer = ?', [payload.token, no_user]);
+                    const [place] = await pool.query('SELECT ST_X(location) as lng, ST_Y(location) as lat FROM Places WHERE id_customer = ? AND type = "Home"', [no_user]);
+                    const rowsPlace = place as RowDataPacket[]
+                    location = {lat: rowsPlace[0].lat, lng: rowsPlace[0].lng}
+                }
                 const userData = {
                     uid: user.uid,
                     email: user.email,
                     name: user.displayName,
-                    role: userDB.role
+                    role: userDB.role,
+                    no_user,
+                    location
                 };
                 return new Promise( (res)=> res({ user: userData, isEmailVerified: true, token: encryptedToken, } as LoginResponse) );
             } else {
@@ -48,10 +67,10 @@ export class AuthRepository {
         }
     }
 
-    async courier_register(payload: UserType & Courier): Promise<boolean> {
+    async courier_register(payload: UserType & Courier): Promise<string> {
         let connection: PoolConnection | null = null;
         try {
-            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex } = payload;
+            const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color, description } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -75,12 +94,12 @@ export class AuthRepository {
 
 
             await connection.query(
-                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status) VALUES (?,?,?,?)',
-                [userRecord.uid, vehicle_type, license_plate, 'Out of service']
+                'INSERT INTO Couriers (id_person, vehicle_type, license_plate, status, face_url, ine_url, plate_url, brand, model, color, description) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                [userRecord.uid, vehicle_type, license_plate, 'Out of service', face_photo, INE_photo, plate_photo, brand, model, color, description]
             );
 
             await connection.commit();
-            return true;
+            return userRecord.uid;
         } catch (error: any) {
             console.log(error)
             if (connection) {
@@ -97,10 +116,23 @@ export class AuthRepository {
         }
     }
 
-    async customer_register(payload: UserType & Customer): Promise<boolean> {
-        let connection: PoolConnection | null = null;
+    async updateUrlImages(uid: string, payload: Courier): Promise<boolean> {
         try {
-            const { email, password, name, surname, lastname, phone, sex, CURP } = payload;
+            const { face_photo, INE_photo, plate_photo } = payload;
+            await pool.query(
+                'UPDATE Couriers SET face_url = ?, ine_url = ?, plate_url = ? WHERE id_person = ?',
+                [face_photo, INE_photo, plate_photo, uid]
+            );
+            return true;
+        } catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async customer_register(payload: UserType & Customer): Promise<boolean> {
+        const connection = await pool.getConnection();
+        try {
+            const { email, password, name, surname, lastname, phone, sex, CURP, direction, lat, lng } = payload;
 
             const userRecord = await admin.auth().createUser({
                 email,
@@ -114,12 +146,12 @@ export class AuthRepository {
             await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: 'Customer' });
             await sendEmailVerification(userCredential.user);
 
-            connection = await pool.getConnection();
+
             await connection.beginTransaction();
 
             await connection.query(
                 'INSERT INTO People (uid, email, name, surname, role, lastname, phone, sex, curp) VALUES (?,?,?,?,?,?,?,?,?)',
-                [userRecord.uid, email, name, surname, 'CUSTOMER', lastname, phone, sex, CURP]
+                [userRecord.uid, email, name, surname, 'Customer', lastname, phone, sex, CURP]
             );
 
             await connection.query(
@@ -127,12 +159,20 @@ export class AuthRepository {
                 [userRecord.uid]
             );
 
+            const [rows_customer] = await connection.query<RowDataPacket[]>(
+                'SELECT no_customer FROM Customers WHERE id_person = ?', [userRecord.uid]
+            );
+
+            const no_customer = rows_customer[0].no_customer;
+            await connection.query<RowDataPacket[]>(
+                `INSERT INTO Places (id_customer, location, name, type) VALUES (?, ST_GeomFromText(?), ?, ?)`,
+                [no_customer, `POINT(${lng} ${lat})`, direction, 'Home'])
+
+            await connection.commit();
             return true;
         } catch (error: any) {
             console.log(error)
-            if (connection) {
-                await connection.rollback();
-            }
+            await connection.rollback();
             if (error.code.includes('auth/email-already-exists')){
                 throw new Error('Email already exists');
             }
@@ -243,6 +283,16 @@ export class AuthRepository {
     async existsCustomerById(id: string = ''): Promise<boolean> {
         try {
             const [result] =  await pool.query('SELECT * FROM Customers WHERE no_customer = ? limit 1', [id])
+            const rows = result as RowDataPacket[]
+            return rows.length > 0;
+        } catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async existsCourierById(id: string = ''): Promise<boolean> {
+        try {
+            const [result] =  await pool.query('SELECT * FROM Couriers WHERE no_courier = ? limit 1', [id])
             const rows = result as RowDataPacket[]
             return rows.length > 0;
         } catch (error: any) {

@@ -4,8 +4,8 @@
       <SideBar :class="{ 'active': isSidebarOpen }"/>
       <div class="content">
         <div class="header-layout">
-          <span class="text-light text mr-3 font-weight-bold mr-3">Juan Rodrígo</span>
-          <span class="text-light text mr-3 font-weight-bold pa-2 px-5 cursor-pointer rounded-pill bg-blue-grey-lighten-4"> <i class="fas fa-sign-out-alt"></i> </span>
+          <span class="text-light text mr-3 font-weight-bold mr-3">{{ name }}</span>
+          <span @click="handleSessionModal" class="text-light text mr-3 font-weight-bold pa-2 px-5 cursor-pointer rounded-pill bg-blue-grey-lighten-4"> <i class="fas fa-sign-out-alt"></i> </span>
         </div>
         <div class="content-body">
           <router-view></router-view>
@@ -13,19 +13,40 @@
       </div>
     </div>
   </div>
+  <ConfirmationModal :is-visible="showModal" @cancel="handleSessionModal" @confirm="logout" :is-completed="false" message="¿Estás seguro de cerrar sesión?"/>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import SideBar from "@/components/SideBar.vue";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+import {getNamesByToken} from "@/kernel/utils";
 
 export default defineComponent({
   name: "PrivateLayout",
-  components: { SideBar },
+  components: {ConfirmationModal, SideBar },
   data() {
     return {
-      isSidebarOpen: false
+      showModal: false,
+      isSidebarOpen: false,
+      name: ''
     };
+  },
+
+  methods:{
+    async getStorageName(){
+      this.name = await getNamesByToken()
+    },
+    handleSessionModal(){
+      this.showModal = !this.showModal;
+    },
+    logout(){
+      localStorage.removeItem('token');
+      this.$router.push({name: 'login'});
+    }
+  },
+  mounted(){
+    this.getStorageName()
   }
 });
 </script>

@@ -21,10 +21,17 @@ export type Courier = {
     face_photo: string;
     INE_photo: string;
     plate_photo?: string;
+    brand?: string;
+    model?: string;
+    color?: string;
+    description?: string;
 }
 
 export type Customer = {
     no_customer?: number;
+    direction?: string;
+    lat?: number;
+    lng?: number;
 }
 
 export type Role = 'COURIER' | 'CUSTOMER';

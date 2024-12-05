@@ -8,14 +8,10 @@
         <v-card class="card-custom">
           <div class="card-header d-flex align-center justify-space-between">
             <h2 class="header-title">
-              <v-icon icon="fa-solid fa-location-dot" style="color: white;"></v-icon> ¿Dónde Estoy?
+              <v-icon icon="fa-solid fa-location-dot" style="color: white; font-size: 36px;"></v-icon> 
+              <span class="ml-4 fas text-white"> D o n d e  -  e s t o y? </span>
             </h2>
-            <div class="switch-container">
-              <label class="switch">
-                <input type="checkbox" v-model="isChecked" @change="toggleTracking">
-                <span class="slider"></span>
-              </label>
-            </div>
+            <Switch v-model="isChecked" @onFalse="stopTracking" @onTrue="startTracking"/>
           </div>
           <div class="map-container">
             <GoogleMap
@@ -35,41 +31,59 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WaveComponent from '@/components/WaveComponent.vue';
-import { GoogleMap } from 'vue3-google-map';
+import { GoogleMap, Marker } from 'vue3-google-map';
+import Switch from '@/components/Switch.vue';
 
 export default defineComponent({
   name: "MapView",
-  components: { WaveComponent, GoogleMap },
+  components: { WaveComponent, GoogleMap, Switch },
   data() {
     return {
-      center: { lat: 19.42847, lng: -99.12766 },
+      center: { lat: 19.42847, lng: -99.12766 }, // Default location
       isChecked: false,
-      isTracking: false,
       userIcon: require('@/assets/location/assistant_navigation.svg'),
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
-      marker: null as google.maps.Marker | null
+      marker: null as google.maps.Marker | null,
+      thereConnection: true,
     };
   },
   mounted() {
-    if (this.isChecked) {
-      this.toggleTracking();
+    this.checkConnection();
+    window.addEventListener('online', this.checkConnection);
+    window.addEventListener('offline', this.checkConnection);
+
+    // Try to load the last known location if available
+    const savedLocation = localStorage.getItem('lastLocation');
+    if (savedLocation) {
+      this.center = JSON.parse(savedLocation);
     }
   },
+  beforeUnmount() {
+    this.stopTracking();
+    window.removeEventListener('online', this.checkConnection);
+    window.removeEventListener('offline', this.checkConnection);
+  },
   methods: {
-    toggleTracking() {
-      this.isTracking = this.isChecked;
-      if (this.isTracking) {
-        this.startTracking();
-      } else {
-        this.stopTracking();
+    checkConnection() {
+      this.thereConnection = navigator.onLine;
+      if (!this.thereConnection) {
+        this.showNoConnectionMap();  
       }
     },
     startTracking() {
-      this.updateLocation(); 
+      if (!this.thereConnection) {
+        console.warn('No connection. Tracking will not start.');
+        return;
+      }
+      if (this.locationInterval) {
+        clearInterval(this.locationInterval);
+        this.locationInterval = null;
+      }
+      this.updateLocation();
       this.locationInterval = setInterval(() => {
-        this.updateLocation(); 
-      }, 5000);
+        this.updateLocation();
+      }, 5000) as any;
     },
     stopTracking() {
       if (this.locationInterval) {
@@ -83,38 +97,47 @@ export default defineComponent({
     },
     updateLocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          this.center = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          this.updateMarker();
-        }, (error) => {
-          console.error("Error obtaining location: ", error);
-        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            this.center = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            this.updateMarker();
+            // Save the last known location in localStorage
+            localStorage.setItem('lastLocation', JSON.stringify(this.center));
+          },
+          (error) => {
+            console.error("Error obtaining location: ", error);
+          }
+        );
       } else {
         console.error("Geolocation is not supported by this browser.");
       }
     },
     updateMarker() {
-      const mapInstance = this.$refs.mapInstance as any;
-
-      if (!this.marker) {
-        this.marker = new google.maps.Marker({
-          position: this.center,
-          map: mapInstance.map, 
-          icon: {
-            url: this.userIcon,
-            scaledSize: new google.maps.Size(40, 40)
-          }
-        });
-      } else {
-        this.marker.setPosition(this.center);
+      try {
+        const mapInstance = this.$refs.mapInstance as any;
+        if (!this.marker) {
+          this.marker = new google.maps.Marker({
+            position: this.center,
+            map: mapInstance.map,
+            icon: {
+              url: this.userIcon,
+              scaledSize: new google.maps.Size(40, 40)
+            }
+          });
+        } else {
+          this.marker.setPosition(this.center);
+        }
+      } catch (error) {
+        console.error("Error updating marker: ", error);
       }
+    },
+    showNoConnectionMap() {
+      // Optional: Replace this with a static image or map fallback
+      console.log('Showing static map or fallback');
     }
-  },
-  beforeUnmount() {
-    this.stopTracking(); 
   }
 });
 </script>
@@ -145,84 +168,25 @@ export default defineComponent({
 .card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
   background-color: #566981;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  height: 64px;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .header-title {
-  color: white;
-  font-size: 1.25rem;
-}
-.switch-container {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 24px;
-}
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #CB5E5E;
-  transition: 0.4s;
-  border-radius: 24px; 
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background-color: #4caf50;
-}
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
+
+/* map estilos */
 .map-container {
   height: calc(100% - 64px); 
   width: 100%;
-}
-.wave-animation {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px; 
-  height: 200px; 
-  background: rgba(75, 192, 192, 0.5);
-  border-radius: 50%;
-  animation: wave-animation 3s infinite;
-  transform: translate(-50%, -50%);
-  z-index: -1; 
-}
-@keyframes wave-animation {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(5);
-    opacity: 0;
-  }
 }
 </style>

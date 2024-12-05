@@ -20,9 +20,9 @@ const createFavor = async (req: Request, res: Response) => {
 
         const repository: FavorRepository = new FavorRepository();
         const service: FavorService = new FavorService(repository);
-        await service.createFavor(payload);
+        const no_order = await service.createFavor(payload);
 
-        const response: ResponseApi<any> = Response200({ message: 'Favor created successfully' });
+        const response: ResponseApi<any> = Response200({ no_order });
         res.status(response.code).json(response);
     } catch (e) {
       console.log(e)
@@ -39,10 +39,6 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
     const fieldId = id;
 
     const existingConnection = connectionManager.getConnection(connectionId);
-    if (existingConnection) {
-      existingConnection.res.end();
-      connectionManager.removeConnection(connectionId);
-    }
 
     const repository: FavorRepository = new FavorRepository();
     const service: FavorService = new FavorService(repository);
@@ -53,45 +49,45 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive'
     });
-    let lastStatus: string | null = null;
 
     // Send status every 10 seconds
     const sendStatus = async () => {
       try {
-        const result = await service.getFavorStatus(id);
-        // Send only if status has changed
-        if (lastStatus !== result.get('status')) {
-          lastStatus = result.get('status');
-          res.write(`data: ${JSON.stringify(Object.fromEntries(result))}\n\n`);
+          const result = await service.getFavorStatus(id);
+          console.log(result);
+          // Send only if status has changed
+          const response = Response200(Object.fromEntries(result));
+          res.write(`${JSON.stringify(response)}\n\n`);
 
           // If status is "FINISHED", close connection
-          if (result.get('status') === 'Finished') {
-            clearInterval(intervalId);
-            connectionManager.removeConnection(connectionId);
-            res.end();
+          if (result.get('status') === 'Finished' || result.get('status') === 'Canceled') {
+            setTimeout(() => {
+                clearInterval(intervalId);
+                connectionManager.removeConnection(connectionId);
+                res.end();
+            }, 500);
           }
-        }
+
       } catch (error) {
         console.error('Error fetching status:', error);
-        res.write(`event: error\ndata: ${JSON.stringify({ message: 'Error fetching status' })}\n\n`);
-
         // If error is critical, close connection
         if (error instanceof Error && error.message.includes('CRITICAL')) {
           clearInterval(intervalId);
           connectionManager.removeConnection(connectionId);
           res.end();
+          throw new Error('Error fetching status')
         }
       }
     };
 
     // Add connection to manager
     const intervalId = setInterval(sendStatus, 10000);
-    const connectionAdded = connectionManager.addConnection(connectionId, res, intervalId, fieldId);
+    if (!existingConnection) {
+        const connectionAdded = connectionManager.addConnection(connectionId, res, intervalId, fieldId);
 
-    if (!connectionAdded) {
-      const response: ResponseApi<any> = Response503({ message: 'Server is at maximum capacity' });
-      res.status(response.code).json(response);
-      return;
+        if (!connectionAdded) {
+            throw new Error('Server is at maximum capacity');
+        }
     }
 
     // Send the initial status
@@ -103,6 +99,7 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
       connectionManager.removeConnection(connectionId);
     });
   } catch (e) {
+      console.log(e)
     const error: ResponseApi<any> = validateError(e as Error);
     if (!res.headersSent) {
       res.status(error.code).json(error);
@@ -125,10 +122,11 @@ const updateCourierStatus = async (req: Request, res: Response) => {
 
     // Send the new status to all connections
     connections.forEach((connection) => {
-      connection.res.write(`data: ${JSON.stringify(Object.fromEntries(result))}\n\n`);
+        const response = Response200(Object.fromEntries(result));
+      connection.res.write(`${JSON.stringify(response)}\n\n`);
 
       // If status is "FINISHED", close connection
-      if (newStatus === 'Finished') {
+      if (newStatus === 'Finished' || newStatus === 'Canceled') {
         connectionManager.removeConnection(connection.connectionId);
         connection.res.end();
       }
@@ -144,6 +142,23 @@ const updateCourierStatus = async (req: Request, res: Response) => {
     }
   }
 };
+
+const getDetailsFavor = async (req: Request, res: Response) => {
+    try {
+        const { no_order } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const favor = await service.getDetailsFavor(no_order);
+
+        const response: ResponseApi<any> = Response200(favor);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
 
 const acceptFavor = async (req: Request, res: Response) => {
     try {
@@ -183,14 +198,65 @@ const cancelFavor = async (req: Request, res: Response) => {
 
 const rejectFavor = async (req: Request, res: Response) => {
     try {
-        const { no_order } = req.params;
+        const { id_order } = req.params;
         const { courier_id } = req.body;
 
         const repository: FavorRepository = new FavorRepository();
         const service: FavorService = new FavorService(repository);
-        await service.rejectFavor(no_order, courier_id);
+        await service.rejectFavor(id_order, courier_id);
 
         const response: ResponseApi<any> = Response200({ message: 'Favor rejected successfully' });
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
+const readNotifications = async (req: Request, res: Response) => {
+    try {
+        const { no_courier } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const result = await service.readNotifications(no_courier);
+
+        const response: ResponseApi<any> = Response200(result);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
+const readCourierHistory = async (req: Request, res: Response) => {
+    try {
+        const { no_courier } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const result = await service.readCourierHistory(no_courier);
+
+        const response: ResponseApi<any> = Response200(result);
+        res.status(response.code).json(response);
+    } catch (e) {
+        console.log(e)
+        const error: ResponseApi<any> = validateError(e as Error);
+        res.status(error.code).json(error);
+    }
+}
+
+const readCustomerHistory = async (req: Request, res: Response) => {
+    try {
+        const { no_customer } = req.params;
+
+        const repository: FavorRepository = new FavorRepository();
+        const service: FavorService = new FavorService(repository);
+        const result = await service.readCustomerHistory(no_customer);
+
+        const response: ResponseApi<any> = Response200(result);
         res.status(response.code).json(response);
     } catch (e) {
         console.log(e)
@@ -206,4 +272,4 @@ const monitorConnections = (req: Request, res: Response, next: Function) => {
     res.status(response.code).json(response);
 };
 
-export {createFavor, setupStatusSSE, monitorConnections, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor};
+export {createFavor, setupStatusSSE, monitorConnections, getDetailsFavor, updateCourierStatus, acceptFavor, cancelFavor, rejectFavor, readNotifications, readCourierHistory, readCustomerHistory};

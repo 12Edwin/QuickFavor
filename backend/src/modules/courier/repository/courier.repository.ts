@@ -13,13 +13,11 @@ export class CourierRepository{
         }
     }
 
-    async editCourierProfile(uid: string, profileData: any): Promise<void>{
+    async editCourierProfile(uid: string, phone: string): Promise<void>{
         const connection = await pool.getConnection();
         try{
-            const { email, name, surname, lastname, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone } = profileData
             await connection.beginTransaction();
-            await connection.query('UPDATE People SET email = ?, phone = ?, name = ?, surname = ?, lastname = ? WHERE uid = ?;', [email, phone, name, surname, lastname, uid]);
-            await connection.query('UPDATE Couriers SET vehicle_type = ?, license_plate = ? WHERE id_person = ?;', [vehicle_type,license_plate, uid]);
+            await connection.query('UPDATE People SET phone = ? WHERE uid = ?;', [phone, uid]);
             await connection.commit();
         }catch (error: any) {
             await connection.rollback();
@@ -32,6 +30,14 @@ export class CourierRepository{
     async changeCourierStatus(uid: string, status: string): Promise<void>{
         try{
             await pool.query('UPDATE Couriers SET status = ? WHERE id_person = ?;', [status, uid]);
+        }catch (error: any) {
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async editVehicleCourier(id_person: string, vehicle_type: string, license_plate: string | null, plate_photo: string | null, brand: string | null, model: string | null, color: string | null, description: string | null): Promise<void>{
+        try{
+            await pool.query('UPDATE Couriers SET brand = ?, model = ?, color = ?, vehicle_type = ?, license_plate = ?, plate_url = ?, description = ? WHERE id_person = ?;', [brand, model, color, vehicle_type, license_plate, plate_photo, description, id_person]);
         }catch (error: any) {
             throw new Error((error as Error).message)
         }

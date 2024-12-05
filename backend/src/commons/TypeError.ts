@@ -22,6 +22,9 @@ const errors: { [x: string]: ResponseApi<any> } = {
     'forbidden': Response403(null, 'Forbidden'),
     'too many requests': Response400(null, 'Too many requests'),
     'client not connected': Response400(null, 'client not connected'),
+    'error fetching status': Response400(null, 'Error fetching status'),
+    'server is at maximum capacity': Response500(null, 'Server is at maximum capacity'),
+    'order not found': Response400(null, 'Order not found'),
     'default': Response500(null, 'Internal server error'),
 }
 

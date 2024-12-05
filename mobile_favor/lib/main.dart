@@ -1,4 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
@@ -7,9 +9,17 @@ import 'package:mobile_favor/widgets/splash_screen.dart';
 import 'package:mobile_favor/modules/auth/Register.dart';
 import 'package:mobile_favor/modules/auth/login.dart';
 import 'package:mobile_favor/navigation/navigation.dart';
-import 'package:mobile_favor/navigation/customer/order_details.dart';  // Importamos la vista de "OrderDetails"
+import 'config/firebase_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseService.initializeFirebase();
+  FirebaseService.configurePushNotifications();
   runApp(const MyApp());
 }
 
@@ -31,9 +41,7 @@ class MyApp extends StatelessWidget {
         '/sarch_customer': (context) => const MapCustomer(),
         '/navigation': (context) => const Navigation(),
         '/create-order': (context) => const CreateOrder(),
-        '/order-details': (context) => const OrderDetails(),  // Nueva ruta para OrderDetails
       },
-      home: const OrderDetails(),  // Establecemos "OrderDetails" temporalmente como la vista principal
     );
   }
 }

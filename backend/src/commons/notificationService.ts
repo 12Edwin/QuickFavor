@@ -1,6 +1,6 @@
 import pool from "./connection-db";
-import {RowDataPacket} from "mysql2";
-import {messaging} from "./config-SDK";
+import { RowDataPacket } from "mysql2";
+import { messaging } from "./config-SDK";
 
 export class NotificationService {
   async sendOrderNotification(driverId: string, distance: number, order: any) {
@@ -12,7 +12,7 @@ export class NotificationService {
 
       const fcmToken = rows[0]?.fcm_token;
       if (!fcmToken) {
-        throw new Error(`No FCM token found for driver ${driverId}`);
+        return;
       }
 
       const message = {
@@ -30,14 +30,13 @@ export class NotificationService {
 
       const response = await messaging.send(message);
       await pool.query(
-        `Insert Into Notifications (courier_id, order_id, type, status) VALUES (?, ?, ?, ?);`,
+        `INSERT INTO Notifications (courier_id, order_id, type, status) VALUES (?, ?, ?, ?);`,
         [driverId, order.no_order, 'Order', 'Pending']
       );
 
       return response;
     } catch (error) {
       console.error('Error sending notification:', error);
-      throw error;
     }
   }
 }

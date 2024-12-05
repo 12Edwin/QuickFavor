@@ -12,6 +12,7 @@ export default [
       import(/* webpackChunkName "admin" */ "@/layouts/PrivateLayout.vue"),
     meta: {
       requireAuth: true,
+      role: 'Courier'
     },
     children: [
       {
@@ -20,6 +21,7 @@ export default [
         component: Profile,
         meta: {
           title: "Perfil",
+          role: 'Courier'
         },
       },
       {
@@ -28,6 +30,7 @@ export default [
         component: HistoryView,
         meta: {
           title: "Historial",
+          role: 'Courier'
         },
       },
       {
@@ -36,6 +39,7 @@ export default [
         component: Notifications,
         meta: {
           title: "Notificaciones",
+          role: 'Courier'
         },
       },
       {
@@ -44,6 +48,7 @@ export default [
         component: MapView,
         meta: {
           title: "Mapa",
+          role: 'Courier'
         },
       },
       {
@@ -52,6 +57,7 @@ export default [
         component: Order,
         meta: {
           title: "Orden",
+          role: 'Courier'
         },
       },
       {
@@ -60,6 +66,7 @@ export default [
         component: HistoryDetailsView,
         meta: {
           title: "History Details",
+          role: 'Courier'
         },
         props: true,
       },

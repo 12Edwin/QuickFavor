@@ -11,6 +11,7 @@
             </div>
             <h2 style="color: #2383f0" class="mb-3">{{ title }}</h2>
             <p>{{ message }}</p>
+            <p style="color: red">{{ extraText }}</p>
             <div class="buttons">
               <button @click="confirm">
                 {{ confirmText }}
@@ -28,6 +29,7 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
+  name: "ConfirmationModal",
   props: {
     isVisible: Boolean,
     isCompleted: Boolean,
@@ -40,6 +42,10 @@ export default defineComponent({
     cancelText: {
       type: String,
       default: 'Cancelar'
+    },
+    extraText:{
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -75,7 +81,7 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 10000;
 }
 
 .m_modal-wrapper {

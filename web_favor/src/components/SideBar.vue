@@ -43,16 +43,21 @@ export default defineComponent({
       isSidebarOpen: false, 
       menuItems: [
         { name: "map", text: "Mapa", icon: "fa-solid fa-location-dot" },
-        {
-          name: "notifications",
-          text: "Notificaciones",
-          icon: "fa-solid fa-bell",
-        },
+        { name: "notifications", text: "Notificaciones", icon: "fa-solid fa-bell" },
         { name: "order", text: "Favor", icon: "fa-solid fa-box" },
         { name: "history", text: "Historial", icon: "fa-solid fa-history" },
         { name: "profile", text: "Perfil", icon: "fa-solid fa-user" },
       ],
     };
+  },
+  watch: {
+    $route() {
+      this.selected = this.$route.path.split("/")[1];
+      const ind = this.menuItems.findIndex(
+          (item) => item.name === this.selected
+      );
+      this.setSelected(this.selected, ind);
+    },
   },
   methods: {
     toggleSidebar() {
@@ -108,7 +113,7 @@ export default defineComponent({
   background: #89a7b1;
   backdrop-filter: blur(5px);
   transition: transform 0.3s ease; 
-  z-index: 1000;
+  z-index: 100;
   margin-top: 56px;
 }
 
@@ -117,7 +122,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; 
+  z-index: 100;
   transform: translateX(0);
 }
 
@@ -129,7 +134,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   background-color: rgba(137, 167, 177, 0.6);
-  z-index: 1001;
+  z-index: 100;
 }
 
 nav {
@@ -183,6 +188,10 @@ nav {
   color: #cbdad5;
   margin-left: 2px;
   margin-right: 4px;
+}
+
+.sidebar-item.selected .icon-sidebar {
+  color: #89a7b1;
 }
 
 @media screen and (max-width: 900px) {

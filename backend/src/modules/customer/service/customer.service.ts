@@ -22,13 +22,11 @@ export class CustomerService{
         }
     }
 
-    async editCustomerProfile(currentId: string, payload: User & Customer){
+    async editCustomerProfile(currentId: string, phone: string, lat: string, lng: string){
         try {
-            if (! await existsUserByUid(payload.uid)) throw new Error('User not found');
-            if (payload.uid != currentId) throw  new Error('Forbidden');
-            if (await existsUserByEmailWithDifferentUid(payload.email, payload.uid)) throw new Error('email already exists')
-            if (await existsUserByPhoneWithDifferentUid(payload.phone, payload.uid)) throw new Error('phone already exists')
-            return await this.repository.editCustomerProfile(payload);
+            if (! await existsUserByUid(currentId)) throw new Error('User not found');
+            if (await existsUserByPhoneWithDifferentUid(phone, currentId)) throw new Error('phone already exists')
+            return await this.repository.editCustomerProfile(currentId, phone, lat, lng);
         }catch (error: any){
             throw new Error((error as Error).message)
         }

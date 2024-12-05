@@ -2,274 +2,191 @@
   <div class="back-container">
     <WaveComponent />
   </div>
-  <div class="container">
-    <v-row justify="center">
-      <v-col class="md-8">
-        <v-card class="card-custom">
-          <div class="card-header d-flex align-center justify-space-between">
-            <h2 class="header-title">
-              <v-icon icon="fa-solid fa-user" style="color: white;"></v-icon> Perfil
-            </h2>
-          </div>
-          <div class="content" sty>
-            <v-row justify="center" no-gutters style="margin-top: 30px;">
-              <v-col cols="12" md="3" class="text-center">
-                <div class="profile-container">
-                  <v-avatar :image="avatarImage" size="200" class="avatar"></v-avatar>
+  <div class="profile-container">
+    <!-- Header -->
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-user fa-lg text-white"></i>
+        <span class="ml-4 fas text-white">P E R F I L</span>
+      </h2>
+      <Switch @onFalse="" @onTrue=""/>
+    </div>
 
-                  <!-- Botón para cambiar la foto en una esquina pegada al avatar -->
-                  <v-btn icon @click="triggerFileInput" class="upload-btn" >
-                    <v-icon class="icon" icon="fa-solid fa-camera"></v-icon>
-                  </v-btn>
+    <v-card class="card-custom">
+      <!-- Banner y Avatar -->
+      <div class="banner-container">
+        <div class="banner-image"></div>
+        <div class="avatar-container">
+          <v-avatar size="170" class="profile-avatar">
+            <v-img :src="profile.face_url" alt="Profile"></v-img>
+          </v-avatar>
+        </div>
+      </div>
 
-                  <!-- Input de archivo oculto para seleccionar la foto de perfil -->
-                  <input type="file" ref="fileInput" @change="onFileSelected" accept="image/*" style="display: none;" />
+      <!-- Botón Editar Perfil -->
+      <v-btn 
+        class="edit-profile-btn" 
+        @click="handleModalUpdateUserInfo(true)"
+        rounded
+      >
+        Editar perfil
+      </v-btn>
 
-                  <!-- Botón para guardar la imagen en local storage debajo de la foto -->
-                  <v-btn @click="saveImage" class="btn">
-                    <v-icon class="icon-save" icon="fa-solid fa-save"></v-icon>
-                    <v-text>Guardar</v-text>
-                  </v-btn>
-                </div>
-                <h3>Juan Rodrigo</h3>
-                <div class="d-flex align-center justify-center txt">
-                  <v-icon icon="mdi-phone" style="color: black !important"></v-icon>
-                  <span class="ml-1">777-234-4325</span>
-                </div>
-              </v-col>
+      <!-- Contenido del Perfil -->
+      <v-container class="profile-content">
+        <v-row>
+          <!-- Información Principal -->
+          <v-col cols="12" md="8">
+            <div class="profile-info">
+              <h2 class="profile-name">{{ profile.name }} {{ profile.surname }}</h2>
+              <span class="profile-role">Repartidor</span>
+              <div class="profile-stats">
+                <span><i class="fas fa-phone"></i> {{ profile.phone }}</span>
+                <span><i class="fas fa-envelope"></i> {{ profile.email }}</span>
+              </div>
+              <div class="profile-stats">
+                <span><i class="fas fa-id-card"></i> {{ profile.curp }}</span>
+              </div>
+            </div>
+          </v-col>
 
-              <v-col cols="12" md="6">
-                <v-card class="pa-4 profile-card">
-                  <v-card-title class="text-h6" align="center">Repartidor</v-card-title>
-                  <v-card-text>
-                    <v-row>
-                      <v-col align="center" cols="4"><strong>CURP</strong></v-col>
-                      <v-col align="center" cols="8">OOAZ900824MTSRLL08</v-col>
+          <!-- Panel de Edición -->
+          <v-col cols="12" md="4">
+            <v-card class="edit-card">
+              <v-card-title align="center" justify="center">Transporte</v-card-title>
+              <v-card-text>
 
-                      <v-col align="center" cols="4"><strong>SEXO</strong></v-col>
-                      <v-col align="center" cols="8">Masculino</v-col>
-
-                      <v-col align="center" cols="4"><strong>CORREO</strong></v-col>
-                      <v-col align="center" cols="8">correo@gmail.com</v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-card class="input-card">
-                  <div class="input-group">
-                    <div>
-                      <v-icon class="icon" icon="fa-solid fa-phone"></v-icon>
+                <!-- Carros y motos -->
+                <div v-if="profile.vehicle_type == 'Carro' || profile.vehicle_type == 'Moto'">
+                  <v-row align="center" justify="center">
+                    <div v-if="profile.vehicle_type == 'Carro'">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
                     </div>
-                    <input class="input" type="input" placeholder="Nuevo telefono" required />
+                    </div>
+                    <div v-if="profile.vehicle_type == 'Moto'">
+                      <div class="content-image">
+                      <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
+                    </div>
+                    </div>
+                  </v-row>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-address-card icon"></v-icon>
+                    <input type="text" :value="profile.license_plate" class="register-input" disabled>
                   </div>
-
-                  <div class="input-group">
-                    <div>
-                      <v-icon class="icon" icon="fa-solid fa-envelope"></v-icon>
-                    </div>
-                    <input class="input" type="email" placeholder="Nuevo correo" required />
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
-
-
-                  <div class="div-btn">
-                    <v-btn class="btn">
-                      <v-icon class="icon-save" icon="fa-solid fa-save"></v-icon>
-                      <v-text>Guardar cambios</v-text>
-                    </v-btn>
-                  </div>
-                </v-card>
-
-              </v-col>
-              <v-col cols="12" md="6" class="d-flex justify-center">
-                <v-btn style="margin-left: 16px;" @click="openDialog" icon>
-                  <v-icon icon="fa-solid fa-pen" class="icon"></v-icon>
-                </v-btn>
-                <v-card class="pa-2 oval-card">
-                  <v-card-title>
-                    <v-text class="text-card">Repartidor a moto</v-text>
-                  </v-card-title>
-                  <v-card-text style="align-items: center; justify-content: center; display: flex">
-                    <v-icon icon="fa-solid fa-motorcycle" class="icon-moto"></v-icon>
-                    <v-text class="moto-brand">Yamaha YBR 125 ZR 2023 Color rojo</v-text>
-                  </v-card-text>
-                  <v-card-foot class="card-footer">
-                    <v-card>
-                      <v-card-text>
-                        <v-text>123-ABC</v-text>
-                      </v-card-text>
-                    </v-card>
-                  </v-card-foot>
-                </v-card>
-              </v-col>
-            </v-row>
-          </div>
-        </v-card>
-
-        <v-dialog v-model="dialog" max-width="500px">
-          <v-card style="border-radius: 16px;">
-            <v-card-title class="headline">Actualizar Información</v-card-title>
-            <v-card-text>
-              <form>
-                <div>
-                  <div class="icon-button-group">
-                    <button class="icon-button" @click.prevent="selectOption(1)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/6591/6591639.png" alt="Carro" />
-                    </button>
-                    <button class="icon-button" @click.prevent="selectOption(2)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/7695/7695164.png" alt="Moto" />
-                    </button>
-                    <button class="icon-button" @click.prevent="selectOption(3)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/732/732944.png" alt="Bicicleta" />
-                    </button>
-                    <button class="icon-button" @click.prevent="selectOption(4)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/10059/10059782.png" alt="Patín" />
-                    </button>
-                    <button class="icon-button" @click.prevent="selectOption(5)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/7512/7512332.png" alt="Caminante" />
-                    </button>
-                    <button class="icon-button" @click.prevent="selectOption(6)">
-                      <img src="https://cdn-icons-png.flaticon.com/128/512/512142.png" alt="Más" />
-                    </button>
-                  </div>
-
-                  <div v-if="showDescriptionOnly">
-                    <div class="form-group">
-                      <input type="text" v-model="form.descripcion" placeholder="Descripción" />
-                    </div>
-                  </div>
-
-                  <div v-else-if="showImageOnly">
-                    <div class="form-group">
-                      <img src="https://cdn-icons-png.flaticon.com/128/7512/7512332.png" alt="Solo Imagen" />
-                    </div>
-                  </div>
-
-
-                  <div v-else>
-                    <div class="form-group">
-                      <div class="input-icon">
-                        <img src="https://cdn-icons-png.flaticon.com/128/1743/1743637.png" alt="Matrícula Icono"
-                          class="flaticon-icon" />
-                      </div>
-                      <input type="text" v-model="form.matricula" placeholder="Matrícula" />
-                    </div>
-                    <div class="form-group">
-                      <div class="input-icon">
-                        <img src="https://cdn-icons-png.flaticon.com/128/5812/5812183.png" alt="Modelo Icono"
-                          class="flaticon-icon" />
-                      </div>
-                      <input type="text" v-model="form.modelo" placeholder="Modelo" />
-                    </div>
-                    <div class="form-group-row">
-                      <div class="form-group color-picker">
-                        <label class="color-sample" :style="{ backgroundColor: form.color }">
-                          <input type="color" v-model="form.color" class="color-input" />
-                        </label>
-                        <div class="color-label">Color</div>
-                      </div>
-                      <div class="form-group small-file-input">
-                        <v-file-input v-model="form.licenciaFile" color="deep-purple-accent-4" label="Licencia"
-                          placeholder="Selecciona un archivo" prepend-icon="mdi-paperclip" variant="outlined" counter />
-                      </div>
-                    </div>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-circle icon"></v-icon>
+                    <input type="text" :value="profile.color" class="register-input" disabled>
                   </div>
                 </div>
-              </form>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn text="Cerrar" @click="dialog = false"></v-btn>
-              <v-btn style="background-color: #3A415A;" @click="dialog = false"><v-text
-                  style="color: #ffff;">Guardar</v-text></v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-col>
-    </v-row>
+
+                <!-- Bicicletas y Scooters -->
+                <div v-if="profile.vehicle_type == 'Bicicleta' || profile.vehicle_type == 'Scooter'">
+                  <v-row align="center" justify="center">
+                    <div v-if="profile.vehicle_type == 'Bicleta'">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
+                    </div>
+                    </div>
+                    <div v-if="profile.vehicle_type == 'Scooter'">
+                      <div class="content-image">
+                      <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
+                    </div>
+                    </div>
+                  </v-row>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" :value="profile.model" class="register-input" disabled>
+                  </div>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-circle icon"></v-icon>
+                    <input type="text" :value="profile.color" class="register-input" disabled>
+                  </div>
+                </div>
+
+                <!-- Para los caminantes -->
+                <div v-if="profile.vehicle_type == 'Caminando'">
+                  <v-row align="center" justify="center">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
+                    </div>
+                  </v-row>
+                </div>
+
+                <!-- Para los que tienen otro tipo de transporte -->
+                <div v-if="profile.vehicle_type == 'Otro'">
+                  <v-row align="center" justify="center">
+                    <div class="content-image">
+                      <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
+                    </div>
+                  </v-row>
+                </div>
+
+              </v-card-text>
+              <v-card-actions align="center" justify="center">
+                <v-btn @click="handleModalUpdate(true)">Editar</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" :profile="profile"  />
+    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" :profile="profile"  />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import WaveComponent from "@/components/WaveComponent.vue";
+import Switch from "@/components/Switch.vue";
+import EditTrasnport from '../components/UpdateTrasnport.vue';
+import UpdateUserInfo from '../components/UpdateUserInfo.vue';
+import { getProfile } from '../services/profile';
 
 export default defineComponent({
-  name: "Notifications",
-  components: { WaveComponent },
+  name: "Profile",
+  components: { WaveComponent, Switch, EditTrasnport, UpdateUserInfo },
   setup() {
-    const dialog = ref(false);
-    const form = ref({
-      matricula: '',
-      modelo: '',
-      color: '',
-      licenciaFile: [] as File[],
-      rostroFile: [] as File[],
-      ineFile: [] as File[],
-      descripcion: '',
+    const isModalVisible = ref(false);
+    const isModalVisibleUserInfo = ref(false);
+    const profile = ref({});
+
+    const handleModalUpdate = (newVisibility: boolean) => {
+      isModalVisible.value = newVisibility;
+    };
+
+    const handleModalUpdateUserInfo = (newVisibility: boolean) => {
+      isModalVisibleUserInfo.value = newVisibility;
+    };
+
+    const getUserInfo = async () => {
+      try {
+        const data = await getProfile();
+        if (data) {
+          profile.value = data.data || profile.value;  
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    onMounted(() => {
+      getUserInfo();
     });
-    const avatarImage = ref('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThnnN0Nj42DW5N9u177sXStr7NPl1JZSOODQ&s');
-    const fileInput = ref<HTMLInputElement | null>(null);
-    const showDescriptionOnly = ref(false);
-    const showImageOnly = ref(false);
-    const selectOption = (index: number) => {
-      if ([3, 4, 6].includes(index)) {
-        showDescriptionOnly.value = true;
-        showImageOnly.value = false;
-      } else if (index === 5) {
-        showImageOnly.value = true;
-        showDescriptionOnly.value = false;
-      } else {
-        showDescriptionOnly.value = false;
-        showImageOnly.value = false;
-      }
-    };
-
-    
-
-    // Trigger file input when button is clicked
-    const triggerFileInput = () => {
-      fileInput.value?.click();
-    };
-
-    // Handle file selection
-    const onFileSelected = (event: Event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) {
-        avatarImage.value = URL.createObjectURL(file);
-      }
-    };
-
-    // Save image to local storage (optional)
-    const saveImage = () => {
-      localStorage.setItem('profileImage', avatarImage.value);
-      alert('Profile picture saved!');
-    };
-
-    // Load saved image on component mount
-    if (localStorage.getItem('profileImage')) {
-      avatarImage.value = localStorage.getItem('profileImage') as string;
-    }
-
-    const openDialog = () => {
-      dialog.value = true;
-      console.log("Dialog opened");
-    };
 
     return {
-      dialog,
-      form,
-      showDescriptionOnly,
-      showImageOnly,
-      selectOption,
-      avatarImage,
-      triggerFileInput,
-      onFileSelected,
-      fileInput,
-      saveImage,
-      openDialog
+      profile,
+      handleModalUpdate,
+      handleModalUpdateUserInfo,
+      isModalVisible,
+      isModalVisibleUserInfo
     };
-  },
-
+  }
 });
 </script>
 
@@ -283,529 +200,230 @@ export default defineComponent({
   z-index: -1;
 }
 
+.profile-container {
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
+}
 
-/* CARDS*/
 .card-custom {
   position: relative;
-  margin-left: 16px;
-  margin-right: 16px;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  height: 88vh;
+  border-radius: 16px;
+  min-height: 88vh;
   background-color: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
-  z-index: 1;
-  overflow: hidden;
-}
-
-@media (max-width: 960px) {
-  .card-custom {
-    overflow-y: auto;
-    scrollbar-width: none;
-    /* Para Firefox */
-    -ms-overflow-style: none;
-    /* Para Internet Explorer y Edge */
-  }
-
-  .card-custom ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.profile-card {
-  border-radius: 16px;
-  background-color: #F5F5F5;
-  margin-bottom: 20px;
-  margin-left: 16px;
-  margin-right: 16px;
-}
-
-.txt {
-  margin-bottom: 20px
-}
-
-.input-card {
-  margin-left: 16px;
-  padding: 8px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
 }
 
 .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
   background-color: #566981;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  height: 64px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: center;
-}
-
-.oval-card {
-  border-radius: 50%;
-  width: 500px;
-  height: 250px;
-  background-color: #89A7B1;
-  margin-bottom: 20px;
-  margin-right: 16px;
-}
-
-@media (max-width: 768px) {
-  .oval-card {
-    width: 70vw;
-    height: 25vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .oval-card {
-    width: 90vw;
-    height: 30vh;
-  }
-}
-
-.profile-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.avatar {
-  margin-bottom: 10px;
-}
-
-.upload-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.save-btn {
-  margin-top: 10px;
-
-}
-
-/* textos, iconos, botones */
-
-.text-card {
-  color: white;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-}
-
-.div-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.btn {
-  background-color: #566981;
-  color: white;
-  border-radius: 20px;
-
-}
-
-.btn v-icon {
-  color: white !important;
-}
-
-.btn v-text {
-  color: white;
-}
-
-.icon {
-  color: #5686e1;
-}
-
-.icon-save {
-  color: white;
-}
-
-.icon-moto {
-  font-size: 70px;
-  margin-right: 20px;
-  color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 16px 16px 16px 16px;
 }
 
 .header-title {
-  color: white;
-  font-size: 1.25rem;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.slider {
+.banner-container {
+  position: relative;
+  height: 200px;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px 16px 16px 16px;
+  background: radial-gradient(circle at 100%, #89A7B1, #89A7B1 50%, #CBDAD5 75%, #556666 100%);
+}
+
+.avatar-container {
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #CB5E5E;
-  transition: 0.4s;
-  border-radius: 24px;
+  bottom: -75px;
+  left: 24px;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
+.profile-avatar {
+  border: 4px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-left: 42px;
 }
 
-
-
-/* Inputs */
-input:checked+.slider {
-  background-color: #4caf50;
+.profile-content {
+  margin-top: -64px;
+  padding-top: 80px;
+  margin-left: 42px;
 }
 
-input:checked+.slider:before {
-  transform: translateX(24px);
+.profile-info {
+  padding: 0 24px;
 }
 
-.notification-card {
+.profile-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.profile-role {
+  color: #566981;
+  font-size: 16px;
+}
+
+.profile-stats {
   margin-top: 16px;
-  margin-left: 16px;
-  margin-right: 16px;
-  border-radius: 32px;
-}
-
-.line-indicator {
-  width: 16px;
-  height: 100%;
-  background-color: #34344E;
-}
-
-.input {
-  width: 95%;
-  padding: 12px 12px 12px 40px;
-  border: 1px solid #ccc;
-  border-radius: 32px;
-  outline: none;
-  transition: border-color 0.3s;
-  margin: 10px;
-  background-color: white;
-}
-
-.input-group {
   display: flex;
-  align-items: center;
-  border: 1px solid #89A7B1;
-  border-radius: 25px;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
+  gap: 24px;
+  color: #666;
 }
 
-/* Dialog */
+.details-card, .edit-card {
+  margin-right: 72px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+}
 
-.register-container {
+.details-card {
+  margin-top: 24px;
+}
+
+.edit-card {
+  padding: 8px;
+  margin-top: -64px;
+}
+
+.icon-step-2 {
+  font-size: 32px;
+  color: #566981;
+}
+
+.content-image {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  /* Alinea a la izquierda dentro del círculo */
-  height: 100vh;
-  background-color: #d0dadb;
-  padding: 20px;
-  position: relative;
-}
-
-/* Centrar el formulario en pantallas móviles */
-.register-container {
   justify-content: center;
-}
-
-.half-circle-background {
-  position: absolute;
-  width: 80%;
-  height: 150%;
-  border-radius: 60%;
-  background-color: #95abb3;
-  left: -30%;
-  top: -20%;
-  z-index: 0;
-}
-
-.register-form {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  align-items: center;
   width: 100%;
-  max-width: 400px;
-  text-align: center;
-  z-index: 1;
-  margin-left: -50vw;
-  /* Usar unidades relativas para ajustar el margen */
+  height: 100%;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.input-container {
   position: relative;
+  margin-bottom: 12px;
 }
 
-.logo {
-  width: 80px;
-  margin-bottom: 1rem;
-}
-
-.form-group {
-  display: flex;
-  align-items: center;
-  border: 1px solid #89A7B1;
-  border-radius: 25px;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: #f0f5f8;
-}
-
-.form-group-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.small-file-input .v-input__control {
-  height: 30px;
-  padding: 0 8px;
-}
-
-.small-file-input .v-file-input .v-label {
-  font-size: 0.8rem;
-}
-
-.scrollable-step {
-  max-height: 300px;
-  overflow: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.scrollable-step::-webkit-scrollbar {
-  display: none;
-}
-
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 1rem;
-}
-
-.next-button {
-  background-color: #505c86;
-  color: #ffffff !important;
-  font-weight: bold;
-  font-size: 1.1rem;
-  letter-spacing: 0.5px;
-}
-
-.back-link {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #A0A0A0;
-}
-
-.back-link a {
-  color: #A0A0A0;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-/* Ocultar el contenedor del logo y el texto */
-.right-logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.icon {
   position: absolute;
-  right: 10%;
+  left: 12px;
   top: 50%;
+  width: 8px;
+  height: 8px;
   transform: translateY(-50%);
+  color: #566981;
 }
 
-/* Estilos del logo en el lado derecho */
-.right-logo-container img {
-  width: 300px;
-  /* Incrementa este valor para hacer el logo más grande */
-  height: auto;
-  /* Mantiene la proporción */
-  margin-bottom: 0.5rem;
+.register-input {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* Espacio para el ícono */
+    border: 1px solid #ccc;
+    border-radius: 32px;
+    outline: none;
+    transition: border-color 0.3s;
+    height: 40px;
+  }
+
+  /* Estilo para el botón de editar perfil */
+.edit-profile-btn {
+  margin-top: 40px;
+  margin-left: 300px;
+  color: #fff; 
+  border-radius: 20px;
+  padding: 8px 24px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  transition: background-color 0.3s; /* Transición de color */
 }
 
-.right-logo-container p {
-  font-size: 2.0rem;
-  color: #505c86;
-  font-weight: bold;
+.edit-profile-btn:hover {
+  background-color: #4b5c68; /* Color de fondo cuando el mouse pasa por encima */
 }
 
-.right-logo {
-  width: 100px;
-  /* Ajusta el tamaño si es necesario */
-}
 
-.right-logo-text {
-  font-size: 1.5rem;
-  color: #505c86;
-  /* Color del texto */
-}
+@media screen and (max-width: 768px) {
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+  }
 
-/* Media query para ocultar el contenedor en pantallas pequeñas */
-@media (max-width: 768px) {
-  .right-logo-container {
-    display: none;
+  .profile-name {
+    font-size: 20px;
+  }
+
+  .profile-role {
+    font-size: 14px;
+  }
+
+  .profile-stats {
+    font-size: 14px;
+  }
+
+  .edit-card {
+    margin-top: 0px;
+  }  
+  .edit-profile-btn {
+    font-size: 14px; /* Reducir el tamaño de fuente en pantallas más pequeñas */
+    padding: 6px 18px; /* Ajustar el relleno */
+    margin-top: 84px;
+    margin-left: 84px; /* Centrar el botón */
+  }
+
+  .profile-content {
+    margin-top: -56px;
   }
 }
 
-.icon-button-group {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 1rem;
-}
-
-.icon-button {
-  background-color: #d0dadb !important;
-  border: none;
-  padding: 6px !important;
-  border-radius: 6px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.icon-button img {
-  width: 18px !important;
-  height: 18px !important;
-}
-
-.icon-button:hover {
-  transform: scale(1.1);
-}
-
-/* Estilos para el selector de color */
-.color-picker {
-  display: flex;
-  align-items: center;
-  background-color: #f0f5f8;
-  border: 1px solid #89A7B1;
-  border-radius: 25px;
-  padding: 0.5rem;
-  gap: 10px;
-}
-
-.color-input-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.color-sample {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.color-input {
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  cursor: pointer;
-}
-
-.color-label {
-  width: 60px;
-  height: 32px;
-  background-color: #f0f5f8;
-  border: 1px solid #89A7B1;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Media query para dispositivos móviles */
-@media (max-width: 768px) {
-  .register-container {
-    padding: 0;
-    align-items: center;
-    justify-content: center;
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .edit-card {
+    margin-top: 16px;
+  }  
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
   }
 
-  /* Centrar el formulario en dispositivos móviles */
-  .register-form {
-    margin: 0 auto;
+  .profile-name {
+    font-size: 28px;
   }
 
-  .logo {
-    width: 60px;
+  .profile-role {
+    font-size: 18px;
   }
 
-  .half-circle-background {
-    display: none;
+  .profile-stats {
+    font-size: 16px;
+  }
+
+  .edit-profile-btn {
+    font-size: 16px; /* Aumentar el tamaño de fuente en pantallas más grandes */
+    padding: 8px 24px; /* Ajustar el relleno */
+    margin-top: 40px;
+    margin-left: 300px; 
+  }
+
+  .profile-content {
+    margin-top: -64px;
   }
 }
 
-@media (max-width: 768px) {
-  .register-form {
-    margin-left: 0;
-    /* Centrar en pantallas pequeñas */
-  }
-
-  .form-group {
-    display: flex;
-    align-items: center;
-    border: 1px solid #89A7B1;
-    border-radius: 25px;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    background-color: #f0f5f8;
-  }
-
-  .input-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-    background-color: #ffffff;
-    border-radius: 50%;
-  }
-
-  .button-group {
-    flex-direction: column;
+@media screen and (min-width: 1200px) {
+  .details-card, .edit-card {
+    margin-left: -256px;
   }
 }
+
 </style>

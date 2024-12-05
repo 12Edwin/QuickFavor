@@ -11,13 +11,16 @@ import {CustomerRouter} from "./modules/customer/router/customer.router";
 import {FavorRouter} from "./modules/favors/router/favor.router";
 import {DeliveryService} from "./grpc/services/locationService";
 import {NotificationService} from "./commons/notificationService";
+import proxy from "@grpc-web/proxy";
+import * as http2 from "node:http2";
+import {LocationRouter} from "./modules/maps/router/router";
 
 const app: Application = express();
 const port: Number = 3000;
 const grpcPort = process.env.GRPC_PORT || 50051;
 
 dotenv.config();
-app.use(express.json({limit:'50mb'}));
+app.use(express.json({limit:'15mb'}));
 app.use(cors({
     credentials: true,
     origin: '*'
@@ -64,3 +67,4 @@ app.use('/auth', AuthRouter)
 app.use('/courier', CourierRouter)
 app.use('/customer', CustomerRouter)
 app.use('/favor', FavorRouter)
+app.use('/location', LocationRouter)
