@@ -12,6 +12,11 @@ Future<String?> getStorageNoUser() async {
   return prefs.getString('no_user');
 }
 
+Future<String?> getStorageRole() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('role');
+}
+
 Future<String?> getStorageNoOrder() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getString('no_order');

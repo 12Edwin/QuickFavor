@@ -8,6 +8,7 @@ import '../../config/alerts.dart';
 import '../../config/error_types.dart';
 import '../../config/utils.dart';
 import '../../kernel/widget/canceled_favor.dart';
+import '../../kernel/widget/chat.dart';
 import '../../kernel/widget/location_preview.dart';
 import '../../kernel/widget/photo_picker.dart';
 import '../../kernel/widget/success_favor.dart';
@@ -25,6 +26,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
   bool _isExpanded2 = false;
   bool _isLoading = true; // Variable para controlar el estado de carga
   late FavorService _favorService;
+  late String no_user;
   OrderPreviewEntity? _orderDetails;
   SSEOrderMessage? _orderStatus;
   Timer? _timer;
@@ -38,6 +40,9 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
   @override
   void initState() {
     super.initState();
+    (() async {
+      no_user = await getStorageNoUser() ?? '';
+    })();
     _favorService = FavorService(context);
     _fetchOrderDetails();
     _startTimer();
@@ -282,7 +287,14 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                                             ),
                                           ),
                                           IconButton(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => ChatScreen(chatId: _orderDetails?.no_order ?? '0', no_user: no_user, name: _orderDetails?.customer_name ?? '',)
+                                                ),
+                                              );
+                                            },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.white,
                                             ),

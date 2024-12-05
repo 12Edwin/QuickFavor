@@ -59,19 +59,23 @@
         }
       }
     </style>
+    <script>
+      if (('serviceWorker' in navigator)) {
+        console.log('Service worker supported');
+        
+      }
+      if (!('serviceWorker' in navigator)) {
+        
+        const alertBox = document.getElementById("alert");
+        alertBox.style.display = "block";
+        console.log("Service worker not supported");
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
     <div id="alert" class="alert-sw" style="display: none;">
       Service Worker no es soportado en este navegador.
     </div>
-
-    <script>
-      if (!("serviceWorker" in navigator)) {
-        const alertBox = document.getElementById("alert");
-        alertBox.style.display = "block";
-        console.log("Service worker not supported");
-      }
-    </script>
   </body>
 </html>

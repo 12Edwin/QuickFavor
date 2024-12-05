@@ -227,6 +227,7 @@ class OrderStatus{
 class OrderPreviewEntity {
   final String no_order;
   final String order_created_at;
+  final String? order_finished_at;
   final String status;
   final String? receipt_url;
   final double? cost;
@@ -259,6 +260,7 @@ class OrderPreviewEntity {
   OrderPreviewEntity({
     required this.no_order,
     required this.order_created_at,
+    this.order_finished_at,
     required this.status,
     this.cost,
     this.receipt_url,
@@ -293,6 +295,7 @@ class OrderPreviewEntity {
     return OrderPreviewEntity(
       no_order: json['no_order'],
       order_created_at: json['order_created_at'],
+      order_finished_at: json['order_finished_at'],
       status: json['status'],
       cost: json['cost'] != null ? num.parse(json['cost'].toString()).toDouble(): null,
       receipt_url: json['receipt_url'],
@@ -341,6 +344,9 @@ class OrderPreviewEntity {
       'place_lng': place_lng,
     };
 
+    if (order_finished_at != null) {
+      data['order_finished_at'] = order_finished_at;
+    }
     if (cost != null) {
       data['cost'] = cost;
     }
