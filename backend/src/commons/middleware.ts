@@ -43,6 +43,7 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction): Pro
         }
         next();
     } catch (error) {
+        console.log(error);
         res.status(result.code).json(result);
     }
 }
