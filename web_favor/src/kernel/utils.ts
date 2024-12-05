@@ -228,6 +228,15 @@ function convertirImagenABase64(archivo: File): Promise<string> {
     });
   }  
 
+  // Función privada para extraer el base64, sin prefijo
+function extraerBase64(dataUrl: string): string | null {
+    const base64Prefix = 'base64,';
+    if (dataUrl.includes(base64Prefix)) {
+      return dataUrl.split(base64Prefix)[1]; // Retorna solo la parte base64
+    }
+    return null; // Si no tiene el prefijo esperado, devuelve null
+  }
+
 
 export {
     getRoleNameByToken,
@@ -242,5 +251,6 @@ export {
     getIconByStatus,
     filterByName,
     getColorByStatus,
-    convertirImagenABase64
+    convertirImagenABase64,
+    extraerBase64
 }
