@@ -19,6 +19,7 @@ const errors: { [x: string]: ResponseApi<any> } = {
     'time to accept is over': Response400(null, 'Time to accept is over'),
     'weak password': Response400(null, 'Weak password'),
     'time to finish is over': Response400(null, 'Time to finish is over'),
+    'favor already accepted' : Response400(null, 'Favor already accepted'),
     'forbidden': Response403(null, 'Forbidden'),
     'too many requests': Response400(null, 'Too many requests'),
     'client not connected': Response400(null, 'client not connected'),

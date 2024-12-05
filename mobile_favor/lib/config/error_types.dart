@@ -14,6 +14,7 @@ String getErrorMessages(String errorCode) {
     'customer not found': 'Cliente no encontrado',
     'courier not found': 'Mensajero no encontrado',
     'favor not found': 'Favor no encontrado',
+    'favor already accepted' : 'Favor ya aceptado por otro repartidor',
     'courier not available': 'Mensajero no disponible',
     'courier not near location': 'Mensajero no cerca de la ubicación',
     'time to accept is over': 'El tiempo para aceptar ha terminado',
