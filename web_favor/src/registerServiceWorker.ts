@@ -1,10 +1,12 @@
+
+
 import { register } from 'register-service-worker'
 import firebaseMessaging from './firebase'
-import {showInfoToast} from "@/kernel/alerts";
+import {showErrorToast, showInfoToast} from "@/kernel/alerts";
 
-const messaging = firebaseMessaging
 
-if (true) {
+  const messaging = firebaseMessaging
+
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready() {
       console.log(
@@ -41,8 +43,8 @@ if (true) {
       console.error('Error during service worker registration:', error)
       showServiceWorkerErrorMessage(error)
     }
-  })
-}
+  });
+
 
 async function requestPushPermission() {
   try {

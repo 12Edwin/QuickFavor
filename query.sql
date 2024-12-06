@@ -29,6 +29,7 @@ create table Couriers(
     brand varchar(100) null,
     model varchar(200) null,
     color varchar(100) null,
+    description text null,
     id_person varchar(100) not null,
     foreign key (id_person) references People(uid)
 );

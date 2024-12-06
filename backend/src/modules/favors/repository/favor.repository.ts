@@ -71,6 +71,9 @@ export class FavorRepository{
         try {
             connection.beginTransaction();
             await connection.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
+            if (newStatus === 'Finished'){
+                await connection.query('UPDATE Orders SET finished_at = current_timestamp WHERE no_order = ?;', [id])
+            }
             if (newStatus === 'Finished' || newStatus === 'Canceled') {
                 await connection.query('UPDATE Couriers SET status = "Available" WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [id])
             }
@@ -149,7 +152,7 @@ export class FavorRepository{
 
     async readCourierHistory(no_courier: string): Promise<any>{
         try {
-            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_courier = ? AND status IN ("Canceled", "Finished") ORDER BY created_at ASC;', [no_courier])
+            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_courier = ? AND status IN ("Canceled", "Finished") ORDER BY created_at DESC;', [no_courier])
             return  rowsHistory as RowDataPacket[];
         }catch (error: any){
             throw new Error((error as Error).message)
@@ -158,7 +161,7 @@ export class FavorRepository{
 
     async readCustomerHistory(no_customer: string): Promise<any>{
         try {
-            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_customer = ? AND status IN ("Canceled", "Finished") ORDER BY created_at ASC;', [no_customer])
+            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_customer = ? AND status IN ("Canceled", "Finished") ORDER BY created_at DESC;', [no_customer])
             return  rowsHistory as RowDataPacket[];
         }catch (error: any){
             throw new Error((error as Error).message)

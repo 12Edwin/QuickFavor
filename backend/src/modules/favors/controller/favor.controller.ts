@@ -97,6 +97,7 @@ const setupStatusSSE = async (req: Request, res: Response): Promise<void> => {
     req.on('close', () => {
       clearInterval(intervalId);
       connectionManager.removeConnection(connectionId);
+      res.end();
     });
   } catch (e) {
       console.log(e)

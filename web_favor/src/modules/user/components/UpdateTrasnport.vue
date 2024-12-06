@@ -122,7 +122,7 @@
 import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
 import {getErrorMessages, convertirImagenABase64} from "@/kernel/utils";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
-import { updateProfile } from '../services/profile';
+import { updateProfile, updateTransport } from '../services/profile';
 
 export default {
   props: {
@@ -268,14 +268,70 @@ export default {
         this.profile.plate_url = this.form.plate_url;
       }
 
-
       try {
-        const result = await updateProfile(this.profile);
+        const type = this.selectOptionClick;
+        let data = {};
+        switch (type) {
+          case 1:
+            this.profile.vehicle_type = 'Carro';
+            data = {
+              vehicle_type: 'Carro',
+              license_plate: this.form.license_plate,
+              model: this.form.model,
+              color: this.form.color,
+              plate_url: this.form.plate_url,
+            };
+            break;
+          case 2:
+            this.profile.vehicle_type = 'Moto';
+            data = {
+              vehicle_type: 'Moto',
+              license_plate: this.form.license_plate,
+              model: this.form.model,
+              color: this.form.color,
+              plate_url: this.form.plate_url,
+            };
+            break;
+          case 3:
+            this.profile.vehicle_type = 'Bicicleta';
+            data = {
+              vehicle_type: 'Bicicleta',
+              model: this.form.model,
+              color: this.form.color,
+            };
+            break;
+          case 4:
+            this.profile.vehicle_type = 'Scooter';
+            data = {
+              vehicle_type: 'Scooter',
+              model: this.form.model,
+              color: this.form.color,
+            };
+            break;
+          case 5:
+            this.profile.vehicle_type = 'Caminando';
+            data = {
+              vehicle_type: 'Caminando',
+            };
+            break;
+          case 6:
+            this.profile.vehicle_type = 'Otro';
+            data = {
+              vehicle_type: 'Otro',
+              description: this.form.description,
+            };
+            break;
+        }
+
+        const result = await updateTransport(data);
         console.log(result);
         if (result.error) {
           showErrorToast(getErrorMessages(result.message));
           return;       
         }
+
+        this.showModal = false;
+        this.localIsModalVisible = false;
         showSuccessToast('Información actualizada correctamente');
         this.$emit('update:isModalVisible', this.localIsModalVisible);  
       } catch (error) {

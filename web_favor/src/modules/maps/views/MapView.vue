@@ -45,7 +45,7 @@ export default defineComponent({
       API_KEY_MAPS: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
       locationInterval: null as number | null,
       marker: null as google.maps.Marker | null,
-      thereConnection: true, // Flag to manage connectivity
+      thereConnection: true,
     };
   },
   mounted() {

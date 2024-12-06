@@ -14,7 +14,6 @@
     "baseUrl": ".",
     "allowJs": true,
     "types": [
-      "node",
       "webpack-env",
       "jest",
       "vue3-toastify/global"
