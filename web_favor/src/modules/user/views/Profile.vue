@@ -24,13 +24,34 @@
       </div>
 
       <!-- Botón Editar Perfil -->
-      <v-btn 
-        class="edit-profile-btn" 
-        @click="handleModalUpdateUserInfo(true)"
-        rounded
-      >
-        Editar perfil
-      </v-btn>
+      <div class="edit-profile-btn-container">
+        <v-btn 
+          class="edit-profile-btn" 
+          @click="handleModalUpdateUserInfo(true)"
+          rounded
+        >
+          <v-icon class="fa-solid fa-pencil icon-edit"></v-icon>
+        </v-btn>
+
+        <div v-if="profile.plate_url != null">
+          <v-btn 
+            class="edit-profile-btn" 
+            @click="handleModalShowPlate(true)"
+            rounded
+          >
+            <v-icon class="fa-solid fa-id-card icon-edit"></v-icon>
+          </v-btn>
+        </div>
+        <div v-if="profile.ine_url != null">
+          <v-btn 
+            class="edit-profile-btn" 
+            @click="handleModalShowINE(true)"
+            rounded
+          >
+            <v-icon class="fa-regular fa-id-card icon-edit"></v-icon>
+          </v-btn>
+        </div>
+      </div>
 
       <!-- Contenido del Perfil -->
       <v-container class="profile-content">
@@ -73,6 +94,10 @@
                   <div class="input-container">
                     <v-icon class="fa-solid fa-address-card icon"></v-icon>
                     <input type="text" :value="profile.license_plate" class="register-input" disabled>
+                  </div>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" :value="profile.brand" class="register-input" disabled>
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
@@ -160,6 +185,8 @@
     </v-card>
     <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" :profile="profile"  />
     <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" :profile="profile"  />
+    <ShowPlate :isModalVisiblePlate="isModalVisiblePlate" :profile="profile" @update:isModalVisiblePlate="handleModalShowPlate" />
+    <ShowINE :isModalVisibleINE="isModalVisibleINE" :profile="profile" @update:isModalVisibleINE="handleModalShowINE" />
   </div>
 </template>
 
@@ -169,14 +196,18 @@ import WaveComponent from "@/components/WaveComponent.vue";
 import Switch from "@/components/Switch.vue";
 import EditTrasnport from '../components/UpdateTrasnport.vue';
 import UpdateUserInfo from '../components/UpdateUserInfo.vue';
+import ShowPlate from '../components/ShowPlate.vue';
+import ShowINE from '../components/ShowINE.vue';
 import { getProfile } from '../services/profile';
 
 export default defineComponent({
   name: "Profile",
-  components: { WaveComponent, Switch, EditTrasnport, UpdateUserInfo },
+  components: { WaveComponent, Switch, EditTrasnport, UpdateUserInfo, ShowPlate, ShowINE },
   setup() {
     const isModalVisible = ref(false);
     const isModalVisibleUserInfo = ref(false);
+    const isModalVisiblePlate = ref(false);
+    const isModalVisibleINE = ref(false);
     const defaultColor = "#566981"; // Define a default color
 
     const profile = ref({
@@ -191,6 +222,9 @@ export default defineComponent({
       model: "",
       color: "",
       description: "",
+      brand: "",
+      plate_url: null,
+      ine_url: null,
     });
 
     const handleModalUpdate = (newVisibility: boolean) => {
@@ -199,6 +233,14 @@ export default defineComponent({
 
     const handleModalUpdateUserInfo = (newVisibility: boolean) => {
       isModalVisibleUserInfo.value = newVisibility;
+    };
+
+    const handleModalShowPlate = (newVisibility: boolean) => {
+      isModalVisiblePlate.value = newVisibility;
+    };
+
+    const handleModalShowINE = (newVisibility: boolean) => {
+      isModalVisibleINE.value = newVisibility;
     };
 
     const getUserInfo = async () => {
@@ -220,8 +262,12 @@ export default defineComponent({
       profile,
       handleModalUpdate,
       handleModalUpdateUserInfo,
+      handleModalShowPlate,
+      handleModalShowINE,
       isModalVisible,
       isModalVisibleUserInfo,
+      isModalVisiblePlate,
+      isModalVisibleINE,
       defaultColor,
     };
   }
@@ -366,6 +412,15 @@ export default defineComponent({
   color: #566981;
 }
 
+.icon-edit {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%);
+  color: #566981;
+}
+
 .register-input {
     width: 100%;
     padding: 12px 12px 12px 40px; /* Espacio para el ícono */
@@ -376,15 +431,25 @@ export default defineComponent({
     height: 40px;
   }
 
-  /* Estilo para el botón de editar perfil */
+  .edit-profile-btn-container {
+    margin-top: 40px;
+    margin-left: 300px; /* Mover el margen al contenedor para no interferir con el botón */
+    display: flex;
+    gap: 12px; /* Espaciado entre los botones */
+  }
+
 .edit-profile-btn {
-  margin-top: 40px;
-  margin-left: 300px;
   color: #fff; 
   border-radius: 20px;
   padding: 8px 24px; 
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
   transition: background-color 0.3s; /* Transición de color */
+  border: 2px solid #1976D2; /* Mantener borde */
+  font-size: 16px;
+}
+
+.edit-profile-btn .icon {
+  margin-right: 8px; /* Espacio entre el ícono y el texto */
 }
 
 .edit-profile-btn:hover {
@@ -413,11 +478,15 @@ export default defineComponent({
   .edit-card {
     margin-top: 0px;
   }  
-  .edit-profile-btn {
-    font-size: 14px; /* Reducir el tamaño de fuente en pantallas más pequeñas */
-    padding: 6px 18px; /* Ajustar el relleno */
+  .edit-profile-btn-container {
+    margin-left: 50%;
     margin-top: 84px;
-    margin-left: 84px; /* Centrar el botón */
+    transform: translateX(-50%);
+  }
+
+  .edit-profile-btn {
+    font-size: 14px;
+    padding: 6px 18px; 
   }
 
   .profile-content {
@@ -446,11 +515,15 @@ export default defineComponent({
     font-size: 16px;
   }
 
+  .edit-profile-btn-container {
+    margin-left: 50%;
+    margin-top: 84px;
+    transform: translateX(-50%);
+  }
+
   .edit-profile-btn {
-    font-size: 16px; /* Aumentar el tamaño de fuente en pantallas más grandes */
-    padding: 8px 24px; /* Ajustar el relleno */
-    margin-top: 40px;
-    margin-left: 300px; 
+    font-size: 16px;
+    padding: 8px 24px; 
   }
 
   .profile-content {
@@ -460,7 +533,7 @@ export default defineComponent({
 
 @media screen and (min-width: 1200px) {
   .details-card, .edit-card {
-    margin-left: -256px;
+    margin-left: -224px;
   }
 }
 
