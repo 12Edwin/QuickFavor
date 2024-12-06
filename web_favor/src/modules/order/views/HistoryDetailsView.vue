@@ -2,7 +2,7 @@
   <div class="back-container">
     <WaveComponent />
   </div>
-  <div class="history-container" v-if="historyItem">
+  <div class="history-container">
     <div class="card-header d-flex align-center justify-space-between">
       <h2 class="header-title">
         <i class="fas fa-history fa-lg text-white" style="font-size: 36px"></i>
@@ -11,36 +11,44 @@
       <Switch @onFalse="toggleStatus" @onTrue="toggleStatus" />
     </div>
     <div class="content-container">
-      <div class="left-section">
-        <div class="left-content">
-          <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
-            <img
-              :src="historyItem.face_url || '../../../assets/oldManUser.png'"
-              alt="User Avatar"
-              style="width: 100%; height: 100%; border-radius: 50%"
-            />
-          </v-avatar>
-          <p class="username">{{ historyItem.customer_name }}</p>
-          <v-chip
-            :color="getChipColor(historyItem.status)"
-            variant="flat"
-            class="chip-style"
-          >
-            <span style="color: white">{{ historyItem.status }}</span>
-          </v-chip>
-          <v-divider
-            class="chip-divider border-opacity-100"
-            :thickness="4"
-            color="#A3BBBF"
-          ></v-divider>
-          <p class="completion-text">Completado en</p>
-          <p class="completion-status">
-            {{ formatDate(historyItem.order_created_at) }}
-          </p>
+      <transition-group>
+        <transition name="fade" key="loading">
+          <div v-if="isLoading" class="loader-container">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </div>
+        </transition>
+        <transition name="fade" key="content">
+          <div v-if="!isLoading" class="left-section">
+          <div class="left-content">
+            <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
+              <img
+                src="@/assets/profile.png"
+                alt="User Avatar"
+                style="width: 100%; height: 100%; border-radius: 50%"
+              />
+            </v-avatar>
+            <p class="username">{{ historyItem.customer_name || '' }} {{ historyItem.customer_surname || '' }}</p>
+            <v-chip
+              :color="getChipColor(historyItem.status)"
+              variant="flat"
+              class="chip-style"
+            >
+              <span style="color: white">{{getStatus (historyItem.status) }}</span>
+            </v-chip>
+            <v-divider
+              class="chip-divider border-opacity-100"
+              :thickness="4"
+              color="#A3BBBF"
+            ></v-divider>
+            <p class="completion-text">Completado en</p>
+            <p class="completion-status">
+              {{ getMinutesDifference(historyItem.order_created_at, historyItem.order_finished_at)  }} / 120 minutos
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div class="details-section">
+        </transition>
+        <transition name="fade" key="content2">
+          <div v-if="!isLoading" class="details-section">
         <div class="header-container">
           <div class="left-stripe"></div>
           <p class="header-text">Productos</p>
@@ -115,9 +123,11 @@
           </div>
         </div>
       </div>
+        </transition>
+      </transition-group>
     </div>
 
-    <v-dialog v-model="dialog" max-width="600" class="centered-dialog">
+    <v-dialog v-if="!isLoading" v-model="dialog" max-width="600" class="centered-dialog">
       <v-card>
         <v-card-title>Detalles del Producto</v-card-title>
         <v-card-text class="product-details">
@@ -140,7 +150,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="receiptDialog" max-width="800" class="centered-dialog">
+    <v-dialog v-if="!isLoading" v-model="receiptDialog" max-width="800" class="centered-dialog">
       <v-card>
         <v-card-title>Factura</v-card-title>
         <v-card-text>
@@ -157,12 +167,6 @@
     </v-dialog>
   </div>
 
-  <div v-else class="loading-container">
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-</div>
-
-  </div>
 </template>
 
 <script lang="ts">
@@ -181,6 +185,7 @@ export default defineComponent({
   },
   data() {
     return {
+      isLoading: true,
       isActive: true,
       dialog: false,
       receiptDialog: false, // Nuevo estado para el modal de factura
@@ -194,6 +199,12 @@ export default defineComponent({
   methods: {
     toggleStatus() {
       this.isActive = !this.isActive;
+    },
+    getMinutesDifference(startDate: string = new Date().toISOString(), endDate: string = new Date().toISOString()) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffMs = end.getTime() - start.getTime();
+      return Math.floor(diffMs / 60000);
     },
     async fetchOrderDetails() {
       try {
@@ -222,6 +233,8 @@ export default defineComponent({
         }
       } catch (error) {
         console.error("Error al hacer la solicitud al backend:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
     getChipColor(estatus: string) {
@@ -238,6 +251,23 @@ export default defineComponent({
           return "#f70b0b";
         default:
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
+      }
+    },
+
+    getStatus(status: string) {
+      switch (status) {
+        case "Pending":
+          return "Pendiente";
+        case "In delivery":
+          return "En entrega";
+        case "In shopping":
+          return "En compra";
+        case "Finished":
+          return "Finalizado";
+        case "Canceled":
+          return "Cancelado";
+        default:
+          return "Desconocido";
       }
     },
     viewDetails(product: any) {
@@ -462,12 +492,6 @@ export default defineComponent({
   color: #34344e;
 }
 
-.products-table {
-  max-height: 350px; /* Ajusta esta altura según tus necesidades */
-  overflow-y: auto; /* Permite que la tabla tenga desplazamiento vertical */
-  text-align: center;
-}
-
 .centered-dialog {
   display: flex;
   justify-content: center;
@@ -566,153 +590,6 @@ export default defineComponent({
   margin-top: 20px;
 }
 
-/* Estilo para el contenedor del título */
-.title-container {
-  width: 100%;
-  background-color: #566981; /* Color de fondo azul claro */
-  padding: 16px;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.titlePrincipal {
-  color: #ffffff; /* Color de texto blanco */
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.bell-icon {
-  color: #ffffff; /* Mismo color que el texto del título */
-  font-size: 30px; /* Tamaño del icono */
-  margin-right: 30px;
-}
-
-/* Estilos para el botón de estado */
-.status-container {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
-
-.status-button {
-  display: flex;
-  align-items: center;
-  background-color: #89a7b1;
-  border: none;
-  border-radius: 50px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
-}
-
-.status-button.inactive {
-  background-color: #f70b0b;
-}
-
-.icon-circle {
-  background-color: white;
-  border-radius: 50%;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  position: absolute;
-  left: -8px; /* Ajusta cuánto sobresale el icono */
-}
-
-.icon-circle.inactive-icon {
-  background-color: #ffffff;
-}
-
-.power-icon {
-  color: #0066cc; /* Color del icono de encendido */
-  font-size: 24px;
-}
-
-.power-icon.inactive-icon {
-  color: #f70b0b;
-}
-
-.status-text {
-  color: white;
-  margin-left: 30px;
-}
-
-/* Contenedor para centrar solo la sección de no-orders */
-.no-orders-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.no-orders {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  color: #34344e;
-  font-size: 18px;
-}
-
-.no-orders-image {
-  width: 300px;
-  height: auto;
-  margin-bottom: 30px;
-}
-
-.white-card {
-  background-color: white;
-  width: 85%;
-  margin: 0 auto;
-  margin-bottom: 20px; /* Espacio entre cards */
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.card-overlay {
-  z-index: 2;
-}
-
-.card-content {
-  display: flex;
-  align-items: center;
-  width: 95%;
-  gap: 15px;
-}
-
-.text-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-}
-
-.title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #34344e;
-  margin: 0;
-}
-
-.date {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  margin-left: 20px;
-}
-
 .chip-style {
   font-size: 14px;
   font-weight: bold;
@@ -722,16 +599,6 @@ export default defineComponent({
   margin-top: 12px;
 }
 
-.icon-style {
-  font-size: 30px;
-  color: #312070;
-  padding: 15px;
-}
-
-.icon-link {
-  margin-left: 100px; /* Espacio entre el chip y el icono */
-  text-decoration: none;
-}
 
 @media (max-width: 768px) {
   .history-container {
@@ -833,7 +700,6 @@ export default defineComponent({
     color: #34344e;
   }
 
-  /* Ajuste del botón de factura */
   .summary-button-container {
     display: flex;
     justify-content: center;
@@ -851,5 +717,19 @@ export default defineComponent({
     width: 100%;
     max-width: 200px;
   }
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
 }
 </style>
