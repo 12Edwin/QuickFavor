@@ -135,6 +135,7 @@ const getErrorMessages = (errorCode: string): string => {
         'favor not found': 'Favor no encontrado',
         'courier not available': 'Mensajero no disponible',
         'courier not near location': 'Mensajero no cerca de la ubicación',
+        'favor already accepted' : 'Favor ya aceptado por otro repartidor',
         'time to accept is over': 'El tiempo para aceptar ha terminado',
         'weak password': 'Contraseña débil',
         'time to finish is over': 'El tiempo para finalizar ha terminado',

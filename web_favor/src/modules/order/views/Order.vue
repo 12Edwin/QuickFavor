@@ -181,7 +181,7 @@
   </div>
   <ChatModal :name="order?.customer_name" @close="() => showChat = false" :current-user-id="no_user" :chat-id="order?.no_order" :show="showChat" />
   <MapModal v-if="showMap" :lat="selectedAddress.lat" :lng="selectedAddress.lng" @close="()=> showMap = false"/>
-  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="newStatus == 'Canceled' ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
+  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="(newStatus == 'Canceled' && order?.rejected_orders >= 2) ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
 </template>
 
 <script lang="ts">
