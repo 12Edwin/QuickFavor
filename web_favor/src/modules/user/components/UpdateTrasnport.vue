@@ -94,6 +94,15 @@
             <v-icon class="fa-solid fa-file icon"></v-icon>
             <input 
               type="text" 
+              v-model="form.brand" 
+              placeholder="Marca" 
+              class="register-input" 
+              :required="selectOptionClick === 1 || selectOptionClick === 2">
+          </div>
+          <div class="input-container">
+            <v-icon class="fa-solid fa-file icon"></v-icon>
+            <input 
+              type="text" 
               v-model="form.model" 
               placeholder="Modelo" 
               class="register-input" 
@@ -217,6 +226,7 @@ export default {
       stream: null,  // El flujo de la cámara
       form: {
         description: '',
+        brand: '',
         license_plate: '',
         model: '',
         color: '#000000',
@@ -257,6 +267,7 @@ export default {
       handler(newProfile) {
         if (newProfile) {
           this.form.description = newProfile.description || '';
+          this.form.brand = newProfile.brand || '';
           this.form.license_plate = newProfile.license_plate || '';
           this.form.model = newProfile.model || '';
           this.form.color = newProfile.color || '';
@@ -293,10 +304,10 @@ export default {
 
     switch (this.selectOptionClick) {
       case 1: // Carro
-        requiredFields.push('license_plate', 'model', 'color', 'plate_url');
+        requiredFields.push('license_plate', 'model', 'color', 'plate_url', 'brand');
         break;
       case 2: // Moto
-        requiredFields.push('license_plate', 'model', 'color', 'plate_url');
+        requiredFields.push('license_plate', 'model', 'color', 'plate_url', 'brand');
         break;
       case 3: // Bicicleta
         requiredFields.push('model', 'color');
@@ -383,7 +394,8 @@ export default {
               license_plate: this.form.license_plate,
               model: this.form.model,
               color: this.form.color,
-              plate_url: this.form.plate_url,
+              plate_photo: this.form.plate_url,
+              brand: this.form.brand,
             };
             break;
           case 2:
@@ -393,7 +405,8 @@ export default {
               license_plate: this.form.license_plate,
               model: this.form.model,
               color: this.form.color,
-              plate_url: this.form.plate_url,
+              plate_photo: this.form.plate_url,
+              brand: this.form.brand,
             };
             break;
           case 3:
