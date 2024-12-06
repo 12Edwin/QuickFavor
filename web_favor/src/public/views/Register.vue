@@ -127,10 +127,10 @@
                     </v-col>
                     <v-col cols="6" class="col-item">
                       <div class="input-container">
-                        <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
+                        <v-icon :class="form.licenciaFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                         <div class="custom-file-input-wrapper">
-                          <label for="file-upload" class="file-label">
-                            <input type="file" id="file-upload" ref="fileInput" @change="handleFileChange"
+                          <label for="file-license" class="file-label">
+                            <input type="file" id="file-license" ref="fileInput" @change="handleFileChange"
                               class="custom-file-input" />
                             <span class="file-placeholder">Licencia</span>
                           </label>
@@ -147,10 +147,10 @@
                 <v-row align="start" no-gutters style="margin-bottom: 0px !important;">
                   <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
+                      <v-icon :class="form.rostroFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                       <div class="custom-file-input-wrapper">
-                        <label for="file-upload" class="file-label">
-                          <input type="file" id="file-upload" ref="fileInput" @change="handleRostroChange"
+                        <label for="file-face" class="file-label">
+                          <input type="file" id="file-face" ref="fileInput" @change="handleRostroChange"
                             class="custom-file-input" />
                           <span class="file-placeholder">Rostro</span>
                         </label>
@@ -159,10 +159,10 @@
                   </v-col>
                   <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
+                      <v-icon :class="form.ineFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                       <div class="custom-file-input-wrapper">
-                        <label for="file-upload" class="file-label">
-                          <input type="file" id="file-upload" ref="fileInput" @change="handleIneChange"
+                        <label for="file-ine" class="file-label">
+                          <input type="file" id="file-ine" ref="fileInput" @change="handleIneChanges"
                             class="custom-file-input" />
                           <span class="file-placeholder">INE</span>
                         </label>
@@ -235,8 +235,8 @@ import router from '@/router';
 import { defineComponent, ref } from 'vue';
 import { showErrorToast, showSuccessToast } from '@/kernel/alerts';
 import { RegisterCourierEntity } from "@/public/entity/auth.entity";
-import {register} from "@/public/services/auth";
-import {getErrorMessages, setStatusCourier} from "@/kernel/utils";
+import { register } from "@/public/services/auth";
+import { convertirImagenABase64, extraerBase64, getErrorMessages, setStatusCourier } from "@/kernel/utils";
 
 export default defineComponent({
   name: "Register",
@@ -252,15 +252,17 @@ export default defineComponent({
       matricula: '',
       modelo: '',
       color: '#0000FF',
-      licenciaFile: null as File | null,
-      rostroFile:  null as File | null,
-      ineFile:  null as File | null,
+      licenciaFile: '',
+      rostroFile: '',
+      ineFile: '',
       descripcion: '',
       telefono: '',
       correo: '',
       contrasena: '',
       confirmarContrasena: ''
     });
+
+    const isfile = ref(false);
 
     const items = Array.from({ length: 3 }).map((_, i) => ({
       value: i + 1,
@@ -283,45 +285,46 @@ export default defineComponent({
     };
 
     // Manejo del cambio de archivo
-    const handleFileChange = (event: Event) => {
+    const handleFileChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const file = target?.files ? target.files[0] : null;
-      if (file) {
-        form.value.licenciaFile = file;
+      const files = target.files;
+
+      if (files && files.length === 1) {
+        const base64 = convertirImagenABase64(files[0]);
+        const substr = extraerBase64(await base64);
+        form.value.licenciaFile = substr || '';
+
       } else {
-        form.value.licenciaFile = null;
+        form.value.licenciaFile = '';
+        alert('Por favor, selecciona solo un archivo.');
       }
     };
 
     // Manejo del cambio de archivo
-    const handleRostroChange = (event: Event) => {
+    const handleRostroChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const file = target?.files ? target.files[0] : null;
+      
+      const file = target.files;
       if (file) {
-        form.value.rostroFile = file;
+        const base64 = convertirImagenABase64(file[0]);
+        const substr = extraerBase64(await base64);
+        form.value.rostroFile = substr || '';
       } else {
-        form.value.rostroFile = null;
+        form.value.rostroFile = '';
       }
     };
 
-    const handleIneChange = (event: Event) => {
+    const handleIneChanges = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const files = target?.files ? Array.from(target.files) : [];
-
-      if (files.length > 2) {
-        showErrorToast("Solo se permiten 2 archivos maximo .");
-        return;
+      const files = target.files;
+      if (files) {
+        const base64 = convertirImagenABase64(files[0]);
+        const substr = extraerBase64(await base64);
+        
+        form.value.ineFile = substr || '';
+      } else {
+        form.value.ineFile = '';
       }
-
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-      const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-
-      if (invalidFiles.length > 0) {
-        showErrorToast("Solo se permiten archivos de tipo imagen (png, jpeg) o pdf.");
-        return;
-      }
-
-      form.value.ineFile = files[0];
     };
 
     const submitForm = async () => {
@@ -348,7 +351,6 @@ export default defineComponent({
           vehiculeType = 'Otro';
           break;
       }
-
       const credentials = {
         name: form.value.nombre,
         surname: form.value.apellidoPaterno,
@@ -359,8 +361,9 @@ export default defineComponent({
         vehicle_type: vehiculeType,
         model: form.value.modelo,
         license_plate: form.value.matricula,
+        INE_photo: form.value.ineFile,
         face_photo: form.value.rostroFile,
-        INE: form.value.ineFile,
+        plate_photo: form.value.licenciaFile,
         email: form.value.correo,
         password: form.value.contrasena,
       } as unknown as RegisterCourierEntity;
@@ -369,11 +372,8 @@ export default defineComponent({
       if (result.error) {
         showErrorToast(getErrorMessages(result.message));
       } else {
-        await router.push({name: "login"});
+        await router.push({ name: "login" });
       }
-
-      console.log("CREDENCIALES" ,credentials);
-      
     };
 
     const goToInicio = () => {
@@ -416,7 +416,7 @@ export default defineComponent({
       selectOptionClick,
       handleFileChange,
       handleRostroChange,
-      handleIneChange
+      handleIneChanges
     };
   }
 });

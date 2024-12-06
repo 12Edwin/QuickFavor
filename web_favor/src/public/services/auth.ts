@@ -23,13 +23,11 @@ export const login = async (credentials: LoginEntity): Promise <ResponseEntity> 
 export const register = async (credentials: RegisterCourierEntity): Promise <ResponseEntity> => {
     try {
         const response = await api.doPost("/auth/courier-register", credentials);
-        console.log("RESPONSE DEL REGISTER",response.data);
         return response.data;
     } catch (error: any) {
         if (error.response.data.data !== undefined && error.response.data.data !== null && Array.isArray(error.response.data.data)) {
             return getErrorMessages(error.response.data)
         }
-        console.log("RESPONSE DEL REGISTER",error.response.data);
         return error.response.data;
     }
 }

@@ -16,6 +16,7 @@ export interface RegisterCourierEntity {
     license_plate: string | null,
     face_photo: string | null,
     INE_photo: string | null,
+    plate_photo: string | null,
     email: string,
     password: string,
 }
