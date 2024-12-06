@@ -5,7 +5,7 @@ services:
     depends_on:
       - db
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
       target: ${STAGE}
     restart: always
@@ -20,12 +20,23 @@ services:
       DB_NAME: ${DB_NAME}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
       DB_USERNAME: ${DB_USERNAME}
     volumes:
-      - .:/app
+      - ./backend:/app
       - /app/node_modules
     container_name: ${APP_NAME}
+
+  web_app:
+    depends_on:
+      - app
+    build:
+      context: ./web_favor
+      dockerfile: Dockerfile
+      target: prod
+    restart: always
+    ports:
+      - 3001:80
 
   db:
     image: mysql:9.0.1

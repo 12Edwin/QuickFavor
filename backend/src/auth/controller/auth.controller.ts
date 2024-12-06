@@ -26,13 +26,13 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
 const courier_register = async (req: Request, res: Response) => {
     try {
-        const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color } = req.body;
+        const { email, password, name, surname, lastname, CURP, vehicle_type, license_plate, face_photo, INE_photo, plate_photo, phone, sex, brand, model, color, description } = req.body;
 
         const repository: AuthRepository = new AuthRepository();
         const service: AuthService = new AuthService(repository);
         const user: User = {email, password, name, surname, lastname,
             role: 'COURIER', sex, phone, CURP, vehicle_type, status: true,
-            license_plate, face_photo, INE_photo, plate_photo, state: 'Out of service', brand, model, color
+            license_plate, face_photo, INE_photo, plate_photo, state: 'Out of service', brand, model, color, description
         };
         await service.courier_register(user);
 

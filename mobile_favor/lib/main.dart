@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_favor/modules/points/screens/map_customer.dart';
 import 'package:mobile_favor/navigation/courier/profile_courier.dart';
 import 'package:mobile_favor/navigation/customer/create_order.dart';
@@ -12,6 +14,9 @@ import 'config/firebase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   await Firebase.initializeApp();
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseService.initializeFirebase();

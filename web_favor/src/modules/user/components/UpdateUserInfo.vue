@@ -3,71 +3,118 @@
       <v-card class="card-custom">
         <v-card-title class="headline">Selecciona el nuevo transporte</v-card-title>
         <v-card-text>
-          <!-- Botones en la parte superior -->
           <div>
-            <div class="input-container">
-                <v-icon class="fa-solid fa-phone icon"></v-icon>
-                <input type="tel" v-model="form.telefono" placeholder="Teléfono" class="register-input" required>
-                </div>
-
-                <!-- Correo -->
-                <div class="input-container">
-                <v-icon class="fa-solid fa-envelope icon"></v-icon>
-                <input type="text" v-model="form.correo" placeholder="Correo electronico" class="register-input" required>
-                </div>
+          <div class="input-container">
+            <v-icon class="fa-solid fa-phone icon"></v-icon>
+            <input 
+              type="tel" 
+              v-model="form.phone" 
+              placeholder="Teléfono" 
+              class="register-input" 
+              required 
+              :class="{ 'is-invalid': phoneError }" 
+              @input="validatePhone"
+            />
           </div>
+          <div v-if="phoneError" class="validation-message">El teléfono debe tener solo números y 10 dígitos</div>
+        </div>
         </v-card-text>
   
         <v-card-actions>
-            <v-btn color="secondary" @click="SaveInfo">Guardar</v-btn>
+          <button class="btn-save" @click="openModal" :disabled="phoneError">GUARDAR</button>
           <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <ConfirmationModal :is-visible="showModal" @cancel="closeModal" @confirm="saveInfo" :is-completed="false" message="¿Estás seguro o segura de actualizar tú información?"/>
   </template>
   
   <script>
-  export default {
-    props: {
-      isModalVisibleUserInfo: {
-        type: Boolean,
-        required: true
-      }
+import { updateProfile } from '../services/profile';
+import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
+import {getErrorMessages} from "@/kernel/utils";
+import ConfirmationModal from "@/kernel/confirmation_modal.vue";
+
+export default {
+  props: {
+    isModalVisibleUserInfo: {
+      type: Boolean,
+      required: true,
     },
-    data() {
-      return {
-        localIsModalVisible: this.isModalVisibleUserInfo, // Usamos una variable local para el diálogo
-        selectOptionClick: 2,
-        showDescriptionOnly: false,
-        showImageOnly: false,
-        showModelOnly: false,
-        form: {
-            telefono: '',
-            correo: ''
-        }
-      };
+    profile: {
+      type: Object,
+      required: true,
     },
-    watch: {
-      isModalVisibleUserInfo(newValue) {
-        this.localIsModalVisible = newValue;
+  },
+  components: {ConfirmationModal },
+  data() {
+    return {
+      localIsModalVisible: this.isModalVisibleUserInfo,
+      showModal: false,
+      form: {
+        phone: '',
       },
-      localIsModalVisible(newValue) {
-        this.$emit('update:isModalVisibleUserInfo', newValue);
+      phoneError: false,
+    };
+  },
+  computed: {
+    computedProfile() {
+      if (this.profile) {
+        return this.profile;
+      }
+      return {};
+    }
+  },
+  watch: {
+    isModalVisibleUserInfo(newValue) {
+      this.localIsModalVisible = newValue;
+    },
+    localIsModalVisible(newValue) {
+      this.$emit('update:isModalVisibleUserInfo', newValue);
+    },
+    profile: {
+      handler(newProfile) {
+        if (newProfile) {
+          this.form.phone = newProfile.phone || '';
+        }
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    validatePhone() {
+      const regex = /^[0-9]{10}$/;
+      this.phoneError = !regex.test(this.form.phone);
+    },
+    openModal() {
+      this.showModal = true;
+    },
+    async saveInfo() {
+      this.profile.phone = this.form.phone;
+      try {
+        const result = await updateProfile(this.form);
+        console.log(result);
+        if (result.error) {
+          showErrorToast(getErrorMessages(result.message));
+          return;       
+        }
+        this.showModal = false;
+        this.localIsModalVisible = false;
+        showSuccessToast('Información actualizada correctamente');
+        this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);  
+      } catch (error) {
+        showErrorToast(getErrorMessages(error.message))
+        console.error(error);
       }
     },
-    methods: {
-        SaveInfo() {
-            console.log(this.form);
-            this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);
-        },
-      
-      closeModal() {
-        this.localIsModalVisible = false; // Cerrar el modal
-        this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);
-      }
-    }
-  };
-  </script>
+    closeModal() {
+      this.showModal = false;
+      this.localIsModalVisible = false; 
+    },
+  },
+};
+</script>
+
   
   <style scoped>
   .icon-button-group {
@@ -231,6 +278,46 @@
     transform: translateY(-50%);
     color: #566981;
   }
-  
+  .error-message {
+  color: red;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.validation-message {
+  color: red;
+  margin-left: 16px;
+  text-align: left;
+  margin-top: 1px;
+}
+
+.btn-save {
+  background-color: #34344E; 
+  color: white;
+  border: none; 
+  padding: 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+}
+
+/* Efecto hover */
+.btn-save:hover {
+  background-color: #4a4a73; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.btn-save:active {
+  background-color: #2c2c3d;
+  transform: translateY(1px); 
+}
+
+.btn-save:disabled {
+  background-color: #b0b0b0; 
+  cursor: not-allowed; 
+}
   </style>
   

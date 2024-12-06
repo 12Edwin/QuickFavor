@@ -24,6 +24,7 @@ export type Courier = {
     brand?: string;
     model?: string;
     color?: string;
+    description?: string;
 }
 
 export type Customer = {

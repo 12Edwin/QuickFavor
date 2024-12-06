@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'order_details.dart'; // Asegúrate de importar esta vista
+import 'package:mobile_favor/config/alerts.dart';
+import 'package:mobile_favor/config/error_types.dart';
+import 'package:mobile_favor/config/utils.dart';
+import 'entity/history.entity.dart';
+import 'order_details.dart';
+import 'service/favor.service.dart'; // Asegúrate de importar el servicio
 
 class HistoryOrder extends StatefulWidget {
   const HistoryOrder({super.key});
@@ -9,19 +14,71 @@ class HistoryOrder extends StatefulWidget {
 }
 
 class _HistoryOrderState extends State<HistoryOrder> {
-  // Lista de pedidos simulada
-  List<Map<String, dynamic>> historyOrder = [
-    {
-      'id': 'ORD01',
-      'fecha': '05-07-2024 14:04:00',
-      'cantidad': 10,
-    },
-    {
-      'id': 'ORD02',
-      'fecha': '04-07-2024 12:00:00',
-      'cantidad': 7,
-    },
-  ];
+  List<HistoryItemEntity> historyOrder = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCustomerHistory();
+  }
+
+  Future<void> fetchCustomerHistory() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final service = FavorService(context);
+      final customer_id = await getStorageNoUser();
+      if (customer_id == null) {
+        showErrorAlert(context, 'No se pudo obtener la información del usuario');
+        return;
+      }
+      final response = await service.getListCustomerHistory(customer_id);
+      if (response.error) {
+        showErrorAlert(context, getErrorMessages(response.message));
+        return;
+      }
+      setState(() {
+        historyOrder.clear();
+        for (var item in response.data) {
+          historyOrder.add(HistoryItemEntity.fromJson(item));
+        }
+      });
+    } catch (error) {
+      print('Error fetching customer history: $error');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  String replaceStatus(String status) {
+    switch (status) {
+      case 'Pending':
+        return 'Pendiente';
+      case 'Canceled':
+        return 'Cancelado';
+      case 'Finished':
+        return 'Finalizado';
+      default:
+        return '';
+    }
+  }
+
+  Color replaceColor(String status) {
+    switch (status) {
+      case 'Pending':
+        return Colors.orange;
+      case 'Canceled':
+        return Colors.red;
+      case 'Finished':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +87,10 @@ class _HistoryOrderState extends State<HistoryOrder> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial de pedidos'),
+        automaticallyImplyLeading: false,
       ),
       body: Stack(
         children: [
-          // Contenedor azul en el fondo
           Positioned(
             top: -screenWidth * 0.809,
             left: (screenWidth - (screenWidth * 1.5)) / 2,
@@ -46,11 +103,9 @@ class _HistoryOrderState extends State<HistoryOrder> {
               ),
             ),
           ),
-          // Contenido principal
           Column(
             children: [
               const SizedBox(height: 10),
-              // Imagen superior
               Image.asset(
                 './assets/history.webp',
                 width: 250,
@@ -58,7 +113,6 @@ class _HistoryOrderState extends State<HistoryOrder> {
                 fit: BoxFit.cover,
               ),
               const SizedBox(height: 20),
-              // Card inferior para la lista
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -68,110 +122,108 @@ class _HistoryOrderState extends State<HistoryOrder> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: historyOrder.isEmpty
+                    child: _isLoading
                         ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  './assets/empty2.png',
-                                  width: 150,
-                                  height: 150,
-                                  fit: BoxFit.cover,
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  "Aún no hay pedidos en esta cuenta",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
+                            child: CircularProgressIndicator(),
                           )
-                        : ListView.builder(
-                            itemCount: historyOrder.length,
-                            padding: const EdgeInsets.all(10),
-                            itemBuilder: (context, index) {
-                              final order = historyOrder[index];
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                                color: const Color(0xFFDCE8E8),
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 15),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // Información del pedido
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${order['cantidad']} productos",
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            order['fecha'],
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
+                        : historyOrder.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      './assets/empty2.png',
+                                      width: 150,
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      "Aún no hay pedidos en esta cuenta",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      // Número de orden y el ícono de vista
-                                      Row(
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: historyOrder.length,
+                                padding: const EdgeInsets.all(10),
+                                itemBuilder: (context, index) {
+                                  final order = historyOrder[index];
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 2,
+                                    color: const Color(0xFFDCE8E8),
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 15),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            order['id'],
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      OrderDetails(
-                                                    orderId: order['id'],
-                                                    fecha: order['fecha'],
-                                                    cantidad: order['cantidad'],
-                                                  ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${order.products.toString()} producto(s)",
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                              );
-                                            },
-                                            child: const Icon(
-                                              Icons.remove_red_eye,
-                                              color: Colors.purple,
-                                              size: 24,
-                                            ),
+                                              ),
+                                              const SizedBox(height: 5),
+                                              Text(
+                                                order.created_at.substring(0, 19).replaceAll('T', ' '),
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                replaceStatus( order.status ),
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: replaceColor( order.status ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          OrderDetails(no_order: order.no_order),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Icon(
+                                                  Icons.remove_red_eye,
+                                                  color: Colors.purple,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                                    ),
+                                  );
+                                },
+                              ),
                   ),
                 ),
               ),

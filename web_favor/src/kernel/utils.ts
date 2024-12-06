@@ -69,10 +69,9 @@ export const getCurrentLocation = async (): Promise<{ lat: number, lng: number }
 
 export const getNamesByToken = async () => {
     try {
-        const decrypted = decrypt(getToken() || '');
-        const { sub } = jwtDecode(decrypted || '')
-        const { name } = await JSON.parse(sub || '')
-        return name
+        const tokenDecrypted = decrypt(getToken() || '');
+        const decode = jwtDecode(tokenDecrypted || '');
+        return (decode as any).name
     } catch (error) {
         removeToken()
     }
@@ -136,6 +135,7 @@ const getErrorMessages = (errorCode: string): string => {
         'favor not found': 'Favor no encontrado',
         'courier not available': 'Mensajero no disponible',
         'courier not near location': 'Mensajero no cerca de la ubicación',
+        'favor already accepted' : 'Favor ya aceptado por otro repartidor',
         'time to accept is over': 'El tiempo para aceptar ha terminado',
         'weak password': 'Contraseña débil',
         'time to finish is over': 'El tiempo para finalizar ha terminado',
@@ -145,6 +145,7 @@ const getErrorMessages = (errorCode: string): string => {
         'client not connected': 'Cliente no conectado',
         'network error': 'Error de red',
         'default': 'Error interno del servidor',
+        "lastname must be at least 3 characters": "El apellido debe tener al menos 3 caracteres",
     };
     return errorMessages[errorCode.toLowerCase()] || 'Ocurrió un error desconocido';
 };
@@ -210,6 +211,33 @@ const setStatusCourier = async (status: any) => {
     }
 }
 
+function convertirImagenABase64(archivo: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+  
+      reader.onloadend = () => {
+        if (reader.result) {
+          resolve(reader.result as string); // Resultado en base64
+        }
+      };
+  
+      reader.onerror = (error) => {
+        reject("Error al leer el archivo: " + error);
+      };
+  
+      reader.readAsDataURL(archivo); // Lee el archivo y lo convierte a base64
+    });
+  }  
+
+  // Función privada para extraer el base64, sin prefijo
+function extraerBase64(dataUrl: string): string | null {
+    const base64Prefix = 'base64,';
+    if (dataUrl.includes(base64Prefix)) {
+      return dataUrl.split(base64Prefix)[1]; // Retorna solo la parte base64
+    }
+    return null; // Si no tiene el prefijo esperado, devuelve null
+  }
+
 
 export {
     getRoleNameByToken,
@@ -224,4 +252,6 @@ export {
     getIconByStatus,
     filterByName,
     getColorByStatus,
+    convertirImagenABase64,
+    extraerBase64
 }

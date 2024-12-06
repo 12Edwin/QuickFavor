@@ -71,6 +71,9 @@ export class FavorRepository{
         try {
             connection.beginTransaction();
             await connection.query('UPDATE Orders SET status = ?, cost = ?, receipt_url = ? WHERE no_order = ?;', [newStatus, cost, receipt, id])
+            if (newStatus === 'Finished'){
+                await connection.query('UPDATE Orders SET finished_at = current_timestamp WHERE no_order = ?;', [id])
+            }
             if (newStatus === 'Finished' || newStatus === 'Canceled') {
                 await connection.query('UPDATE Couriers SET status = "Available" WHERE no_courier = (SELECT id_courier FROM Orders WHERE no_order = ?);', [id])
             }
@@ -147,6 +150,24 @@ export class FavorRepository{
         }
     }
 
+    async readCourierHistory(no_courier: string): Promise<any>{
+        try {
+            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_courier = ? AND status IN ("Canceled", "Finished") ORDER BY created_at DESC;', [no_courier])
+            return  rowsHistory as RowDataPacket[];
+        }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
+    async readCustomerHistory(no_customer: string): Promise<any>{
+        try {
+            const [rowsHistory] = await pool.query('SELECT O.no_order, O.status, O.created_at, (SELECT COUNT(id) FROM Products P WHERE P.id_order = O.no_order) as products FROM Orders O WHERE id_customer = ? AND status IN ("Canceled", "Finished") ORDER BY created_at DESC;', [no_customer])
+            return  rowsHistory as RowDataPacket[];
+        }catch (error: any){
+            throw new Error((error as Error).message)
+        }
+    }
+
     async existsFavorByNo_order(no_order: string): Promise<boolean>{
         try {
             const [result] = await pool.query('SELECT no_order FROM Orders WHERE no_order = ?;', [no_order])
@@ -178,6 +199,16 @@ export class FavorRepository{
         } catch (error: any) {
             throw new Error((error as Error).message);
         }
+    }
+
+    async hasNotBeenAccepted(no_order: string): Promise<boolean> {
+        try {
+            const [result] = await pool.query('SELECT * FROM Orders WHERE no_order = ? AND status = "Pending";', [no_order]);
+            const rows = result as RowDataPacket[];
+            return rows.length > 0;
+        } catch (error: any) {
+            throw new Error((error as Error).message);
+            }
     }
 
     async thereIsTimeToFinish(no_order: string): Promise<boolean> {

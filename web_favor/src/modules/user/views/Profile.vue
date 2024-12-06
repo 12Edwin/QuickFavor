@@ -79,15 +79,27 @@
                     <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
                   <div class="input-container">
-                    <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="profile.color" class="register-input" disabled>
-                  </div>
+                  <!-- Icono con color dinámico, cambia de color según profile.color -->
+                  <v-icon
+                    class="fa-solid fa-circle icon"
+                    :style="{ color: profile.color || defaultColor }"
+                  ></v-icon>
+                  
+                  <!-- Input con valor oculto pero con color dinámico -->
+                  <input 
+                    type="text" 
+                    value="Color" 
+                    class="register-input" 
+                    disabled 
+                    aria-label="Color seleccionado" 
+                  />
+                </div>
                 </div>
 
                 <!-- Bicicletas y Scooters -->
                 <div v-if="profile.vehicle_type == 'Bicicleta' || profile.vehicle_type == 'Scooter'">
                   <v-row align="center" justify="center">
-                    <div v-if="profile.vehicle_type == 'Bicleta'">
+                    <div v-if="profile.vehicle_type == 'Bicicleta'">
                     <div class="content-image">
                       <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
                     </div>
@@ -101,10 +113,6 @@
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" :value="profile.model" class="register-input" disabled>
-                  </div>
-                  <div class="input-container">
-                    <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="profile.color" class="register-input" disabled>
                   </div>
                 </div>
 
@@ -124,19 +132,34 @@
                       <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
                     </div>
                   </v-row>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" :value="profile.description" class="register-input" disabled>
+                  </div>
                 </div>
 
               </v-card-text>
-              <v-card-actions align="center" justify="center">
-                <v-btn @click="handleModalUpdate(true)">Editar</v-btn>
+              <v-card-actions class="d-flex justify-center">
+                <v-btn
+                  @click="handleModalUpdate(true)"
+                  rounded
+                  color="primary" 
+                  style="width: 100px; height: 30px;
+                    margin-top: -30px; 
+                    background-color: transparent; 
+                    color: #1976D2; 
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 0, 0, 0.1);"         
+                  >
+                  Editar
+                </v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
     </v-card>
-    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" />
-    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" />
+    <EditTrasnport :isModalVisible="isModalVisible" @update:isModalVisible="handleModalUpdate" :profile="profile"  />
+    <UpdateUserInfo :isModalVisibleUserInfo="isModalVisibleUserInfo" @update:isModalVisibleUserInfo="handleModalUpdateUserInfo" :profile="profile"  />
   </div>
 </template>
 
@@ -147,7 +170,6 @@ import Switch from "@/components/Switch.vue";
 import EditTrasnport from '../components/UpdateTrasnport.vue';
 import UpdateUserInfo from '../components/UpdateUserInfo.vue';
 import { getProfile } from '../services/profile';
-import { profile } from 'console';
 
 export default defineComponent({
   name: "Profile",
@@ -155,7 +177,21 @@ export default defineComponent({
   setup() {
     const isModalVisible = ref(false);
     const isModalVisibleUserInfo = ref(false);
-    const profile = ref({});
+    const defaultColor = "#566981"; // Define a default color
+
+    const profile = ref({
+      name: "",
+      surname: "",
+      phone: "",
+      email: "",
+      curp: "",
+      face_url: "",
+      vehicle_type: "",
+      license_plate: "",
+      model: "",
+      color: "",
+      description: "",
+    });
 
     const handleModalUpdate = (newVisibility: boolean) => {
       isModalVisible.value = newVisibility;
@@ -166,9 +202,13 @@ export default defineComponent({
     };
 
     const getUserInfo = async () => {
-      const data = await getProfile();
-      if (data) {
-        profile.value = data.data || profile.value;  
+      try {
+        const data = await getProfile();
+        if (data) {
+          profile.value = data.data || profile.value;  
+        }
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -181,12 +221,12 @@ export default defineComponent({
       handleModalUpdate,
       handleModalUpdateUserInfo,
       isModalVisible,
-      isModalVisibleUserInfo
+      isModalVisibleUserInfo,
+      defaultColor,
     };
   }
 });
 </script>
-
 
 <style scoped>
 .back-container {
@@ -348,7 +388,7 @@ export default defineComponent({
 }
 
 .edit-profile-btn:hover {
-  background-color: #4b5c68; /* Color de fondo cuando el mouse pasa por encima */
+  background-color: whitesmoke; /* Color de fondo cuando el mouse pasa por encima */
 }
 
 
@@ -382,6 +422,39 @@ export default defineComponent({
 
   .profile-content {
     margin-top: -56px;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .edit-card {
+    margin-top: 16px;
+  }  
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-name {
+    font-size: 28px;
+  }
+
+  .profile-role {
+    font-size: 18px;
+  }
+
+  .profile-stats {
+    font-size: 16px;
+  }
+
+  .edit-profile-btn {
+    font-size: 16px; /* Aumentar el tamaño de fuente en pantallas más grandes */
+    padding: 8px 24px; /* Ajustar el relleno */
+    margin-top: 40px;
+    margin-left: 300px; 
+  }
+
+  .profile-content {
+    margin-top: -64px;
   }
 }
 
