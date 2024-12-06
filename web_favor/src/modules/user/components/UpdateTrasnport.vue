@@ -2,53 +2,60 @@
   <v-dialog v-model="localIsModalVisible" max-width="600px">
     <v-card class="card-custom">
       <v-card-title class="headline">Selecciona el nuevo transporte</v-card-title>
+
       <v-card-text>
         <!-- Botones en la parte superior -->
         <div>
           <div class="icon-button-group">
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 1 }" 
-            @click.prevent="selectOption(1)">
-            <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
-          </button>
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 2 }" 
-            @click.prevent="selectOption(2)">
-            <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
-          </button>
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 3 }" 
-            @click.prevent="selectOption(3)">
-            <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
-          </button>
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 4 }" 
-            @click.prevent="selectOption(4)">
-            <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
-          </button>
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 5 }" 
-            @click.prevent="selectOption(5)">
-            <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
-          </button>
-          <button 
-            class="icon-button-step2"
-            :class="{ 'selected': selectOptionClick === 6 }" 
-            @click.prevent="selectOption(6)">
-            <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
-          </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 1 }" 
+              @click.prevent="selectOption(1)">
+              <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
+            </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 2 }" 
+              @click.prevent="selectOption(2)">
+              <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
+            </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 3 }" 
+              @click.prevent="selectOption(3)">
+              <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
+            </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 4 }" 
+              @click.prevent="selectOption(4)">
+              <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
+            </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 5 }" 
+              @click.prevent="selectOption(5)">
+              <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
+            </button>
+            <button 
+              class="icon-button-step2"
+              :class="{ 'selected': selectOptionClick === 6 }" 
+              @click.prevent="selectOption(6)">
+              <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
+            </button>
+          </div>
         </div>
 
         <!-- Mostrar solo descripción -->
         <div v-if="showDescriptionOnly">
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.description" placeholder="Descripción" class="register-input" required>
+            <input 
+              type="text" 
+              v-model="form.description" 
+              placeholder="Descripción" 
+              class="register-input" 
+              :required="selectOptionClick === 5 || selectOptionClick === 6">
           </div>
         </div>
 
@@ -63,7 +70,12 @@
         <div v-else-if="showModelOnly">
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.model" placeholder="Modelo" class="register-input" required>
+            <input 
+              type="text" 
+              v-model="form.model" 
+              placeholder="Modelo" 
+              class="register-input" 
+              :required="selectOptionClick === 4 || selectOptionClick === 3">
           </div>
         </div>
 
@@ -71,18 +83,29 @@
         <div v-else>
           <div class="input-container">
             <v-icon class="fa-solid fa-address-card icon"></v-icon>
-            <input type="text" v-model="form.license_plate" placeholder="Matrícula" class="register-input" required>
+            <input 
+              type="text" 
+              v-model="form.license_plate" 
+              placeholder="Matrícula" 
+              class="register-input" 
+              :required="selectOptionClick === 1 || selectOptionClick === 2">
           </div>
           <div class="input-container">
             <v-icon class="fa-solid fa-file icon"></v-icon>
-            <input type="text" v-model="form.model" placeholder="Modelo" class="register-input" required>
+            <input 
+              type="text" 
+              v-model="form.model" 
+              placeholder="Modelo" 
+              class="register-input" 
+              :required="selectOptionClick === 1 || selectOptionClick === 2">
           </div>
+
           <!-- Selector de Color y Licencia -->
           <v-row align="start" no-gutters>
             <v-col cols="6" class="col-item">
               <div class="color-container">
                 <div class="color-picker">
-                  <input type="color" v-model="form.color" class="color-input" />
+                  <input type="color" v-model="form.color" class="color-input" :required="selectOptionClick !== 5 && selectOptionClick !== 6"/>
                   <div class="color-label">Color</div>
                 </div>
               </div>
@@ -101,11 +124,10 @@
                   </label>
                 </div>
               </div>
-             </v-col>
-
+            </v-col>
           </v-row>
-           <!-- Mostrar el video en vivo cuando la cámara esté activa -->
-           <div v-show="isCameraActive" align="center" justify="center">
+                     <!-- Mostrar el video en vivo cuando la cámara esté activa -->
+                     <div v-show="isCameraActive" align="center" justify="center">
                 <v-row >
                   <v-col cols="12">
                     <div class="camera-container">
@@ -137,23 +159,33 @@
                   </v-col>
                 </v-row>
               </div>
-            
-        </div>
         </div>
       </v-card-text>
 
       <v-card-actions>
-        <button class="btn-save" @click="openModal">GUARDAR</button>
+        <button 
+          class="btn-save" 
+          @click="handleSave" 
+          :disabled="!isFormValid">
+          GUARDAR
+        </button>
         <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <ConfirmationModal :is-visible="showModal" @cancel="closeModal" @confirm="saveTrasport" :is-completed="false" message="¿Estás seguro o segura de actualizar la info. de tú medio de transporte?"/>
+
+  <!-- Componente de confirmación que ya tienes -->
+  <ConfirmationModal 
+    :is-visible="showModal" 
+    @cancel="closeModal" 
+    @confirm="saveTrasport" 
+    :is-completed="false" 
+    message="¿Estás seguro o segura de actualizar la info. de tú medio de transporte?" />
 </template>
 
 <script>
 import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
-import {getErrorMessages, convertirImagenABase64, extraerBase64} from "@/kernel/utils";
+import {getErrorMessages, extraerBase64} from "@/kernel/utils";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
 import { updateTransport } from '../services/profile';
 
@@ -166,7 +198,7 @@ export default {
     profile: {
       type: Object,
       required: true
-    } 
+    }
   },
   components: {ConfirmationModal },
   data() {
@@ -188,18 +220,31 @@ export default {
         license_plate: '',
         model: '',
         color: '#000000',
-        plate_url: null,
+        plate_url: '',
         vehicle_type: '',
+        missingFields: [], // Campos que faltan
+        isSaveAttempted: false // Para determinar si se intentó guardar
       }
     };
   },
   computed: {
-    computedProfile() {
-      if (this.profile) {
-        return this.profile;
-      }
-      return {};
-    }
+    isFormValid() {
+      // Limpiar la lista de campos faltantes
+      this.missingFields = [];
+
+      // Validar cada campo según el tipo de vehículo
+      const requiredFields = this.getRequiredFields();
+
+      // Verificar si los campos están completos y tienen al menos 3 caracteres
+      requiredFields.forEach((field) => {
+        if (!this.form[field] || this.form[field].length < 3) {
+          this.missingFields.push(field); // Agregar el campo a la lista de faltantes
+        }
+      });
+
+      // Si hay campos faltantes, el formulario no es válido
+      return this.missingFields.length === 0;
+    },
   },
   watch: {
     isModalVisible(newValue) {
@@ -216,7 +261,7 @@ export default {
           this.form.model = newProfile.model || '';
           this.form.color = newProfile.color || '';
           this.form.vehicle_type = newProfile.vehicle_type || '';
-
+          
           switch (newProfile.vehicle_type) {
             case 'Carro':
               this.selectOption(1);
@@ -243,6 +288,38 @@ export default {
     },
   },
   methods: {
+    getRequiredFields() {
+    const requiredFields = ['vehicle_type']; // Siempre es obligatorio el tipo de vehículo
+
+    switch (this.selectOptionClick) {
+      case 1: // Carro
+        requiredFields.push('license_plate', 'model', 'color', 'plate_url');
+        break;
+      case 2: // Moto
+        requiredFields.push('license_plate', 'model', 'color', 'plate_url');
+        break;
+      case 3: // Bicicleta
+        requiredFields.push('model', 'color');
+        break;
+      case 4: // Scooter
+        requiredFields.push('model', 'color');
+        break;
+      case 5: // Caminando
+        break; // Solo requiere "vehicle_type"
+      case 6: // Otro
+        requiredFields.push('description');
+        break;
+    }
+    return requiredFields;
+  },
+    handleSave() {
+      this.isSaveAttempted = true; // Marcar que el usuario intentó guardar
+      if (this.isFormValid) {
+        this.saveTrasport(); // Si es válido, guardamos
+      }else {
+        showErrorToast('Por favor, llena los siguientes campos: ' + this.missingFields.join(', '));
+      }
+    },
     selectOption(option) {
       this.selectOptionClick = option;
       if ([3, 4].includes(option)) {
@@ -348,8 +425,7 @@ export default {
               description: this.form.description,
             };
             break;
-        }
-
+        }  
         const result = await updateTransport(data);
         console.log(result);
         if (result.error) {
@@ -398,7 +474,6 @@ export default {
       this.photo = canvas.toDataURL('image/png'); // Convertir la imagen a base64
       this.photoTaken = true; // Indicar que la foto fue tomada
 
-      // Detener la cámara después de tomar la foto
       if (this.stream) {
         this.stream.getTracks().forEach(track => track.stop());
         this.isCameraActive = false;
@@ -424,7 +499,7 @@ export default {
       this.stream.getTracks().forEach(track => track.stop());
     }
     },
-  }
+}
 </script>
 
 <style scoped>
@@ -664,5 +739,9 @@ video {
   transform: translateY(1px); 
 }
 
+.btn-save:disabled {
+  background-color: #b0b0b0; 
+  cursor: not-allowed; 
+}
 
 </style>

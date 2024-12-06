@@ -79,9 +79,21 @@
                     <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
                   <div class="input-container">
-                    <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="profile.color" class="register-input" disabled>
-                  </div>
+                  <!-- Icono con color dinámico, cambia de color según profile.color -->
+                  <v-icon
+                    class="fa-solid fa-circle icon"
+                    :style="{ color: profile.color || defaultColor }"
+                  ></v-icon>
+                  
+                  <!-- Input con valor oculto pero con color dinámico -->
+                  <input 
+                    type="text" 
+                    value="Color" 
+                    class="register-input" 
+                    disabled 
+                    aria-label="Color seleccionado" 
+                  />
+                </div>
                 </div>
 
                 <!-- Bicicletas y Scooters -->
@@ -102,22 +114,6 @@
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
-                    <div class="input-container">
-    <!-- Icono con color dinámico, cambia de color según profile.color -->
-    <v-icon
-      class="fa-solid fa-circle icon"
-      :style="{ color: profile.color || defaultColor }"
-    ></v-icon>
-    
-    <!-- Input con valor oculto pero con color dinámico -->
-    <input 
-      type="text" 
-      :value="profile.color || defaultColor" 
-      class="register-input" 
-      disabled 
-      aria-label="Color seleccionado" 
-    />
-  </div>
                 </div>
 
                 <!-- Para los caminantes -->
@@ -143,8 +139,19 @@
                 </div>
 
               </v-card-text>
-              <v-card-actions align="center" justify="center">
-                <v-btn @click="handleModalUpdate(true)">Editar</v-btn>
+              <v-card-actions class="d-flex justify-center">
+                <v-btn
+                  @click="handleModalUpdate(true)"
+                  rounded
+                  class="ma-2"
+                  color="primary" 
+                  style="width: 100px; height: 30px; 
+                  background-color: transparent; 
+                    color: #1976D2; 
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 0, 0, 0.1);"         
+                  >
+                  Editar
+                </v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
