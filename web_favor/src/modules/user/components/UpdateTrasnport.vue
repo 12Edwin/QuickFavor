@@ -89,28 +89,61 @@
             </v-col>
             <v-col cols="6" class="col-item">
               <div class="input-container">
-                <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
+                <div v-if="savePhotoOpc">
+                  <v-icon class="fa-solid fa-check icon-especial"></v-icon>
+                </div>
+                <div v-else>
+                  <v-icon class="fa-solid fa-camera icon-especial"></v-icon>
+                </div>
                 <div class="custom-file-input-wrapper">
                   <label for="file-upload" class="file-label">
-                    <input 
-                      type="file" 
-                      id="file-upload" 
-                      ref="fileInput" 
-                      @change="handleFileChange" 
-                      class="custom-file-input" 
-                    />
-                    <span class="file-placeholder">Licencia</span>
+                    <button @click="startCamera" class="camera-button">Licencia</button>
                   </label>
                 </div>
               </div>
-            </v-col>
+             </v-col>
+
           </v-row>
+           <!-- Mostrar el video en vivo cuando la cámara esté activa -->
+           <div v-show="isCameraActive" align="center" justify="center">
+                <v-row >
+                  <v-col cols="12">
+                    <div class="camera-container">
+                      <video ref="video" autoplay playsinline></video>
+                    </div>
+                    
+                    <!-- Botones para tomar la foto -->
+                    <div class="btn-container-photos">
+                      <button @click="takePhoto">Tomar Foto</button>
+                      <button @click="cancelCamera">Cancelar</button>
+                    </div>
+                  </v-col>
+                </v-row>
+              </div>
+
+
+              <!-- Mostrar la foto tomada -->
+              <div v-if="photoTaken"  align="center" justify="center">
+                <v-row>
+                  <v-col cols="12">
+                      <div class="camera-container">
+                        <img :src="photo" alt="Foto capturada" width="70%"/>
+                      </div>
+                  <!-- Botón para reiniciar y tomar otra foto -->
+                  <div class="btn-container-photos">
+                    <button @click="savePhoto">Guardar</button>
+                    <button @click="resetCamera">Tomar otra foto</button>
+                  </div>
+                  </v-col>
+                </v-row>
+              </div>
+            
         </div>
         </div>
       </v-card-text>
 
       <v-card-actions>
-        <v-btn color="secondary" @click="openModal">Guardar</v-btn>
+        <button class="btn-save" @click="openModal">GUARDAR</button>
         <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
@@ -120,9 +153,9 @@
 
 <script>
 import {showErrorToast, showSuccessToast} from "@/kernel/alerts";
-import {getErrorMessages, convertirImagenABase64} from "@/kernel/utils";
+import {getErrorMessages, convertirImagenABase64, extraerBase64} from "@/kernel/utils";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
-import { updateProfile, updateTransport } from '../services/profile';
+import { updateTransport } from '../services/profile';
 
 export default {
   props: {
@@ -138,12 +171,18 @@ export default {
   components: {ConfirmationModal },
   data() {
     return {
-      localIsModalVisible: this.isModalVisible, // Usamos una variable local para el diálogo
+      localIsModalVisible: this.isModalVisible, 
       selectOptionClick: 2,
       showDescriptionOnly: false,
       showImageOnly: false,
       showModelOnly: false,
+      savePhotoOpc: false,
       showModal: false,
+      isCameraActive: false,  // Controla si la cámara está activa
+      photo: null,  // Guarda la foto tomada
+      photoTaken: false,
+      videoElement: null,  // El elemento de video
+      stream: null,  // El flujo de la cámara
       form: {
         description: '',
         license_plate: '',
@@ -224,29 +263,17 @@ export default {
         this.showImageOnly = false;
       }
     },
-     // Manejo del cambio de archivo
-     async handleFileChange (event) {
-        const target = event.target;
-        const file = target?.files ? target.files[0] : null;
-
-        if (file) {
-          try {
-            const base64 = await convertirImagenABase64(file); // Convertir imagen a Base64
-            this.form.plate_url = base64; // Almacenar el resultado en la referencia reactiva
-          } catch (error) {
-            console.error("Error al convertir la imagen:", error);
-          }
-        } else {
-          // Si no hay archivo, limpiar la propiedad
-          base64Image.value = null;
-        }
-      },
     openModal() {
       this.showModal = true;
     },
     closeModal() {
+      this.savePhotoOpc = false;
+      this.photo = null;
       this.localIsModalVisible = false; // Cerrar el modal
       this.showModal = false; // Cerrar el modal de confirmación
+      if (this.stream ) {
+        this.cancelCamera(); // Detener la cámara
+      }
     },
     async saveTrasport() {
       if (this.form.description) {
@@ -339,9 +366,65 @@ export default {
         console.error(error);
       }
     },
+    async startCamera() {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        this.stream = mediaStream; // Guardar el flujo de la cámara
+        this.isCameraActive = true; // Activar la cámara
 
+        this.$nextTick(() => {
+          const videoElement = this.$refs.video;  // Obtener el ref del video
+          if (videoElement) {
+            videoElement.srcObject = mediaStream;
+            videoElement.play(); // Reproducir el video
+          }
+        });
+      } catch (err) {
+        console.error("Error al acceder a la cámara:", err);
+      }
+    },
+    resetCamera() {
+      this.photoTaken = false;
+      this.photo = null;
+      this.startCamera(); // Reiniciar la cámara para tomar otra foto
+    },
+    takePhoto() {
+      const canvas = document.createElement('canvas');
+      const videoElement = this.$refs.video;
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      this.photo = canvas.toDataURL('image/png'); // Convertir la imagen a base64
+      this.photoTaken = true; // Indicar que la foto fue tomada
+
+      // Detener la cámara después de tomar la foto
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.isCameraActive = false;
+      }
+    },
+    cancelCamera() {
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.isCameraActive = false; // Detener la cámara
+      }
+      this.photoTaken = false; // Reiniciar el estado de la foto
+    },
+    savePhoto() {
+      this.savePhotoOpc = true;
+      const substr = extraerBase64(this.photo);
+      this.form.plate_url = substr;
+      this.cancelCamera();
+    },
+  },
+    beforeDestroy() {
+    // Detener la cámara si el componente se destruye
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+    }
+    },
   }
-};
 </script>
 
 <style scoped>
@@ -506,5 +589,80 @@ export default {
   transform: translateY(-50%);
   color: #566981;
 }
+
+/* COMO DIJO QUE MI AMIGA AQUI INICIA TODO */
+/* Estilo para el contenedor del video */
+.camera-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  width: 60%; /* Asegura que ocupe el 100% de su contenedor */
+  height: 128px; /* Ajusta la altura según sea necesario */
+  background-color: #000; /* Fondo negro para el área del video */
+}
+
+video {
+  width: 100%; /* Asegúrate de que el video ocupe el 100% del contenedor */
+  height: 100%; /* Mantener la relación de aspecto */
+  object-fit: cover; /* Para cubrir todo el área sin distorsionar */
+}
+
+/* Contenedor de los botones "Tomar Foto" y "Cancelar" dentro de la cámara */
+.btn-container-photos {
+  display: flex;
+  align-content: center; /* Centra los botones verticalmente */
+  justify-content: center; /* Centra los botones horizontalmente */
+  gap: 16px; /* Espacio entre los botones */
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Estilo para los botones "Tomar Foto" y "Cancelar" */
+.btn-container-photos button {
+  padding: 10px 20px; /* Añadir más espacio dentro de los botones */
+  background-color: #3A415A;
+  border: none;
+  border-radius: 32px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+  width: 128px; /* Asegura que ambos botones tengan un tamaño similar */
+}
+
+/* Efecto hover sobre los botones */
+.btn-container-photos button:hover {
+  background-color: #566981;
+}
+
+/* COMO DIJO MI EX HASTA AQUI */
+
+/* Estilo del botón guardar */
+.btn-save {
+  background-color: #34344E; 
+  color: white;
+  border: none; 
+  padding: 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+}
+
+/* Efecto hover */
+.btn-save:hover {
+  background-color: #4a4a73; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.btn-save:active {
+  background-color: #2c2c3d;
+  transform: translateY(1px); 
+}
+
 
 </style>

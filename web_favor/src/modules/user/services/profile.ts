@@ -41,7 +41,7 @@ export const getProfile = async (): Promise<ResponseEntity> => {
   // Si el caché no es válido o no existe, intenta hacer la solicitud a la API
   try {
     const response = await api.doGet(`/courier/profile/${credential}`);
-    
+    console.log(response);
     if (response?.data?.data) {
       setCache(credential, response.data);
     }

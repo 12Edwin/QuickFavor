@@ -87,7 +87,7 @@
                 <!-- Bicicletas y Scooters -->
                 <div v-if="profile.vehicle_type == 'Bicicleta' || profile.vehicle_type == 'Scooter'">
                   <v-row align="center" justify="center">
-                    <div v-if="profile.vehicle_type == 'Bicleta'">
+                    <div v-if="profile.vehicle_type == 'Bicicleta'">
                     <div class="content-image">
                       <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
                     </div>
@@ -102,10 +102,22 @@
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" :value="profile.model" class="register-input" disabled>
                   </div>
-                  <div class="input-container">
-                    <v-icon class="fa-solid fa-circle icon"></v-icon>
-                    <input type="text" :value="profile.color" class="register-input" disabled>
-                  </div>
+                    <div class="input-container">
+    <!-- Icono con color dinámico, cambia de color según profile.color -->
+    <v-icon
+      class="fa-solid fa-circle icon"
+      :style="{ color: profile.color || defaultColor }"
+    ></v-icon>
+    
+    <!-- Input con valor oculto pero con color dinámico -->
+    <input 
+      type="text" 
+      :value="profile.color || defaultColor" 
+      class="register-input" 
+      disabled 
+      aria-label="Color seleccionado" 
+    />
+  </div>
                 </div>
 
                 <!-- Para los caminantes -->
@@ -124,6 +136,10 @@
                       <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
                     </div>
                   </v-row>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" :value="profile.description" class="register-input" disabled>
+                  </div>
                 </div>
 
               </v-card-text>
@@ -154,7 +170,21 @@ export default defineComponent({
   setup() {
     const isModalVisible = ref(false);
     const isModalVisibleUserInfo = ref(false);
-    const profile = ref({});
+    const defaultColor = "#566981"; // Define a default color
+
+    const profile = ref({
+      name: "",
+      surname: "",
+      phone: "",
+      email: "",
+      curp: "",
+      face_url: "",
+      vehicle_type: "",
+      license_plate: "",
+      model: "",
+      color: "",
+      description: "",
+    });
 
     const handleModalUpdate = (newVisibility: boolean) => {
       isModalVisible.value = newVisibility;
@@ -184,7 +214,8 @@ export default defineComponent({
       handleModalUpdate,
       handleModalUpdateUserInfo,
       isModalVisible,
-      isModalVisibleUserInfo
+      isModalVisibleUserInfo,
+      defaultColor,
     };
   }
 });
