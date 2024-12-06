@@ -240,8 +240,10 @@ class OrderPreviewEntity {
   final String? no_courier;
   final String? license_plate;
   final String? vehicle_type;
+  final String? brand;
   final String? model;
   final String? color;
+  final String? vehicle_description;
   final String? plate_url;
   final String? face_url;
   final int? rejected_orders;
@@ -273,8 +275,10 @@ class OrderPreviewEntity {
     this.no_courier,
     this.license_plate,
     this.vehicle_type,
+    this.brand,
     this.model,
     this.color,
+    this.vehicle_description,
     this.plate_url,
     this.face_url,
     this.rejected_orders,
@@ -308,8 +312,10 @@ class OrderPreviewEntity {
       no_courier: json['no_courier'],
       license_plate: json['license_plate'],
       vehicle_type: json['vehicle_type'],
+      brand: json['brand'],
       model: json['model'],
       color: json['color'],
+      vehicle_description: json['vehicle_description'],
       plate_url: json['plate_url'],
       face_url: json['face_url'],
       rejected_orders: json['rejected_orders'] != null ? num.parse(json['rejected_orders'].toString()).toInt(): 0,
@@ -362,11 +368,17 @@ class OrderPreviewEntity {
     if (vehicle_type != null) {
       data['vehicle_type'] = vehicle_type;
     }
+    if (brand != null) {
+      data['brand'] = brand;
+    }
     if (model != null) {
       data['model'] = model;
     }
     if (color != null) {
       data['color'] = color;
+    }
+    if (vehicle_description != null) {
+      data['vehicle_description'] = vehicle_description;
     }
     if (plate_url != null) {
       data['plate_url'] = plate_url;
