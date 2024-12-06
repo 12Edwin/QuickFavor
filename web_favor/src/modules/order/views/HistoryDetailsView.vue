@@ -158,7 +158,10 @@
   </div>
 
   <div v-else class="loading-container">
-    <p>Cargando detalles de la orden...</p>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+</div>
+
   </div>
 </template>
 
