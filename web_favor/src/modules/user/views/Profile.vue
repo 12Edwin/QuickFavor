@@ -143,10 +143,10 @@
                 <v-btn
                   @click="handleModalUpdate(true)"
                   rounded
-                  class="ma-2"
                   color="primary" 
-                  style="width: 100px; height: 30px; 
-                  background-color: transparent; 
+                  style="width: 100px; height: 30px;
+                    margin-top: -30px; 
+                    background-color: transparent; 
                     color: #1976D2; 
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 0, 0, 0.1);"         
                   >
@@ -388,7 +388,7 @@ export default defineComponent({
 }
 
 .edit-profile-btn:hover {
-  background-color: #4b5c68; /* Color de fondo cuando el mouse pasa por encima */
+  background-color: whitesmoke; /* Color de fondo cuando el mouse pasa por encima */
 }
 
 
