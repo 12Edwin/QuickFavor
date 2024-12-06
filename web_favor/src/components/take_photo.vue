@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div class="icon-button" @click="openPopup">
+    <div :class="['icon-button', { 'has-image': imagePreview }]" @click="openPopup">
       <div class="icon-circle-large">
         <i class="fas fa-file-invoice icon"></i>
+        <span v-if="imagePreview" class="badge-check">✔</span>
       </div>
       <span class="button-text">{{ label }}</span>
     </div>
@@ -169,6 +170,7 @@ export default defineComponent({
   justify-content: center;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   border: 2px solid #d2e1e6;
+  position: relative;
 }
 
 .icon-circle-large .icon {
@@ -180,5 +182,20 @@ export default defineComponent({
   margin-top: 8px;
   font-size: 1rem;
   color: #4A4A4A;
+}
+
+.has-image .icon-circle-large {
+  border: 2px solid #4CAF50; /* Cambia el color del borde si hay una imagen */
+}
+
+.badge-check {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 5px;
+  font-size: 0.8rem;
 }
 </style>
