@@ -80,7 +80,7 @@ export default defineComponent({
       this.updateLocationService();
       this.locationInterval = setInterval(() => {
         this.updateLocationService();
-      }, 5000) as any;
+      }, 10000) as any;
     },
 
     stopTracking() {

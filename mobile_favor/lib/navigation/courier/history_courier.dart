@@ -2,39 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:mobile_favor/config/alerts.dart';
 import 'package:mobile_favor/config/error_types.dart';
 import 'package:mobile_favor/config/utils.dart';
-import 'entity/history.entity.dart';
-import 'order_details.dart';
-import 'service/favor.service.dart'; // Asegúrate de importar el servicio
+import '../customer/entity/history.entity.dart';
+import '../customer/order_details.dart';
+import '../customer/service/favor.service.dart';
 
-class HistoryOrder extends StatefulWidget {
-  const HistoryOrder({super.key});
+class HistoryCourier extends StatefulWidget {
+  const HistoryCourier({super.key});
 
   @override
-  State<HistoryOrder> createState() => _HistoryOrderState();
+  State<HistoryCourier> createState() => _HistoryCourierState();
 }
 
-class _HistoryOrderState extends State<HistoryOrder> {
+class _HistoryCourierState extends State<HistoryCourier> {
   List<HistoryItemEntity> historyOrder = [];
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    fetchCustomerHistory();
+    fetchCourierHistory();
   }
 
-  Future<void> fetchCustomerHistory() async {
+  Future<void> fetchCourierHistory() async {
     setState(() {
       _isLoading = true;
     });
     try {
       final service = FavorService(context);
-      final customerId = await getStorageNoUser();
-      if (customerId == null) {
+      final courier_id = await getStorageNoUser();
+      if (courier_id == null) {
         showErrorAlert(context, 'No se pudo obtener la información del usuario');
         return;
       }
-      final response = await service.getListCustomerHistory(customerId);
+      final response = await service.getListCourierHistory(courier_id);
       if (response.error) {
         showErrorAlert(context, getErrorMessages(response.message));
         return;
@@ -46,7 +46,7 @@ class _HistoryOrderState extends State<HistoryOrder> {
         }
       });
     } catch (error) {
-      print('Error fetching customer history: $error');
+      print('Error fetching courier history: $error');
     } finally {
       setState(() {
         _isLoading = false;
@@ -123,7 +123,7 @@ class _HistoryOrderState extends State<HistoryOrder> {
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: _isLoading
-                        ? const Center(
+                        ? Center(
                             child: CircularProgressIndicator(),
                           )
                         : historyOrder.isEmpty

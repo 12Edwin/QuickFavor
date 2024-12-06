@@ -46,7 +46,8 @@ class _LoginState extends State<CreateOrder> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('Direcciones de Recolección'),
+        title: const Text('Crear pedido'),
+        automaticallyImplyLeading: widget.address != null,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),

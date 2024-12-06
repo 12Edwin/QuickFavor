@@ -7,7 +7,7 @@ export class CustomerRepository{
 
     async getCustomerProfile(uid: string): Promise<any>{
         try{
-            const [result] =  await pool.query('SELECT p.*, c.* FROM People p LEFT JOIN Customers c ON p.uid = c.id_person WHERE p.uid = ?;', [uid])
+            const [result] =  await pool.query('SELECT p.*, c.*, ST_Y(pl.location) AS lat, ST_X(pl.location) AS lng FROM People p LEFT JOIN Customers c ON p.uid = c.id_person LEFT JOIN Places pl ON pl.id_customer = c.no_customer WHERE p.uid = ?;', [uid])
             const rows = result as RowDataPacket[]
             if (rows.length === 0) throw new Error('User not found');
             return rows[0]

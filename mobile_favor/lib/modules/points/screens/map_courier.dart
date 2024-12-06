@@ -8,7 +8,8 @@ import 'package:mobile_favor/navigation/customer/entity/location.entity.dart';
 import 'package:mobile_favor/navigation/customer/service/favor.service.dart';
 
 class MapCourier extends StatefulWidget {
-  const MapCourier({super.key});
+  final Function(bool) onSwitchChanged;
+  const MapCourier({super.key, required this.onSwitchChanged});
 
   @override
   _MapCourierState createState() => _MapCourierState();
@@ -78,7 +79,8 @@ class _MapCourierState extends State<MapCourier> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
     return await Geolocator.getCurrentPosition();
   }
@@ -98,7 +100,7 @@ class _MapCourierState extends State<MapCourier> {
               onChanged: (value) {
                 setState(() {
                   _isActive = value;
-                  toggleStorageAvailability(value);
+                  widget.onSwitchChanged(value);
                   if (_isActive) {
                     _startTimer();
                   } else {

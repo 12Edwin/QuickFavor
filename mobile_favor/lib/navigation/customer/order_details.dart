@@ -1,295 +1,278 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mobile_favor/navigation/customer/service/favor.service.dart';
+
+import '../../config/alerts.dart';
+import '../../config/error_types.dart';
+import '../../config/utils.dart';
+import '../../kernel/widget/location_preview.dart';
+import 'entity/order.entity.dart';
 
 class OrderDetails extends StatefulWidget {
-  const OrderDetails(
-      {super.key, required no_order});
+  final String no_order;
+
+  const OrderDetails({Key? key, required this.no_order}) : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
 }
 
 class _OrderDetailsState extends State<OrderDetails> {
-  bool isProductsExpanded = false; // Control para expandir/comprimir productos
+  bool isProductsExpanded = false;
   bool isFirstLocked = false;
   bool isSecondLocked = true;
   bool isThirdLocked = true;
+  bool _isLoading = true;
+  OrderPreviewEntity? orderDetails;
+  late final String role;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderDetails();
+    (() async =>{
+      role = await getStorageRole() ?? 'Customer'
+    })();
+  }
+
+  Future<void> _fetchOrderDetails() async {
+    final service = FavorService(context);
+    try {
+      final response = await service.getDetailsFavor(widget.no_order);
+      if (response.error) {
+        showErrorAlert(context, getErrorMessages(response.message));
+        return;
+      }
+      setState(() {
+        orderDetails = OrderPreviewEntity.fromJson(response.data);
+      });
+    } catch (error) {
+      print('Error fetching order details: $error');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  String mapOrderStatus(String status) {
+    switch (status) {
+      case 'Finished':
+        return 'Finalizado';
+      case 'Canceled':
+        return 'Cancelado';
+      case 'Pending':
+        return 'Pendiente';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  Color mapOrderStatusColor(String status) {
+    switch (status) {
+      case 'Finished':
+        return const Color(0xFF5A6E7F);
+      case 'Canceled':
+        return Colors.red;
+      case 'Pending':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  int _calculateMinutesTaken(String? createdAt, String? finishedAt) {
+    if (finishedAt == null || createdAt == null) return 0;
+    final created = DateTime.parse(createdAt);
+    final finished = DateTime.parse(finishedAt);
+    return finished.difference(created).inMinutes;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color(0xFF2D3E50),
-          automaticallyImplyLeading: false,
-          toolbarHeight: 15.0
-        ),
+        backgroundColor: const Color(0xFF2D3E50),
+        automaticallyImplyLeading: false,
+        toolbarHeight: 15.0,
+      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Encabezado
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2D3E50),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Este es tu pedido',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          '05-07-2024 14:04:00',
-                          style: TextStyle(
-                            color: Color(0xFFCBDAD5),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Contenedor completo
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Botón "Finalizado" alineado arriba a la derecha
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
-                          horizontal: 16.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5A6E7F),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Finalizado',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    // Encabezado
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2D3E50),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Sección del repartidor centrada con barra verde
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Centrar horizontalmente
-                      crossAxisAlignment: CrossAxisAlignment
-                          .center, // Alinear verticalmente en el centro
-                      children: [
-                        // Imagen del repartidor a la izquierda
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.blue[100],
-                          child: Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.blue[800],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Este es tu pedido',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                orderDetails?.order_created_at != null ? DateFormat('yyyy-MM-dd hh:mm').format(DateTime.parse(orderDetails!.order_created_at)) : '',
+                                style: TextStyle(
+                                  color: Color(0xFFCBDAD5),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 16),
-
-                        // Barra divisoria verde
-                        Container(
-                          width: 2, // Ancho de la barra
-                          height: 80, // Altura que coincida con el contenido
-                          color: const Color(
-                              0xFF91A4A3), // Color verde de la barra
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        // Información del repartidor a la derecha
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Juan Rodrigo',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2D3E50),
-                              ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
                             ),
-                            Text(
-                              'Repartidor',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF91A4A3),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Completado en',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                            Text(
-                              '40 min / 120 min',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 20),
-                    // Barra de "Direcciones de recolección"
+                    // Contenedor completo
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF5A6E7F),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                        ),
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      width: double.infinity,
-                      child: const Text(
-                        'Direcciones de recolección',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Botones de direcciones
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Primer botón
-                        Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  isFirstLocked = !isFirstLocked;
-                                });
-                              },
-                              child: CircleAvatar(
-                                radius: 30,
-                                backgroundColor: const Color(0xFFA5C3C3),
-                                child: Icon(
-                                  isFirstLocked
-                                      ? Icons.visibility
-                                      : Icons.block,
-                                  size: 30,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Botón "Finalizado" alineado arriba a la derecha
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: 16.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: mapOrderStatusColor(orderDetails?.status ?? ''),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                mapOrderStatus(orderDetails?.status ?? ''),
+                                style: const TextStyle(
                                   color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'San Antonio',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF91A4A3),
+                          ),
+                          const SizedBox(height: 10),
+                          // Sección del repartidor centrada con barra verde
+                          orderDetails?.courier_name != null ?
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Imagen del repartidor a la izquierda
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.blue[100],
+                                backgroundImage: role == 'Courier' ? const AssetImage('assets/profile.png') : NetworkImage( orderDetails?.face_url ?? ''),
+                              ),
+                              const SizedBox(width: 16),
+                              // Barra divisoria verde
+                              Container(
+                                width: 2,
+                                height: 80,
+                                color: const Color(0xFF91A4A3),
+                              ),
+                              const SizedBox(width: 16),
+                              // Información del repartidor a la derecha
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 200, // Ajusta el ancho según sea necesario
+                                    child: Text(
+                                      role == 'Courier' ? '${orderDetails?.customer_name ?? ''} ${orderDetails?.customer_surname ?? ''}' : '${orderDetails?.courier_name ?? ''} ${orderDetails?.courier_surname ?? ''}',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2D3E50),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    role == 'Courier' ? 'Cliente' : 'Repartidor',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF91A4A3),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  if(orderDetails?.status == 'Finished') ...[
+                                  const Text(
+                                    'Completado en',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${_calculateMinutesTaken(orderDetails!.order_created_at, orderDetails!.order_finished_at)} / 120 min',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  )]
+                                ],
+                              ),
+                            ],
+                          ):
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                'No hubo asignación de repartidor',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF2D3E50),
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ],
-                        ),
-                        // Segundo botón
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isSecondLocked = !isSecondLocked;
-                            });
-                          },
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: const Color(0xFFA5C3C3),
-                            child: Icon(
-                              isSecondLocked ? Icons.block : Icons.visibility,
-                              size: 30,
-                              color: Colors.white,
-                            ),
                           ),
-                        ),
-                        // Tercer botón
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isThirdLocked = !isThirdLocked;
-                            });
-                          },
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: const Color(0xFFA5C3C3),
-                            child: Icon(
-                              isThirdLocked ? Icons.block : Icons.visibility,
-                              size: 30,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Sección de "Productos" con funcionalidad expandible
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isProductsExpanded = !isProductsExpanded;
-                        });
-                      },
-                      child: Column(
-                        children: [
+                          const SizedBox(height: 20),
+                          // Barra de "Direcciones de recolección"
                           Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                             decoration: const BoxDecoration(
                               color: Color(0xFF5A6E7F),
                               borderRadius: BorderRadius.only(
@@ -298,228 +281,267 @@ class _OrderDetailsState extends State<OrderDetails> {
                               ),
                             ),
                             width: double.infinity,
-                            child: const Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                'Productos',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
+                            child: const Text(
+                              'Direcciones de recolección',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          if (isProductsExpanded) ...[
-                            const SizedBox(height: 16),
-                            // Lista de productos
-                            Column(
+                          const SizedBox(height: 16),
+                          // Botones de direcciones
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: orderDetails?.deliveryPoints?.map((point) {
+                              return SizedBox(
+                                width: 100,
+                                child: Column(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () async {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => LocationPreview(
+                                              text: point.name,
+                                              lat: point.lat,
+                                              lng: point.lng,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: const CircleAvatar(
+                                        radius: 30,
+                                        backgroundColor: Color(0xFFA5C3C3),
+                                        child: Icon(
+                                          Icons.location_on,
+                                          size: 30,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      point.name,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF91A4A3),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList() ?? [],
+                          ),
+                          const SizedBox(height: 20),
+                          // Sección de "Productos" con funcionalidad expandible
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isProductsExpanded = !isProductsExpanded;
+                              });
+                            },
+                            child: Column(
                               children: [
-                                ProductItem(
-                                  number: 1,
-                                  name: '1 Lt de aceite',
-                                  details: 'Aceite 123 de litro',
-                                  onTap: () => showProductModal(
-                                    context,
-                                    '1 Lt de aceite',
-                                    'Aceite de oliva extra virgen',
-                                    'Cantidad: 1',
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF5A6E7F),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                    ),
+                                  ),
+                                  width: double.infinity,
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(left: 16.0),
+                                    child: Text(
+                                      'Productos',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                ProductItem(
-                                  number: 2,
-                                  name: '1 kg de jitomate',
-                                  details: 'Jitomate maduro',
-                                  onTap: () => showProductModal(
-                                    context,
-                                    '1 kg de jitomate',
-                                    'Jitomate rojo maduro, ideal para salsas.',
-                                    'Cantidad: 1 kg',
+                                if (isProductsExpanded) ...[
+                                  const SizedBox(height: 16),
+                                  // Lista de productos
+                                  Column(
+                                    children: orderDetails?.products?.map((product) {
+                                      return ProductItem(
+                                        number: product.amount,
+                                        name: product.name,
+                                        details: product.description,
+                                        onTap: () => showProductModal(
+                                          context,
+                                          product.name,
+                                          product.description,
+                                          '${product.amount}',
+                                        ),
+                                      );
+                                    }).toList() ?? [],
                                   ),
-                                ),
-                                ProductItem(
-                                  number: 3,
-                                  name: '1 kg de arroz',
-                                  details: '',
-                                  onTap: () => showProductModal(
-                                    context,
-                                    '1 kg de arroz',
-                                    'Arroz blanco para preparar comidas.',
-                                    'Cantidad: 1 kg',
+                                  const SizedBox(height: 16),
+                                ],
+                                // Barra inferior verde con el ícono de flecha que queda abajo de los productos
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFD9E6E5),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
                                   ),
-                                ),
-                                ProductItem(
-                                  number: 4,
-                                  name: '3 cebollas',
-                                  details: 'Cebollas moradas',
-                                  onTap: () => showProductModal(
-                                    context,
-                                    '3 cebollas',
-                                    'Cebollas moradas grandes.',
-                                    'Cantidad: 3 unidades',
-                                  ),
-                                ),
-                                ProductItem(
-                                  number: 5,
-                                  name: '3 paquetes de galletas Marías',
-                                  details: 'Si no hay, otro tipo',
-                                  onTap: () => showProductModal(
-                                    context,
-                                    '3 paquetes de galletas Marías',
-                                    'Galletas dulces ideales para acompañar con café.',
-                                    'Cantidad: 3 paquetes',
+                                  width: double.infinity,
+                                  child: Center(
+                                    child: Icon(
+                                      isProductsExpanded
+                                          ? Icons.keyboard_arrow_up
+                                          : Icons.keyboard_arrow_down,
+                                      color: Colors.grey[700],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                          ],
-                          // Barra inferior verde con el ícono de flecha que queda abajo de los productos
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFD9E6E5),
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10),
+                          ),
+                          const SizedBox(height: 20),
+                          // Sección de Subtotal, Costo de Servicio, Total y Botón "Factura"
+                          orderDetails?.status == 'Finished' ?
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Subtotal:',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Costo de servicio:',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Total:',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            width: double.infinity,
-                            child: Center(
-                              child: Icon(
-                                isProductsExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: Colors.grey[700],
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '\$${orderDetails?.cost ?? 0}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  const Text(
+                                    '\$100',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '\$${(orderDetails?.cost ?? 0) + 100}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2D3E50),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Botón de Factura con estilo
+                              GestureDetector(
+                                onTap: () {
+                                  showInvoiceModal(context, orderDetails?.receipt_url ?? '');
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    border: Border.all(
+                                      color: const Color(0xFFD9E6E5),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 6.0, horizontal: 10.0),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.blueAccent,
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.all(6.0),
+                                            child: Icon(
+                                              Icons.receipt_long,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ):
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                'El pedido no contiene información de costos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF2D3E50),
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    // Sección de Subtotal, Costo de Servicio, Total y Botón "Factura"
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Subtotal:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Costo de servicio:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Total:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '\$300',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '\$100',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '\$400',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2D3E50),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Botón de Factura con estilo
-                        GestureDetector(
-                          onTap: () {
-                            // Acción para el botón de Factura
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: const Color(0xFFD9E6E5),
-                                width: 2,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 6.0, horizontal: 10.0),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.blueAccent,
-                                    ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(6.0),
-                                      child: Icon(
-                                        Icons.visibility,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Factura',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFF2D3E50),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
   }
 
-  // Método para mostrar el modal con la información del producto
-  void showProductModal(
-      BuildContext context, String title, String description, String quantity) {
+  void showProductModal(BuildContext context, String title, String description, String quantity) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -534,6 +556,26 @@ class _OrderDetailsState extends State<OrderDetails> {
               Text('Cantidad: $quantity'),
             ],
           ),
+          actions: [
+            TextButton(
+              child: const Text('Cerrar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showInvoiceModal(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Factura'),
+          content: Image.network(url),
           actions: [
             TextButton(
               child: const Text('Cerrar'),
@@ -571,11 +613,7 @@ class ProductItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                '$number. ',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

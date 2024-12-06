@@ -50,6 +50,7 @@ class CourierService {
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
+      print(error);
       ResponseEntity resp = ResponseEntity.fromJson(
           (error as DioException).response!.data);
       print(resp.message);
