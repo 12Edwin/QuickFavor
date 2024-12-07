@@ -24,22 +24,31 @@
               <div v-if="step === 1">
                 <div class="input-container">
                   <v-icon class="fa-solid fa-user icon"></v-icon>
-                  <input type="text" v-model="form.nombre" placeholder="Nombre" class="register-input" required>
-                </div>
-                <div class="input-container">
-                  <v-icon class="fa-solid fa-user icon"></v-icon>
-                  <input type="text" v-model="form.apellidoPaterno" placeholder="Apellido Paterno"
+                  <input type="text" @input="validateNombre" v-model="form.nombre" placeholder="Nombre"
                     class="register-input" required>
                 </div>
+                <div v-if="nombreValidationMessage" class="validation-message">{{ nombreValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-user icon"></v-icon>
-                  <input type="text" v-model="form.apellidoMaterno" placeholder="Apellido Materno"
-                    class="register-input" required>
+                  <input type="text" @input="validateApellidoPaterno" v-model="form.apellidoPaterno"
+                    placeholder="Apellido Paterno" class="register-input" required>
                 </div>
+                <div v-if="apellidoPaternoValidationMessage" class="validation-message">{{
+                  apellidoPaternoValidationMessage }}</div>
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-user icon"></v-icon>
+                  <input type="text" @input="validateApellidoMaterno" v-model="form.apellidoMaterno"
+                    placeholder="Apellido Materno" class="register-input" required>
+                </div>
+                <div v-if="apellidoMaternoValidationMessage" class="validation-message">{{
+                  apellidoMaternoValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                  <input type="text" v-model="form.curp" placeholder="CURP" class="register-input" required>
+                  <input type="text" @input="validateCurp" v-model="form.curp" placeholder="CURP" class="register-input"
+                    required>
                 </div>
+                <div v-if="curpValidationMessage" class="validation-message">{{
+                  curpValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-person-half-dress icon"></v-icon>
                   <select v-model="form.sexo" class="register-input">
@@ -101,20 +110,27 @@
                 <div v-else-if="showModelOnly">
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
-                    <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
+                    <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
+                      class="register-input" required>
                   </div>
+                  <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
                 </div>
 
                 <!-- Mostrar formulario completo de Matrícula y Modelo si no es descripción ni imagen -->
                 <div v-else>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                    <input type="text" v-model="form.matricula" placeholder="Matrícula" class="register-input" required>
+                    <input type="text" @input="validateMatricula" v-model="form.matricula" placeholder="Matrícula"
+                      class="register-input" required>
+                  </div>
+                  <div v-if="matriculaValidationMessage" class="validation-message">{{ matriculaValidationMessage }}
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
-                    <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
+                    <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
+                      class="register-input" required>
                   </div>
+                  <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
                   <!-- Selector de Color y Licencia -->
                   <v-row align="start" no-gutters>
                     <v-col cols="6" class="col-item">
@@ -127,7 +143,8 @@
                     </v-col>
                     <v-col cols="6" class="col-item">
                       <div class="input-container">
-                        <v-icon :class="form.licenciaFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                        <v-icon
+                          :class="form.licenciaFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                         <div class="custom-file-input-wrapper">
                           <label for="file-license" class="file-label">
                             <input type="file" id="file-license" ref="fileInput" @change="handleFileChange"
@@ -147,7 +164,8 @@
                 <v-row align="start" no-gutters style="margin-bottom: 0px !important;">
                   <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon :class="form.rostroFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                      <v-icon
+                        :class="form.rostroFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                       <div class="custom-file-input-wrapper">
                         <label for="file-face" class="file-label">
                           <input type="file" id="file-face" ref="fileInput" @change="handleRostroChange"
@@ -159,7 +177,8 @@
                   </v-col>
                   <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon :class="form.ineFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                      <v-icon
+                        :class="form.ineFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
                       <div class="custom-file-input-wrapper">
                         <label for="file-ine" class="file-label">
                           <input type="file" id="file-ine" ref="fileInput" @change="handleIneChanges"
@@ -174,29 +193,37 @@
                 <!-- Teléfono -->
                 <div class="input-container">
                   <v-icon class="fa-solid fa-phone icon"></v-icon>
-                  <input type="tel" v-model="form.telefono" placeholder="Teléfono" class="register-input" required>
+                  <input type="tel" @input="validateTelefono" v-model="form.telefono" placeholder="Teléfono"
+                    class="register-input" required>
                 </div>
+                <div v-if="telefonoValidationMessage" class="validation-message">{{ telefonoValidationMessage }}</div>
 
                 <!-- Correo -->
                 <div class="input-container">
                   <v-icon class="fa-solid fa-envelope icon"></v-icon>
-                  <input type="text" v-model="form.correo" placeholder="Correo electronico" class="register-input"
-                    required>
+                  <input type="text" @input="validateEmail" v-model="form.correo" placeholder="Correo electronico"
+                    class="register-input" required>
                 </div>
+                <div v-if="emailValidationMessage" class="validation-message">{{ emailValidationMessage }}</div>
 
                 <!-- Contraseña -->
                 <div class="input-container">
                   <v-icon class="fa-solid fa-key icon"></v-icon>
-                  <input type="password" v-model="form.contrasena" placeholder="Contraseña" class="register-input"
-                    required />
+                  <input type="password" @input="validatePassword" v-model="form.contrasena" placeholder="Contraseña"
+                    class="register-input" required />
                 </div>
+                <div v-if="passwordValidationMessage" class="validation-message">{{ passwordValidationMessage }}</div>
+
 
                 <!-- Confirmar Contraseña -->
                 <div class="input-container">
                   <v-icon class="fa-solid fa-key icon"></v-icon>
-                  <input type="password" v-model="form.confirmarContrasena" placeholder="Repita la contraseña"
-                    class="register-input" required />
+                  <input type="password" @input="validateConfirmPassword" v-model="form.confirmarContrasena"
+                    placeholder="Repita la contraseña" class="register-input" required />
                 </div>
+                <div v-if="confirmPasswordValidationMessage" class="validation-message">{{
+                  confirmPasswordValidationMessage }}</div>
+
               </div>
 
               <!-- Botones de navegación -->
@@ -251,7 +278,7 @@ export default defineComponent({
       sexo: '',
       matricula: '',
       modelo: '',
-      color: '#0000FF',
+      color: '',
       licenciaFile: '',
       rostroFile: '',
       ineFile: '',
@@ -262,7 +289,68 @@ export default defineComponent({
       confirmarContrasena: ''
     });
 
-    const isfile = ref(false);
+    const errorMessage = ref('');
+    const emailValidationMessage = ref('');
+    const passwordValidationMessage = ref('');
+    const confirmPasswordValidationMessage = ref('');
+    const nombreValidationMessage = ref('');
+    const apellidoPaternoValidationMessage = ref('');
+    const apellidoMaternoValidationMessage = ref('');
+    const curpValidationMessage = ref('');
+    const sexoValidationMessage = ref('');
+    const matriculaValidationMessage = ref('');
+    const modeloValidationMessage = ref('');
+    const telefonoValidationMessage = ref('');
+
+
+    const validateEmail = () => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      emailValidationMessage.value = regex.test(form.value.correo) ? '' : 'Email no válido';
+    };
+
+    const validatePassword = () => {
+      const regex = /^.{6,}$/;
+      passwordValidationMessage.value = regex.test(form.value.contrasena) ? '' : 'La contraseña debe tener al menos 6 caracteres';
+    };
+
+    const validateConfirmPassword = () => {
+      confirmPasswordValidationMessage.value = form.value.contrasena === form.value.confirmarContrasena ? '' : 'Las contraseñas no coinciden';
+    };
+
+    const validateNombre = () => {
+      const regex = /^.{4,}$/;
+      nombreValidationMessage.value = regex.test(form.value.nombre) ? '' : 'El nombre debe tener al menos 3 caracteres';
+    };
+
+    const validateApellidoPaterno = () => {
+      apellidoPaternoValidationMessage.value = form.value.apellidoPaterno ? '' : 'El apellido paterno es obligatorio';
+    };
+
+    const validateApellidoMaterno = () => {
+      apellidoMaternoValidationMessage.value = form.value.apellidoMaterno ? '' : 'El apellido materno es obligatorio';
+    };
+
+    const validateCurp = () => {
+      const regex = /^.{18}$/;
+      curpValidationMessage.value = regex.test(form.value.curp) ? '' : 'El CURP debe tener exactamente 18 caracteres';
+    };
+
+    const validateSexo = () => {
+      sexoValidationMessage.value = form.value.sexo ? '' : 'El sexo es obligatorio';
+    };
+
+    const validateMatricula = () => {
+      matriculaValidationMessage.value = form.value.matricula ? '' : 'La matrícula es obligatoria';
+    };
+
+    const validateModelo = () => {
+      modeloValidationMessage.value = form.value.modelo ? '' : 'El modelo es obligatorio';
+    };
+
+    const validateTelefono = () => {
+      const regex = /^[0-9]{10}$/;
+      telefonoValidationMessage.value = regex.test(form.value.telefono) ? '' : 'El teléfono debe tener 10 dígitos';
+    };
 
     const items = Array.from({ length: 3 }).map((_, i) => ({
       value: i + 1,
@@ -303,7 +391,7 @@ export default defineComponent({
     // Manejo del cambio de archivo
     const handleRostroChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      
+
       const file = target.files;
       if (file) {
         const base64 = convertirImagenABase64(file[0]);
@@ -320,7 +408,7 @@ export default defineComponent({
       if (files) {
         const base64 = convertirImagenABase64(files[0]);
         const substr = extraerBase64(await base64);
-        
+
         form.value.ineFile = substr || '';
       } else {
         form.value.ineFile = '';
@@ -330,50 +418,152 @@ export default defineComponent({
     const submitForm = async () => {
       const type = selectOptionClick.value;
       let vehiculeType = '';
+      let credentials = {} as unknown as RegisterCourierEntity;;
 
       switch (type) {
         case 1:
           vehiculeType = 'Carro';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: form.value.color,
+            brand: undefined,
+            license_plate: form.value.matricula,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: form.value.licenciaFile,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
           break;
         case 2:
           vehiculeType = 'Moto';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: form.value.color,
+            brand: undefined,
+            license_plate: form.value.matricula,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: form.value.licenciaFile,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
           break;
         case 3:
           vehiculeType = 'Bicicleta';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
           break;
         case 4:
           vehiculeType = 'Scooter';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
           break;
         case 5:
           vehiculeType = 'Caminando';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: undefined,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
           break;
         case 6:
           vehiculeType = 'Otro';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno || undefined,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: undefined,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: form.value.descripcion
+          };
           break;
       }
-      const credentials = {
-        name: form.value.nombre,
-        surname: form.value.apellidoPaterno,
-        lastname: form.value.apellidoMaterno,
-        CURP: form.value.curp,
-        sex: form.value.sexo,
-        phone: form.value.telefono,
-        vehicle_type: vehiculeType,
-        model: form.value.modelo,
-        license_plate: form.value.matricula,
-        INE_photo: form.value.ineFile,
-        face_photo: form.value.rostroFile,
-        plate_photo: form.value.licenciaFile,
-        email: form.value.correo,
-        password: form.value.contrasena,
-      } as unknown as RegisterCourierEntity;
 
       const result = await register(credentials);
+      
       if (result.error) {
         showErrorToast(getErrorMessages(result.message));
       } else {
         await router.push({ name: "login" });
       }
+      console.log(credentials);
+      
     };
 
     const goToInicio = () => {
@@ -416,7 +606,30 @@ export default defineComponent({
       selectOptionClick,
       handleFileChange,
       handleRostroChange,
-      handleIneChanges
+      handleIneChanges,
+      errorMessage,
+      emailValidationMessage,
+      passwordValidationMessage,
+      confirmPasswordValidationMessage,
+      nombreValidationMessage,
+      apellidoPaternoValidationMessage,
+      apellidoMaternoValidationMessage,
+      curpValidationMessage,
+      sexoValidationMessage,
+      matriculaValidationMessage,
+      modeloValidationMessage,
+      telefonoValidationMessage,
+      validateEmail,
+      validatePassword,
+      validateConfirmPassword,
+      validateNombre,
+      validateApellidoPaterno,
+      validateApellidoMaterno,
+      validateCurp,
+      validateSexo,
+      validateMatricula,
+      validateModelo,
+      validateTelefono
     };
   }
 });
