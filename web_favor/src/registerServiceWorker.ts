@@ -2,7 +2,7 @@
 
 import { register } from 'register-service-worker'
 import firebaseMessaging from './firebase'
-import {showErrorToast, showInfoToast} from "@/kernel/alerts";
+import {showInfoToast} from "@/kernel/alerts";
 
 
   const messaging = firebaseMessaging
@@ -50,6 +50,7 @@ async function requestPushPermission() {
   try {
     Notification.requestPermission().then(async (permission) => {
       if (permission === 'granted') {
+        console.log('Notification permission granted.');
         const token = await messaging.getToken({vapidKey: 'BAUkujxVC6KfNTvjW7OrSz_e7Ca70ja3f6k_aP-U_DzKYXsM6C3nmMlDvQyPOTIVwABnelhf8LYEdCw9FurJyyU'});
         console.log('Firebase Messaging token:', token);
         // Envía el token al servidor para registrar el dispositivo
