@@ -64,7 +64,7 @@ class _ModalCourierState extends State<ModalCourier> {
           (index) => GestureDetector(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 5),
-              width: MediaQuery.of(context).size.width *0.08, 
+              width: MediaQuery.of(context).size.width * 0.08,
               height: MediaQuery.of(context).size.width * 0.08,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
