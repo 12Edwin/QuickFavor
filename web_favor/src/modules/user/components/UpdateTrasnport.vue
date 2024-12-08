@@ -379,9 +379,6 @@ export default {
       if (this.form.vehicle_type) {
         this.profile.vehicle_type = this.form.vehicle_type;
       }
-      if (this.form.plate_url) {
-        this.profile.plate_url = this.form.plate_url;
-      }
 
       try {
         const type = this.selectOptionClick;

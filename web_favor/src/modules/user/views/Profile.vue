@@ -51,6 +51,15 @@
             <v-icon class="fa-regular fa-id-card icon-edit"></v-icon>
           </v-btn>
         </div>
+          <!-- Indicador de carga -->
+          <v-progress-circular
+              v-if="isLoading"
+              indeterminate
+              color="primary"
+              size="70"
+              width="7"
+              class="loading-spinner"
+            ></v-progress-circular>
       </div>
 
       <!-- Contenido del Perfil -->
@@ -209,6 +218,7 @@ export default defineComponent({
     const isModalVisiblePlate = ref(false);
     const isModalVisibleINE = ref(false);
     const defaultColor = "#566981"; // Define a default color
+    const isLoading = ref(true);
 
     const profile = ref({
       name: "",
@@ -251,6 +261,8 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        isLoading.value = false;
       }
     };
 
@@ -269,6 +281,7 @@ export default defineComponent({
       isModalVisiblePlate,
       isModalVisibleINE,
       defaultColor,
+      isLoading,
     };
   }
 });
