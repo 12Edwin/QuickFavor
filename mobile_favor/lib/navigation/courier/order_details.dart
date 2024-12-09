@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class OrderDetailsCourier extends StatefulWidget {
   const OrderDetailsCourier(
-      {Key? key, required orderId, required fecha, required cantidad})
-      : super(key: key);
+      {super.key, required orderId, required fecha, required cantidad});
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
@@ -552,12 +551,12 @@ class ProductItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const ProductItem({
-    Key? key,
+    super.key,
     required this.number,
     required this.name,
     required this.details,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

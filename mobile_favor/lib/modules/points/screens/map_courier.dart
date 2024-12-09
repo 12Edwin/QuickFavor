@@ -38,11 +38,22 @@ class _MapCourierState extends State<MapCourier> {
   }
 
   void _startTimer() async {
+    final FavorService favorService = FavorService(context);
+    final String? noCourier = await getStorageNoUser();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
       Position position = await _getCurrentLocation();
       setState(() {
         _currentPosition = position;
       });
+      UpdateLocationEntity location = UpdateLocationEntity(
+        no_courier: noCourier ?? '',
+        lat: position.latitude,
+        lng: position.longitude,
+      );
+      final result = await favorService.updateLocation(location);
+      if (result.error) {
+        showErrorAlert(context, 'Ocurrió un error al actualizar la ubicación');
+      }
     });
   }
 
@@ -68,7 +79,8 @@ class _MapCourierState extends State<MapCourier> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
     return await Geolocator.getCurrentPosition();
   }

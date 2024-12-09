@@ -31,7 +31,7 @@ class _MapCustomerState extends State<MapCustomer> {
     super.initState();
     _markers = {};
     _circles = {};
-    _center = LatLng(37.7749, -122.4194);
+    _center = const LatLng(37.7749, -122.4194);
     _initializeLocation();
   }
 
@@ -45,7 +45,7 @@ class _MapCustomerState extends State<MapCustomer> {
         _lastValidCenter = _center;
 
         _circles.add(Circle(
-          circleId: CircleId('5km_radius'),
+          circleId: const CircleId('5km_radius'),
           center: _center,
           radius: _radius,
           fillColor: Colors.blue.withOpacity(0.3),
@@ -78,7 +78,7 @@ class _MapCustomerState extends State<MapCustomer> {
   void _onPlaceSelected(Place place) async {
     if (_markers.length >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ya has seleccionado 3 lugares.')),
+        const SnackBar(content: Text('Ya has seleccionado 3 lugares.')),
       );
       return;
     }
@@ -135,7 +135,7 @@ class _MapCustomerState extends State<MapCustomer> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('¿Necesitas algo ${name}?'),
+        title: Text('¿Necesitas algo $name?'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Stack(

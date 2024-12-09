@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_favor/navigation/courier/modal_courier_form.dart';
-import 'package:mobile_favor/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileCustomer extends StatefulWidget {
