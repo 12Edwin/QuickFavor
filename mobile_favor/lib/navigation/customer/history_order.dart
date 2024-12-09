@@ -29,12 +29,12 @@ class _HistoryOrderState extends State<HistoryOrder> {
     });
     try {
       final service = FavorService(context);
-      final customer_id = await getStorageNoUser();
-      if (customer_id == null) {
+      final customerId = await getStorageNoUser();
+      if (customerId == null) {
         showErrorAlert(context, 'No se pudo obtener la información del usuario');
         return;
       }
-      final response = await service.getListCustomerHistory(customer_id);
+      final response = await service.getListCustomerHistory(customerId);
       if (response.error) {
         showErrorAlert(context, getErrorMessages(response.message));
         return;
@@ -123,7 +123,7 @@ class _HistoryOrderState extends State<HistoryOrder> {
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: _isLoading
-                        ? Center(
+                        ? const Center(
                             child: CircularProgressIndicator(),
                           )
                         : historyOrder.isEmpty

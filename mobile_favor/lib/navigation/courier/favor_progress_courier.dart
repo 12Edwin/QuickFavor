@@ -22,15 +22,15 @@ class FavorProgressCourier extends StatefulWidget {
 }
 
 class _FavorProgressCourierState extends State<FavorProgressCourier> {
-  bool _isExpanded = false;
-  bool _isExpanded2 = false;
+  final bool _isExpanded = false;
+  final bool _isExpanded2 = false;
   bool _isLoading = true; // Variable para controlar el estado de carga
   late FavorService _favorService;
   late String no_user;
   OrderPreviewEntity? _orderDetails;
   SSEOrderMessage? _orderStatus;
   Timer? _timer;
-  Duration _remainingTime = Duration(hours: 2);
+  Duration _remainingTime = const Duration(hours: 2);
   String _status = 'Cancelado';
 
   final TextEditingController _receiptPhotoController = TextEditingController();
@@ -125,10 +125,10 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingTime.inSeconds > 0) {
-          _remainingTime -= Duration(seconds: 1);
+          _remainingTime -= const Duration(seconds: 1);
         } else {
           _timer?.cancel();
         }
@@ -148,7 +148,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     return Scaffold(
       body: _isLoading // Muestra el loader si _isLoading es true
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Stack(
                 children: [
@@ -403,7 +403,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
                                           borderSide: BorderSide.none,
                                         ),
                                       ),
-                                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'El monto es obligatorio';
@@ -528,7 +528,7 @@ class _FavorProgressCourierState extends State<FavorProgressCourier> {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF6E7E91) : Color(0xFFA4B0BD),
+        color: isActive ? const Color(0xFF6E7E91) : const Color(0xFFA4B0BD),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: Colors.white),

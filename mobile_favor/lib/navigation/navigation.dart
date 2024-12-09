@@ -32,6 +32,8 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   String _role = '';
+  final String _noOrder = '';
+  final bool _thereIsFavor = false;
   Timer? _timer;
   DateTime? _lastPressedTime;
 

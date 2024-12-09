@@ -25,7 +25,7 @@ class DioConfig {
       onResponse: (response, handler) {
         return handler.next(response);
       },
-      onError: (DioError error, handler) async {
+      onError: (DioException error, handler) async {
         // Handle errors
         if (error.response == null) {
           return handler.reject(DioException(

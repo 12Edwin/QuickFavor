@@ -50,7 +50,7 @@ class _CollectionPickerState extends State<CollectionPicker> {
       setState(() {
         _circleCenter = location;
         _circles.add(Circle(
-          circleId: CircleId('5km_radius'),
+          circleId: const CircleId('5km_radius'),
           center: _circleCenter,
           radius: _radius,
           fillColor: Colors.blue.withOpacity(0.3),
@@ -70,20 +70,16 @@ class _CollectionPickerState extends State<CollectionPicker> {
     _lastValidCenter = _currentLocation;
     _getAddressFromLatLng(_currentLocation!);
     setState(() {});
-    if (mapController != null) {
-      mapController.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
-    }
-  } else {
+    mapController.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
+    } else {
     try {
       LatLng location = await getLatLngFromStorageOrCurrent();
       setState(() {
         _currentLocation = location;
         _lastValidCenter = _currentLocation;
       });
-      if (mapController != null) {
-        mapController.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
-      }
-    } catch (e) {
+      mapController.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
+        } catch (e) {
       print('Error al obtener la ubicación: $e');
     }
   }
@@ -108,7 +104,7 @@ class _CollectionPickerState extends State<CollectionPicker> {
   void _onPlaceSelected(Place place) async {
     if (_markers.length >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ya has seleccionado 3 lugares.')),
+        const SnackBar(content: Text('Ya has seleccionado 3 lugares.')),
       );
       return;
     }
@@ -166,7 +162,7 @@ class _CollectionPickerState extends State<CollectionPicker> {
           Positioned.fill(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: _currentLocation ?? LatLng(37.7749, -122.4194),
+                target: _currentLocation ?? const LatLng(37.7749, -122.4194),
                 zoom: 12,
               ),
               onMapCreated: _onMapCreated,

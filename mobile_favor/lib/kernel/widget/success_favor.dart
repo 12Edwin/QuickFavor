@@ -4,7 +4,7 @@ import 'package:mobile_favor/kernel/widget/wave_painter.dart';
 class SuccessFavor extends StatelessWidget {
   final String timeout;
 
-  const SuccessFavor({Key? key, required this.timeout}) : super(key: key);
+  const SuccessFavor({super.key, required this.timeout});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class SuccessFavor extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/navigation');
                 },
-                child: Text('Aceptar'),
+                child: const Text('Aceptar'),
               ),
             ],
           ),
