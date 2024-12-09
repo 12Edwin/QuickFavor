@@ -29,7 +29,7 @@ class _LocationPickerState extends State<LocationPicker> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enable location services')),
+        const SnackBar(content: Text('Please enable location services')),
       );
       return;
     }
@@ -39,7 +39,7 @@ class _LocationPickerState extends State<LocationPicker> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Location permission is required')),
+          const SnackBar(content: Text('Location permission is required')),
         );
         return;
       }
@@ -104,7 +104,7 @@ class _LocationPickerState extends State<LocationPicker> {
           Positioned.fill(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: _currentLocation ?? LatLng(37.7749, -122.4194),
+                target: _currentLocation ?? const LatLng(37.7749, -122.4194),
                 zoom: 12,
               ),
               onMapCreated: (controller) {

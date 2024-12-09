@@ -1,6 +1,8 @@
 import pool from "./connection-db";
 import { RowDataPacket } from "mysql2";
 import { messaging } from "./config-SDK";
+import {messaging as mess} from "firebase-admin";
+import Message = mess.Message;
 
 export class NotificationService {
   async sendOrderNotification(driverId: string, distance: number, order: any) {
@@ -20,13 +22,21 @@ export class NotificationService {
           title: 'Nuevo pedido disponible',
           body: `Pedido con ${order.products} productos para recolección a ${distance} km de tí`
         },
+        android: {
+          priority: 'high',
+          notification: {
+            visibility: 'public',
+            sound: 'default'
+          }
+        },
         data: {
           orderId: order.no_order,
           type: 'NEW_ORDER',
           products: order.products + "",
+          foreground: 'true'
         },
         token: fcmToken
-      };
+      } as Message;
 
       const response = await messaging.send(message);
       await pool.query(

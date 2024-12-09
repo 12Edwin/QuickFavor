@@ -89,7 +89,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
       success: success ?? this.success,
       warning: warning ?? this.warning,
       info: info ?? this.info,
-      danger: danger ?? this.danger,
+      danger: danger ?? danger,
     );
   }
 

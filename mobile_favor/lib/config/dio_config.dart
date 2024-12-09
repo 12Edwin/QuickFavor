@@ -25,7 +25,7 @@ class DioConfig {
       onResponse: (response, handler) {
         return handler.next(response);
       },
-      onError: (DioError error, handler) async {
+      onError: (DioException error, handler) async {
         // Handle errors
         if (error.response == null) {
           return handler.reject(DioException(
@@ -34,7 +34,12 @@ class DioConfig {
               requestOptions: error.requestOptions,
               statusCode: 502,
               statusMessage: 'Network error',
-              data: {'error': true, 'message': 'Network error', 'data': null, 'code': 502},
+              data: {
+                'error': true,
+                'message': 'Network error',
+                'data': null,
+                'code': 502
+              },
             ),
           ));
         }
@@ -43,7 +48,8 @@ class DioConfig {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.remove('token');
           prefs.remove('no_user');
-          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/login', (route) => false);
         } else if (error.response?.statusCode == 403) {
           showErrorAlert(context, 'Acceso denegado a este recurso');
         }

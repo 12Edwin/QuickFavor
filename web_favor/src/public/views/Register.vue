@@ -9,246 +9,249 @@
               <h2>Registro</h2>
             </div>
 
-                <!-- Stepper de Vuetify debajo del formulario -->
-              <v-stepper v-model="step" class="custom-stepper" flat>
-                <v-stepper-header>
-                  <template v-for="(item, i) in items" :key="i">
-                    <v-stepper-item
-                      :value="item.value"
-                      class="stepper-item"
-                      :class="{'stepper-item--active': step === item.value}"
-                    ></v-stepper-item>
-                  </template>
-                </v-stepper-header>
-              </v-stepper>
-              <!-- Formulario -->
-              <form>
-                <!-- Primer Paso: Datos Personales -->
-                <div v-if="step === 1">
+            <!-- Stepper de Vuetify debajo del formulario -->
+            <v-stepper v-model="step" class="custom-stepper" flat>
+              <v-stepper-header>
+                <template v-for="(item, i) in items" :key="i">
+                  <v-stepper-item :value="item.value" class="stepper-item"
+                    :class="{ 'stepper-item--active': step === item.value }"></v-stepper-item>
+                </template>
+              </v-stepper-header>
+            </v-stepper>
+            <!-- Formulario -->
+            <form @submit.prevent="submitForm">
+              <!-- Primer Paso: Datos Personales -->
+              <div v-if="step === 1">
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-user icon"></v-icon>
+                  <input type="text" @input="validateNombre" v-model="form.nombre" placeholder="Nombre"
+                    class="register-input" required>
+                </div>
+                <div v-if="nombreValidationMessage" class="validation-message">{{ nombreValidationMessage }}</div>
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-user icon"></v-icon>
+                  <input type="text" @input="validateApellidoPaterno" v-model="form.apellidoPaterno"
+                    placeholder="Apellido Paterno" class="register-input" required>
+                </div>
+                <div v-if="apellidoPaternoValidationMessage" class="validation-message">{{
+                  apellidoPaternoValidationMessage }}</div>
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-user icon"></v-icon>
+                  <input type="text" @input="validateApellidoMaterno" v-model="form.apellidoMaterno"
+                    placeholder="Apellido Materno" class="register-input" required>
+                </div>
+                <div v-if="apellidoMaternoValidationMessage" class="validation-message">{{
+                  apellidoMaternoValidationMessage }}</div>
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-address-card icon"></v-icon>
+                  <input type="text" @input="validateCurp" v-model="form.curp" placeholder="CURP" class="register-input"
+                    required>
+                </div>
+                <div v-if="curpValidationMessage" class="validation-message">{{
+                  curpValidationMessage }}</div>
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-person-half-dress icon"></v-icon>
+                  <select v-model="form.sexo" class="register-input">
+                    <option value="" disabled>Sexo</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Segundo Paso: Matrícula y Modelo o Descripción o Imagen -->
+              <div v-if="step === 2">
+                <!-- Botones en la parte superior -->
+                <div class="icon-button-group">
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 1 }"
+                    @click.prevent="selectOption(1)">
+                    <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
+                  </button>
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 2 }"
+                    @click.prevent="selectOption(2)">
+                    <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
+                  </button>
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 3 }"
+                    @click.prevent="selectOption(3)">
+                    <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
+                  </button>
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 4 }"
+                    @click.prevent="selectOption(4)">
+                    <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
+                  </button>
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 5 }"
+                    @click.prevent="selectOption(5)">
+                    <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
+                  </button>
+                  <button class="icon-button-step2" :class="{ 'selected': selectOptionClick === 6 }"
+                    @click.prevent="selectOption(6)">
+                    <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
+                  </button>
+                </div>
+
+                <!-- Mostrar solo descripción -->
+                <div v-if="showDescriptionOnly">
                   <div class="input-container">
-                      <v-icon class="fa-solid fa-user icon"></v-icon>
-                      <input type="text" v-model="form.nombre" placeholder="Nombre" class="register-input" required>
-                  </div>
-                  <div class="input-container">
-                      <v-icon class="fa-solid fa-user icon"></v-icon>
-                      <input type="text" v-model="form.apellidoPaterno" placeholder="Apellido Paterno" class="register-input" required>
-                  </div>
-                  <div class="input-container">
-                      <v-icon class="fa-solid fa-user icon"></v-icon>
-                      <input type="text" v-model="form.apellidoMaterno" placeholder="Apellido Materno" class="register-input" required>
-                  </div>
-                  <div class="input-container">
-                      <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                      <input type="text" v-model="form.curp" placeholder="CURP" class="register-input" required>
-                  </div>
-                  <div class="input-container">
-                      <v-icon class="fa-solid fa-person-half-dress icon"></v-icon>
-                      <select v-model="form.sexo" class="register-input">
-                      <option value="" disabled>Sexo</option>
-                      <option value="M">Masculino</option>
-                      <option value="F">Femenino</option>
-                      <option value="O">Otro</option>
-                    </select>
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" v-model="form.descripcion" placeholder="Descripción" class="register-input"
+                      required>
                   </div>
                 </div>
 
-                <!-- Segundo Paso: Matrícula y Modelo o Descripción o Imagen -->
-                <div v-if="step === 2">
-                  <!-- Botones en la parte superior -->
-                    <div class="icon-button-group">
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 1 }" 
-                        @click.prevent="selectOption(1)">
-                        <v-icon class="fa-solid fa-car icon-step-2"></v-icon>
-                      </button>
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 2 }" 
-                        @click.prevent="selectOption(2)">
-                        <v-icon class="fa-solid fa-motorcycle icon-step-2"></v-icon>
-                      </button>
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 3 }" 
-                        @click.prevent="selectOption(3)">
-                        <v-icon class="fa-solid fa-bicycle icon-step-2"></v-icon>
-                      </button>
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 4 }" 
-                        @click.prevent="selectOption(4)">
-                        <v-icon class="fa-solid fa-dolly icon-step-2"></v-icon>
-                      </button>
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 5 }" 
-                        @click.prevent="selectOption(5)">
-                        <v-icon class="fa-solid fa-person-walking icon-step-2"></v-icon>
-                      </button>
-                      <button 
-                        class="icon-button-step2"
-                        :class="{ 'selected': selectOptionClick === 6 }" 
-                        @click.prevent="selectOption(6)">
-                        <v-icon class="fa-solid fa-plus icon-step-2"></v-icon>
-                      </button>
-                    </div>
+                <!-- Mostrar solo imagen -->
+                <div v-else-if="showImageOnly" class="walkable-image">
+                  <v-row>
+                    <img src="../../assets/walk.png" alt="Walking" width="300px">
+                  </v-row>
+                </div>
 
-                  <!-- Mostrar solo descripción -->
-                  <div v-if="showDescriptionOnly">
-                    <div class="input-container">
-                      <v-icon class="fa-solid fa-file icon"></v-icon>
-                      <input type="text" v-model="form.descripcion" placeholder="Descripción" class="register-input" required>
-                    </div>
+                <!-- Mostrar solo el modelo -->
+                <div v-else-if="showModelOnly">
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
+                      class="register-input" required>
                   </div>
+                  <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
+                </div>
 
-                  <!-- Mostrar solo imagen -->
-                  <div v-else-if="showImageOnly" class="walkable-image">
-                    <v-row>
-                      <img src="../../assets/walk.png" alt="Walking" width="300px">
-                    </v-row>
+                <!-- Mostrar formulario completo de Matrícula y Modelo si no es descripción ni imagen -->
+                <div v-else>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-address-card icon"></v-icon>
+                    <input type="text" @input="validateMatricula" v-model="form.matricula" placeholder="Matrícula"
+                      class="register-input" required>
                   </div>
-
-                  <!-- Mostrar solo el modelo -->
-                   <div v-else-if="showModelOnly">
-                      <div class="input-container">
-                          <v-icon class="fa-solid fa-file icon"></v-icon>
-                          <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
-                      </div>
-                   </div>
-
-                  <!-- Mostrar formulario completo de Matrícula y Modelo si no es descripción ni imagen -->
-                  <div v-else>
-                    <div class="input-container">
-                      <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                      <input type="text" v-model="form.matricula" placeholder="Matrícula" class="register-input" required>
+                  <div v-if="matriculaValidationMessage" class="validation-message">{{ matriculaValidationMessage }}
                   </div>
                   <div class="input-container">
-                      <v-icon class="fa-solid fa-file icon"></v-icon>
-                      <input type="text" v-model="form.modelo" placeholder="Modelo" class="register-input" required>
+                    <v-icon class="fa-solid fa-file icon"></v-icon>
+                    <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
+                      class="register-input" required>
                   </div>
-                    <!-- Selector de Color y Licencia -->
-                    <v-row align="start" no-gutters>
-                      <v-col cols="6" class="col-item">
-                        <div class="color-container">
-                          <div class="color-picker">
-                            <input type="color" v-model="form.color" class="color-input" />
+                  <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
+                  <!-- Selector de Color y Licencia -->
+                  <v-row align="start" no-gutters>
+                    <v-col cols="6" class="col-item">
+                      <div class="color-container">
+                        <div class="color-picker">
+                          <input type="color" v-model="form.color" class="color-input" />
                           <div class="color-label">Color</div>
                         </div>
-                        </div>
-                      </v-col>
-                      <v-col cols="6" class="col-item" >
-                        <div class="input-container">
-                          <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
-                          <div class="custom-file-input-wrapper">
-                          <label for="file-upload" class="file-label">
-                            <input 
-                              type="file" 
-                              id="file-upload" 
-                              ref="fileInput" 
-                              @change="handleFileChange" 
-                              class="custom-file-input" 
-                            />
+                      </div>
+                    </v-col>
+                    <v-col cols="6" class="col-item">
+                      <div class="input-container">
+                        <v-icon
+                          :class="form.licenciaFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                        <div class="custom-file-input-wrapper">
+                          <label for="file-license" class="file-label">
+                            <input type="file" id="file-license" ref="fileInput" @change="handleFileChange"
+                              class="custom-file-input" />
                             <span class="file-placeholder">Licencia</span>
                           </label>
                         </div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
+                      </div>
+                    </v-col>
+                  </v-row>
                 </div>
+              </div>
 
-                  <!-- Tercer Paso: Contacto e Identificación -->
-                  <div v-if="step === 3" class="scrollable-step">
-                    <!-- Rostro -->
-                    <v-row align="start" no-gutters style="margin-bottom: 0px !important;">
-                      <v-col cols="6" class="col-item">
-                        <div class="input-container">
-                          <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
-                          <div class="custom-file-input-wrapper">
-                          <label for="file-upload" class="file-label">
-                            <input 
-                              type="file" 
-                              id="file-upload" 
-                              ref="fileInput" 
-                              @change="handleRostroChange" 
-                              class="custom-file-input" 
-                            />
-                            <span class="file-placeholder">Rostro</span>
-                          </label>
-                        </div>
-                        </div>
-                      </v-col>
-                      <v-col cols="6" class="col-item" >
-                        <div class="input-container">
-                          <v-icon class="fa-solid fa-upload icon-especial"></v-icon>
-                          <div class="custom-file-input-wrapper">
-                          <label for="file-upload" class="file-label">
-                            <input 
-                              type="file" 
-                              id="file-upload" 
-                              ref="fileInput" 
-                              @change="handleIneChange" 
-                              class="custom-file-input" 
-                            />
-                            <span class="file-placeholder">INE</span>
-                          </label>
-                        </div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  
-                    <!-- Teléfono -->
+              <!-- Tercer Paso: Contacto e Identificación -->
+              <div v-if="step === 3" class="scrollable-step">
+                <!-- Rostro -->
+                <v-row align="start" no-gutters style="margin-bottom: 0px !important;">
+                  <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon class="fa-solid fa-phone icon"></v-icon>
-                      <input type="tel" v-model="form.telefono" placeholder="Teléfono" class="register-input" required>
+                      <v-icon
+                        :class="form.rostroFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                      <div class="custom-file-input-wrapper">
+                        <label for="file-face" class="file-label">
+                          <input type="file" id="file-face" ref="fileInput" @change="handleRostroChange"
+                            class="custom-file-input" />
+                          <span class="file-placeholder">Rostro</span>
+                        </label>
+                      </div>
                     </div>
-
-                    <!-- Correo -->
+                  </v-col>
+                  <v-col cols="6" class="col-item">
                     <div class="input-container">
-                      <v-icon class="fa-solid fa-envelope icon"></v-icon>
-                      <input type="text" v-model="form.correo" placeholder="Correo electronico" class="register-input" required>
+                      <v-icon
+                        :class="form.ineFile ? 'fa-solid fa-check icon-especial' : 'fa-solid fa-upload icon-especial'"></v-icon>
+                      <div class="custom-file-input-wrapper">
+                        <label for="file-ine" class="file-label">
+                          <input type="file" id="file-ine" ref="fileInput" @change="handleIneChanges"
+                            class="custom-file-input" />
+                          <span class="file-placeholder">INE</span>
+                        </label>
+                      </div>
                     </div>
+                  </v-col>
+                </v-row>
 
-                    <!-- Contraseña -->
-                    <div class="input-container">
-                      <v-icon class="fa-solid fa-key icon"></v-icon>
-                      <input type="password" v-model="form.contrasena" placeholder="Contraseña" class="register-input" required />
-                    </div>
+                <!-- Teléfono -->
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-phone icon"></v-icon>
+                  <input type="tel" @input="validateTelefono" v-model="form.telefono" placeholder="Teléfono"
+                    class="register-input" required>
+                </div>
+                <div v-if="telefonoValidationMessage" class="validation-message">{{ telefonoValidationMessage }}</div>
 
-                    <!-- Confirmar Contraseña -->
-                    <div class="input-container">
-                      <v-icon class="fa-solid fa-key icon"></v-icon>
-                      <input type="password" v-model="form.confirmarContrasena" placeholder="Repita la contraseña" class="register-input" required />
-                    </div>
-                  </div>
+                <!-- Correo -->
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-envelope icon"></v-icon>
+                  <input type="text" @input="validateEmail" v-model="form.correo" placeholder="Correo electronico"
+                    class="register-input" required>
+                </div>
+                <div v-if="emailValidationMessage" class="validation-message">{{ emailValidationMessage }}</div>
 
-        <!-- Botones de navegación -->
-        <div class="text-center">
-          <v-row>
-            <v-col>
-              <button class="btn-left" v-if="step === 1" @click="goToInicio">LOGIN</button>
-              <button class="btn-left" @click="prevStep" v-if="step > 1">ATRÁS</button>
-            </v-col>
-            <v-col>
-              <button class="btn-rigth" @click="nextStep" v-if="step < 3">SIGUIENTE</button>
-              <button class="btn-rigth" @click="submitForm" v-if="step === 3">REGISTRARSE</button>
-            </v-col>
-          </v-row>
+                <!-- Contraseña -->
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-key icon"></v-icon>
+                  <input type="password" @input="validatePassword" v-model="form.contrasena" placeholder="Contraseña"
+                    class="register-input" required />
+                </div>
+                <div v-if="passwordValidationMessage" class="validation-message">{{ passwordValidationMessage }}</div>
 
-        </div>
-      </form>
+
+                <!-- Confirmar Contraseña -->
+                <div class="input-container">
+                  <v-icon class="fa-solid fa-key icon"></v-icon>
+                  <input type="password" @input="validateConfirmPassword" v-model="form.confirmarContrasena"
+                    placeholder="Repita la contraseña" class="register-input" required />
+                </div>
+                <div v-if="confirmPasswordValidationMessage" class="validation-message">{{
+                  confirmPasswordValidationMessage }}</div>
+
+              </div>
+
+              <!-- Botones de navegación -->
+              <div class="text-center">
+                <v-row>
+                  <v-col>
+                    <button class="btn-left" v-if="step === 1" @click="goToInicio">LOGIN</button>
+                    <button class="btn-left" @click="prevStep" v-if="step > 1">ATRÁS</button>
+                  </v-col>
+                  <v-col>
+                    <button class="btn-rigth" @click="nextStep" v-if="step < 3">SIGUIENTE</button>
+                    <button class="btn-rigth" @click="submitForm" v-if="step === 3">REGISTRARSE</button>
+                  </v-col>
+                </v-row>
+
+              </div>
+            </form>
 
           </div>
         </v-card>
       </v-col>
       <v-col class="logo">
         <v-col cols="12">
-        <div class="logo-content">
-          <img src="../../assets/logo.png" alt="Logo" class="logo-image" />
-          <h2>Quick Favor</h2>
-        </div>
-      </v-col>
+          <div class="logo-content">
+            <img src="../../assets/logo.png" alt="Logo" class="logo-image" />
+            <h2>Quick Favor</h2>
+          </div>
+        </v-col>
       </v-col>
     </v-row>
   </v-container>
@@ -257,7 +260,10 @@
 <script lang="ts">
 import router from '@/router';
 import { defineComponent, ref } from 'vue';
-import { showErrorToast } from '@/kernel/alerts';
+import { showErrorToast, showSuccessToast } from '@/kernel/alerts';
+import { RegisterCourierEntity } from "@/public/entity/auth.entity";
+import { register } from "@/public/services/auth";
+import { convertirImagenABase64, extraerBase64, getErrorMessages, setStatusCourier } from "@/kernel/utils";
 
 export default defineComponent({
   name: "Register",
@@ -272,16 +278,79 @@ export default defineComponent({
       sexo: '',
       matricula: '',
       modelo: '',
-      color: '#0000FF',
-      licenciaFile: [] as File[],
-      rostroFile: [] as File[],
-      ineFile: [] as File[],
+      color: '',
+      licenciaFile: '',
+      rostroFile: '',
+      ineFile: '',
       descripcion: '',
       telefono: '',
       correo: '',
       contrasena: '',
       confirmarContrasena: ''
     });
+
+    const errorMessage = ref('');
+    const emailValidationMessage = ref('');
+    const passwordValidationMessage = ref('');
+    const confirmPasswordValidationMessage = ref('');
+    const nombreValidationMessage = ref('');
+    const apellidoPaternoValidationMessage = ref('');
+    const apellidoMaternoValidationMessage = ref('');
+    const curpValidationMessage = ref('');
+    const sexoValidationMessage = ref('');
+    const matriculaValidationMessage = ref('');
+    const modeloValidationMessage = ref('');
+    const telefonoValidationMessage = ref('');
+
+
+    const validateEmail = () => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      emailValidationMessage.value = regex.test(form.value.correo) ? '' : 'Email no válido';
+    };
+
+    const validatePassword = () => {
+      const regex = /^.{6,}$/;
+      passwordValidationMessage.value = regex.test(form.value.contrasena) ? '' : 'La contraseña debe tener al menos 6 caracteres';
+    };
+
+    const validateConfirmPassword = () => {
+      confirmPasswordValidationMessage.value = form.value.contrasena === form.value.confirmarContrasena ? '' : 'Las contraseñas no coinciden';
+    };
+
+    const validateNombre = () => {
+      const regex = /^.{4,}$/;
+      nombreValidationMessage.value = regex.test(form.value.nombre) ? '' : 'El nombre debe tener al menos 3 caracteres';
+    };
+
+    const validateApellidoPaterno = () => {
+      apellidoPaternoValidationMessage.value = form.value.apellidoPaterno ? '' : 'El apellido paterno es obligatorio';
+    };
+
+    const validateApellidoMaterno = () => {
+      apellidoMaternoValidationMessage.value = form.value.apellidoMaterno ? '' : 'El apellido materno es obligatorio';
+    };
+
+    const validateCurp = () => {
+      const regex = /^.{18}$/;
+      curpValidationMessage.value = regex.test(form.value.curp) ? '' : 'El CURP debe tener exactamente 18 caracteres';
+    };
+
+    const validateSexo = () => {
+      sexoValidationMessage.value = form.value.sexo ? '' : 'El sexo es obligatorio';
+    };
+
+    const validateMatricula = () => {
+      matriculaValidationMessage.value = form.value.matricula ? '' : 'La matrícula es obligatoria';
+    };
+
+    const validateModelo = () => {
+      modeloValidationMessage.value = form.value.modelo ? '' : 'El modelo es obligatorio';
+    };
+
+    const validateTelefono = () => {
+      const regex = /^[0-9]{10}$/;
+      telefonoValidationMessage.value = regex.test(form.value.telefono) ? '' : 'El teléfono debe tener 10 dígitos';
+    };
 
     const items = Array.from({ length: 3 }).map((_, i) => ({
       value: i + 1,
@@ -304,50 +373,197 @@ export default defineComponent({
     };
 
     // Manejo del cambio de archivo
-    const handleFileChange = (event: Event) => {
+    const handleFileChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const file = target?.files ? target.files[0] : null; 
-      if (file) {
-        form.value.licenciaFile = [file];  
+      const files = target.files;
+
+      if (files && files.length === 1) {
+        const base64 = convertirImagenABase64(files[0]);
+        const substr = extraerBase64(await base64);
+        form.value.licenciaFile = substr || '';
+
       } else {
-        form.value.licenciaFile = []; 
+        form.value.licenciaFile = '';
+        alert('Por favor, selecciona solo un archivo.');
       }
     };
 
     // Manejo del cambio de archivo
-    const handleRostroChange = (event: Event) => {
+    const handleRostroChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const file = target?.files ? target.files[0] : null;  
+
+      const file = target.files;
       if (file) {
-        form.value.rostroFile = [file]; 
+        const base64 = convertirImagenABase64(file[0]);
+        const substr = extraerBase64(await base64);
+        form.value.rostroFile = substr || '';
       } else {
-        form.value.rostroFile= [];  
+        form.value.rostroFile = '';
       }
     };
 
-    const handleIneChange = (event: Event) => {
+    const handleIneChanges = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      const files = target?.files ? Array.from(target.files) : []; 
+      const files = target.files;
+      if (files) {
+        const base64 = convertirImagenABase64(files[0]);
+        const substr = extraerBase64(await base64);
 
-      if (files.length > 2) {
-        showErrorToast("Solo se permiten 2 archivos maximo .");
-        return; 
+        form.value.ineFile = substr || '';
+      } else {
+        form.value.ineFile = '';
       }
-
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-      const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-
-      if (invalidFiles.length > 0) {
-        showErrorToast("Solo se permiten archivos de tipo imagen (png, jpeg) o pdf.");
-        return; 
-      }
-
-      form.value.ineFile = files;
     };
 
+    const submitForm = async () => {
+      const type = selectOptionClick.value;
+      let vehiculeType = '';
+      let credentials = {} as unknown as RegisterCourierEntity;;
 
-    const submitForm = () => {
-      console.log("Formulario enviado", form.value);
+      switch (type) {
+        case 1:
+          vehiculeType = 'Carro';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: form.value.color,
+            brand: undefined,
+            license_plate: form.value.matricula,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: form.value.licenciaFile,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
+          break;
+        case 2:
+          vehiculeType = 'Moto';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: form.value.color,
+            brand: undefined,
+            license_plate: form.value.matricula,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: form.value.licenciaFile,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
+          break;
+        case 3:
+          vehiculeType = 'Bicicleta';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
+          break;
+        case 4:
+          vehiculeType = 'Scooter';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: form.value.modelo,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
+          break;
+        case 5:
+          vehiculeType = 'Caminando';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: undefined,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: undefined
+          };
+          break;
+        case 6:
+          vehiculeType = 'Otro';
+          credentials = {
+            name: form.value.nombre,
+            surname: form.value.apellidoPaterno,
+            lastname: form.value.apellidoMaterno || undefined,
+            CURP: form.value.curp,
+            sex: form.value.sexo,
+            phone: form.value.telefono,
+            vehicle_type: vehiculeType,
+            model: undefined,
+            color: undefined,
+            brand: undefined,
+            license_plate: undefined,
+            INE_photo: form.value.ineFile,
+            face_photo: form.value.rostroFile,
+            plate_photo: undefined,
+            email: form.value.correo,
+            password: form.value.contrasena,
+            desciption: form.value.descripcion
+          };
+          break;
+      }
+
+      const result = await register(credentials);
+      
+      if (result.error) {
+        showErrorToast(getErrorMessages(result.message));
+      } else {
+        await router.push({ name: "login" });
+      }
+      console.log(credentials);
+      
     };
 
     const goToInicio = () => {
@@ -356,7 +572,7 @@ export default defineComponent({
 
     const selectOption = (index: number) => {
       selectOptionClick.value = index;
-      if ([3,4].includes(index)) {
+      if ([3, 4].includes(index)) {
         showModelOnly.value = true;
         showDescriptionOnly.value = false;
         showImageOnly.value = false;
@@ -375,22 +591,45 @@ export default defineComponent({
       }
     };
 
-    return { 
-      step, 
-      form, 
-      items, 
-      showDescriptionOnly, 
-      showImageOnly, 
-      showModelOnly, 
-      nextStep, 
-      prevStep, 
-      submitForm, 
-      goToInicio, 
-      selectOption, 
+    return {
+      step,
+      form,
+      items,
+      showDescriptionOnly,
+      showImageOnly,
+      showModelOnly,
+      nextStep,
+      prevStep,
+      submitForm,
+      goToInicio,
+      selectOption,
       selectOptionClick,
       handleFileChange,
       handleRostroChange,
-      handleIneChange
+      handleIneChanges,
+      errorMessage,
+      emailValidationMessage,
+      passwordValidationMessage,
+      confirmPasswordValidationMessage,
+      nombreValidationMessage,
+      apellidoPaternoValidationMessage,
+      apellidoMaternoValidationMessage,
+      curpValidationMessage,
+      sexoValidationMessage,
+      matriculaValidationMessage,
+      modeloValidationMessage,
+      telefonoValidationMessage,
+      validateEmail,
+      validatePassword,
+      validateConfirmPassword,
+      validateNombre,
+      validateApellidoPaterno,
+      validateApellidoMaterno,
+      validateCurp,
+      validateSexo,
+      validateMatricula,
+      validateModelo,
+      validateTelefono
     };
   }
 });
@@ -424,22 +663,22 @@ export default defineComponent({
 }
 
 .card-custom {
-  position: relative; 
+  position: relative;
   margin-left: 72px;
   margin-right: 72px;
   border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.8); 
+  background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  overflow: visible; 
-  z-index: 1; 
+  overflow: visible;
+  z-index: 1;
 }
 
 .car-image {
   position: absolute;
-  top: -128px; 
+  top: -128px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2; 
+  z-index: 2;
 }
 
 .login-form {
@@ -463,7 +702,8 @@ export default defineComponent({
 
 .register-input {
   width: 100%;
-  padding: 12px 12px 12px 40px; /* Espacio para el ícono */
+  padding: 12px 12px 12px 40px;
+  /* Espacio para el ícono */
   border: 1px solid #ccc;
   border-radius: 32px;
   outline: none;
@@ -513,15 +753,16 @@ export default defineComponent({
 }
 
 .register-button:disabled {
-  background-color: #b0b0b0; 
-  cursor: not-allowed; 
+  background-color: #b0b0b0;
+  cursor: not-allowed;
 }
 
 /* Step 2 */
 .icon-button-group {
   display: flex;
   justify-content: center;
-  gap: 16px; /* Espacio entre los botones */
+  gap: 16px;
+  /* Espacio entre los botones */
   margin-bottom: 16px;
   flex-wrap: nowrap;
 }
@@ -534,8 +775,8 @@ export default defineComponent({
   align-items: center;
   width: 40px;
   height: 40px;
-  border: 2px solid transparent; 
-  border-radius: 8px; 
+  border: 2px solid transparent;
+  border-radius: 8px;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -550,12 +791,14 @@ export default defineComponent({
 }
 
 .icon-button-step2.selected {
-  background-color: #3A415A; /* Fondo cuando está seleccionado */
+  background-color: #3A415A;
+  /* Fondo cuando está seleccionado */
   border-radius: 50%;
 }
 
 .icon-button-step2.selected .icon-step-2 {
-  color: white; /* Color del icono cuando está seleccionado */
+  color: white;
+  /* Color del icono cuando está seleccionado */
 }
 
 /* Estilo adicional para los elementos de la columna */
@@ -581,7 +824,8 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #34344E; /* Fondo similar al color del color-picker */
+  background-color: #34344E;
+  /* Fondo similar al color del color-picker */
   padding: 8px;
   border-radius: 32px;
   margin-left: 8px;
@@ -589,7 +833,7 @@ export default defineComponent({
 }
 
 .custom-file-input {
-  display: none; 
+  display: none;
 }
 
 .file-label {
@@ -607,15 +851,15 @@ export default defineComponent({
 }
 
 .file-label:hover {
-  background-color: #4a4a73; 
+  background-color: #4a4a73;
 }
 
 
 .color-picker {
   display: flex;
-  flex-direction: row; 
-  align-items: center; 
-  gap: 8px; 
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .color-input {
@@ -636,7 +880,7 @@ export default defineComponent({
 .color-container {
   display: flex;
   justify-content: center;
-  align-items: center; 
+  align-items: center;
   border-radius: 32px;
   background-color: #34344E;
   padding: 8px;
@@ -702,7 +946,6 @@ export default defineComponent({
   .logo {
     display: none;
   }
-  
-}
 
+}
 </style>

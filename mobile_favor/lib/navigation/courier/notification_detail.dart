@@ -27,15 +27,15 @@ class NotificationDetail extends StatefulWidget {
 }
 
 class _NotificationDetailState extends State<NotificationDetail> {
-  bool _isExpanded = false;
-  bool _isExpanded2 = false;
+  final bool _isExpanded = false;
+  final bool _isExpanded2 = false;
   bool _isLoading = true; // Variable para controlar el estado de carga
   late FavorService _favorService;
   OrderPreviewEntity? _orderDetails;
   SSEOrderMessage? _orderStatus;
   Timer? _timer;
-  Duration _remainingTime = Duration(hours: 2);
-  String _status = 'Cancelado';
+  Duration _remainingTime = const Duration(hours: 2);
+  final String _status = 'Cancelado';
 
   final TextEditingController _receiptPhotoController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
@@ -58,7 +58,7 @@ class _NotificationDetailState extends State<NotificationDetail> {
     setState(() {
       _orderDetails = OrderPreviewEntity.fromJson(details.data);
       final DateTime orderCreatedAt = DateTime.parse(_orderDetails!.order_created_at);
-      final DateTime targetTime = orderCreatedAt.add(Duration(minutes: 10));
+      final DateTime targetTime = orderCreatedAt.add(const Duration(minutes: 10));
       final Duration remainingTime = targetTime.difference(DateTime.now());
       _remainingTime = remainingTime.isNegative ? Duration.zero : remainingTime;
       _isLoading = false;
@@ -78,10 +78,10 @@ class _NotificationDetailState extends State<NotificationDetail> {
   }
 
   void _startTimer() async {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingTime.inSeconds > 0) {
-          _remainingTime -= Duration(seconds: 1);
+          _remainingTime -= const Duration(seconds: 1);
         } else {
           _timer?.cancel();
           _rejectFavor();
@@ -180,7 +180,7 @@ class _NotificationDetailState extends State<NotificationDetail> {
               ),
       ),
       body: _isLoading // Muestra el loader si _isLoading es true
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Stack(
                 children: [
@@ -402,7 +402,7 @@ class _NotificationDetailState extends State<NotificationDetail> {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF6E7E91) : Color(0xFFA4B0BD),
+        color: isActive ? const Color(0xFF6E7E91) : const Color(0xFFA4B0BD),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: Colors.white),

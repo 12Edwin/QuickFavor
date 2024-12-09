@@ -30,16 +30,18 @@ class AuthService {
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('role', data['user']['role']);
       await prefs.setString('name', data['user']['name']);
-      if (data['user']['location'] != null)
+      if (data['user']['location'] != null) {
         await prefs.setDouble('lat', num.parse(data['user']['location']['lat'].toString()).toDouble());
-      if (data['user']['location'] != null)
+      }
+      if (data['user']['location'] != null) {
         await prefs.setDouble('lng', num.parse(data['user']['location']['lng'].toString()).toDouble());
+      }
 
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
       ResponseEntity resp =
-          ResponseEntity.fromJson((error as DioError).response!.data);
+          ResponseEntity.fromJson((error as DioException).response!.data);
       if (resp.data != null) {
         return getErrorMessages(resp);
       } else {
@@ -56,7 +58,7 @@ class AuthService {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       ResponseEntity resp =
-          ResponseEntity.fromJson((error as DioError).response!.data);
+          ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -74,7 +76,7 @@ class AuthService {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       ResponseEntity resp =
-          ResponseEntity.fromJson((error as DioError).response!.data);
+          ResponseEntity.fromJson((error as DioException).response!.data);
       if (resp.data != null) {
         return getErrorMessages(resp);
       } else {
