@@ -18,10 +18,10 @@ class CreateOrder extends StatefulWidget {
   const CreateOrder({super.key, this.lat, this.lng, this.address});
 
   @override
-  State<CreateOrder> createState() => _LoginState();
+  State<CreateOrder> createState() => _CreateOrderState();
 }
 
-class _LoginState extends State<CreateOrder> {
+class _CreateOrderState extends State<CreateOrder> {
   final List<Products> products = [];
   final _nameKey = GlobalKey<FormState>();
   final _descriptionKey = GlobalKey<FormState>();
@@ -39,6 +39,7 @@ class _LoginState extends State<CreateOrder> {
       _coordinates1 = LatLng(widget.lat!, widget.lng!);
       _address1Controller.text = widget.address ?? '';
     }
+    _coordinates1 = null;
   }
 
   @override

@@ -5,46 +5,95 @@ import firebaseMessaging from './firebase'
 import {showInfoToast} from "@/kernel/alerts";
 
 
+  const CACHE_NAME = 'vue-app-cache-v1'
+  const ASSETS_TO_CACHE = [
+    '/',
+    'index.html',
+    'manifest.json',
+    '/favicon.ico',
+    'js/app.js',
+  ]
+
   const messaging = firebaseMessaging
 
   register(`${process.env.BASE_URL}service-worker.js`, {
-    ready() {
-      console.log(
-          'App is being served from cache by a service worker.\n' +
-          'For more details, visit https://goo.gl/AFskqB'
-      )
-
-      initOfflineMode()
+    ready(registration) {
+      console.log('Service worker is active.')
+      cacheAppAssets(registration)
       requestPushPermission()
     },
-    registered() {
+    registered(registration) {
       console.log('Service worker has been registered.')
-      checkForUpdates()
+      checkForUpdates(registration)
     },
     cached() {
-      console.log('Content has been cached for offline use.')
-      showOfflineReadyMessage()
+      console.log('Content cached for offline use')
+      showInfoToast('App available offline')
     },
-    updatefound() {
-      console.log('New content is downloading.')
-      showUpdateProgressIndicator()
+    updatefound(registration) {
+      console.log('New content downloading')
+      registration.installing?.addEventListener('statechange', () => {
+        if (registration.waiting) {
+          showUpdateAvailableNotification()
+        }
+      })
     },
-    updated() {
-      console.log('New content is available; please refresh.')
-      showUpdateAvailableMessage()
-      sendPendingRequests()
+    updated(registration) {
+      console.log('New content available')
+      handleServiceWorkerUpdate(registration)
     },
     offline() {
-      console.log('No internet connection found. App is running in offline mode.')
-      enableOfflineMode()
+      console.log('No internet connection')
       showCachedContent()
     },
     error(error) {
       console.error('Error during service worker registration:', error)
-      showServiceWorkerErrorMessage(error)
     }
   });
 
+async function cacheAppAssets(registration: ServiceWorkerRegistration) {
+  try {
+    console.log('Caching assets');
+    const cache = await caches.open(CACHE_NAME);
+    for (const asset of ASSETS_TO_CACHE) {
+      try {
+        await cache.add(asset);
+      } catch (error) {
+        console.error(`Failed to cache asset: ${asset}`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Asset caching failed:', error);
+  }
+}
+
+async function showCachedContent() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const cachedResponses = await Promise.all(
+        ASSETS_TO_CACHE.map(asset => cache.match(asset))
+    );
+
+    cachedResponses.forEach((response, index) => {
+      if (response) {
+        console.log(`Cached asset available: ${ASSETS_TO_CACHE[index]}`);
+        // Display the cached content as needed
+      } else {
+        console.warn(`Asset not found in cache: ${ASSETS_TO_CACHE[index]}`);
+      }
+    });
+  } catch (error) {
+    console.error('Error showing cached content:', error);
+  }
+}
+
+function handleServiceWorkerUpdate(registration: ServiceWorkerRegistration) {
+  // Prompt user to reload for new version
+  if (registration.waiting) {
+    registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+    window.location.reload()
+  }
+}
 
 async function requestPushPermission() {
   try {
@@ -80,7 +129,7 @@ messaging.onMessage(async (payload: any) => {
 async function showPushNotification(payload: any) {
   const { title, body, icon } = payload.notification;
   if (title && body) {
-    await showInfoToast(body);
+    showInfoToast(body);
     navigator.serviceWorker.getRegistration().then((registration) => {
       registration?.showNotification(title, {
         body,
@@ -91,82 +140,15 @@ async function showPushNotification(payload: any) {
   }
 }
 
-function initOfflineMode() {
-  //cacheUserFavorRequests()
-  //cacheLocationData()
-  //showToast('App is now available for offline use')
-}
-
-async function checkForUpdates() {
-  try {
-    //const response = await fetch('/app-version.json')
-    //const { version } = await response.json()
-
-    //if (version > APP_VERSION) {
-    //  showUpdateAvailableModal()
-    //}
-  } catch (error) {
-    console.error('Error checking for updates:', error)
+function checkForUpdates(registration: ServiceWorkerRegistration) {
+  // Implement update checking logic
+  if (registration.waiting) {
+    showUpdateAvailableNotification()
   }
 }
 
-function showOfflineReadyMessage() {
-  const offlineReadyMessage = document.createElement('div')
-  offlineReadyMessage.textContent = 'App is now available for offline use'
-  offlineReadyMessage.classList.add('offline-ready-message')
-  document.body.appendChild(offlineReadyMessage)
-}
-
-function showUpdateProgressIndicator() {
-  const updateProgressIndicator = document.createElement('div')
-  updateProgressIndicator.classList.add('update-progress-indicator')
-  document.body.appendChild(updateProgressIndicator)
-
-  let progress = 0
-  const interval = setInterval(() => {
-    updateProgressIndicator.style.width = `${progress}%`
-    progress += 10
-    if (progress >= 100) {
-      clearInterval(interval)
-      updateProgressIndicator.remove()
-    }
-  }, 100)
-}
-
-function showUpdateAvailableMessage() {
-  const updateModal = document.createElement('div')
-  updateModal.classList.add('update-modal')
-  updateModal.textContent = 'New version available. Please refresh the app.'
-  document.body.appendChild(updateModal)
-}
-
-function enableOfflineMode() {
-  //enableDeferredDataSync()
-  //showOfflineModeToast()
-  showCachedContent()
-}
-
-function showServiceWorkerErrorMessage(error: any) {
-  const errorMessage = document.createElement('div')
-  errorMessage.classList.add('service-worker-error-message')
-  errorMessage.textContent = `Error registering service worker: ${error.message}`
-  errorMessage.innerHTML += '<p>Please try refreshing the page or check your internet connection.</p>'
-  document.body.appendChild(errorMessage)
-}
-
-async function showCachedContent() {
-  try {
-    const cachedData = await caches.match('/favor-data')
-    if (cachedData) {
-      const data = await cachedData.json()
-      //renderFavorRequests(data)
-    } else {
-      //showOfflineMessage()
-    }
-  } catch (error) {
-    console.error('Error showing cached content:', error)
-    //showOfflineMessage()
-  }
+function showUpdateAvailableNotification() {
+  showInfoToast('New version available. Refresh to update.')
 }
 
 function sendPendingRequests() {
