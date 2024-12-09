@@ -9,14 +9,14 @@ class CourierService {
 
   CourierService(BuildContext context) : dio = DioConfig.createDio(context);
 
-  Future<ResponseEntity> readNotifications(String courier_id) async {
+  Future<ResponseEntity> readNotifications(String courierId) async {
     try {
-      final response = await dio.get('/favor/notification/$courier_id');
+      final response = await dio.get('/favor/notification/$courierId');
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       ResponseEntity resp = ResponseEntity.fromJson(
-          (error as DioError).response!.data);
+          (error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -28,13 +28,13 @@ class CourierService {
 
   Future<ResponseEntity> rejectFavor(AcceptFavorEntity favor) async {
     try {
-      final String order_id = favor.order_id;
-      final response = await dio.put('/favor/reject/$order_id', data: favor.toJson());
+      final String orderId = favor.order_id;
+      final response = await dio.put('/favor/reject/$orderId', data: favor.toJson());
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       ResponseEntity resp = ResponseEntity.fromJson(
-          (error as DioError).response!.data);
+          (error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -50,8 +50,9 @@ class CourierService {
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
+      print(error);
       ResponseEntity resp = ResponseEntity.fromJson(
-          (error as DioError).response!.data);
+          (error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);

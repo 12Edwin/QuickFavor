@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_favor/navigation/customer/entity/profile.entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../config/dio_config.dart';
-import '../../../config/error_response.dart';
 
 class ProfileService {
   final Dio dio;

@@ -7,7 +7,7 @@ export class CustomerRepository{
 
     async getCustomerProfile(uid: string): Promise<any>{
         try{
-            const [result] =  await pool.query('SELECT p.*, c.* FROM People p LEFT JOIN Customers c ON p.uid = c.id_person WHERE p.uid = ?;', [uid])
+            const [result] =  await pool.query('SELECT p.*, c.*, ST_Y(pl.location) AS lat, ST_X(pl.location) AS lng FROM People p LEFT JOIN Customers c ON p.uid = c.id_person LEFT JOIN Places pl ON pl.id_customer = c.no_customer WHERE p.uid = ?;', [uid])
             const rows = result as RowDataPacket[]
             if (rows.length === 0) throw new Error('User not found');
             return rows[0]
@@ -16,15 +16,22 @@ export class CustomerRepository{
         }
     }
 
-    async editCustomerProfile(payload: User & Customer): Promise<any>{
+    async editCustomerProfile(currentId: string, phone: string, lat: string, lng: string): Promise<void>{
         const connection = await pool.getConnection();
         try {
-            const { uid, lastname, phone, email, name, surname }: User & Customer = payload
             await connection.beginTransaction();
-            await connection.query('UPDATE People SET name = $1, surname = $2, lastname = $3, phone = $4, email = $5 WHERE uid = $6',
-                [name, surname, lastname, phone, email, uid]);
+            await connection.query('UPDATE People SET phone = ? WHERE uid = ?',
+                [phone, currentId]);
+
+            const [rows_customer] = await connection.query<RowDataPacket[]>(
+                'SELECT no_customer FROM Customers WHERE id_person = ?', [currentId]
+            );
+
+            await connection.query('UPDATE Places SET location = ST_GeomFromText(?) WHERE id_customer = ?', [`POINT(${lng} ${lat})`, rows_customer[0].no_customer]);
+
             await connection.commit();
         } catch (error: any){
+            console.log(error)
             connection.rollback();
             throw new Error((error as Error).message)
         }finally {

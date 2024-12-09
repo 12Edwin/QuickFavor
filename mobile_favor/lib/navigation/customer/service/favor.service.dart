@@ -19,7 +19,7 @@ class FavorService {
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -30,31 +30,46 @@ class FavorService {
   }
 
   Stream<SSEMessage> listenToSSE(SearchCourierEntity data) async* {
-  final response = await dio.post(
-    '/location/search',
-    data: data.toJson(),
-    options: Options(
-      responseType: ResponseType.stream,
-    ),
-  );
+  const int maxRetries = 3;
+  int retryCount = 0;
 
-  List<int> buffer = [];
-  await for (final chunk in response.data.stream) {
-    buffer.addAll(chunk);
-    String text = utf8.decode(buffer);
-    buffer.clear();
+  while (retryCount < maxRetries) {
+    try {
+      final response = await dio.post(
+        '/location/search',
+        data: data.toJson(),
+        options: Options(
+          responseType: ResponseType.stream,
+        ),
+      );
 
-    for (final line in LineSplitter.split(text)) {
-      if (line.isNotEmpty) {
-        print('Línea recibida: $line');
-        try {
-          final jsonData = jsonDecode(line);
-          yield SSEMessage.fromJson(jsonData);
-        } catch (e) {
-          print('Error decodificando JSON: $e');
-          continue;
+      List<int> buffer = [];
+      await for (final chunk in response.data.stream) {
+        buffer.addAll(chunk);
+        String text = utf8.decode(buffer);
+        buffer.clear();
+
+        for (final line in LineSplitter.split(text)) {
+          if (line.isNotEmpty) {
+            print('Línea recibida: $line');
+            try {
+              final jsonData = jsonDecode(line);
+              yield SSEMessage.fromJson(jsonData);
+            } catch (e) {
+              print('Error decodificando JSON: $e');
+              continue;
+            }
+          }
         }
       }
+      break; // Exit the loop if successful
+    } catch (e) {
+      retryCount++;
+      print('Error en la conexión, intento $retryCount de $maxRetries: $e');
+      if (retryCount >= maxRetries) {
+        rethrow; // Re-throw the error if max retries reached
+      }
+      await Future.delayed(const Duration(seconds: 2)); // Wait before retrying
     }
   }
 }
@@ -66,7 +81,7 @@ Future<ResponseEntity> getDetailsFavor(String idOrder) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -113,7 +128,7 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -123,14 +138,14 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
     }
   }
 
-  Future<ResponseEntity> cancelFavor(String no_order) async {
+  Future<ResponseEntity> cancelFavor(String noOrder) async {
     try {
-      final response = await dio.put('/favor/cancel/$no_order');
+      final response = await dio.put('/favor/cancel/$noOrder');
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -147,7 +162,7 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -157,9 +172,26 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
     }
   }
 
-  Future<ResponseEntity> getListCustomerHistory(String customer_id) async {
+  Future<ResponseEntity> getListCustomerHistory(String customerId) async {
     try {
-      final response = await dio.get('/favor/history-customer/$customer_id');
+      final response = await dio.get('/favor/history-customer/$customerId');
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
+    }
+  }
+
+  Future<ResponseEntity> getListCourierHistory(String courier_id) async {
+    try {
+      final response = await dio.get('/favor/history-courier/$courier_id');
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {

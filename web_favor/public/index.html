@@ -1,28 +1,70 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
+    <title>Service Worker Check</title>
     <script
       src="https://kit.fontawesome.com/7bdc0f172d.js"
       crossorigin="anonymous"
     ></script>
-  </head>
-  <style>
-    * {
-      font-family: Monserrat, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      color: #2c3e50;
-      margin: 0;
-      padding: 0;
-    }
+    <style>
+      * {
+        font-family: Monserrat, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #CBDAD5;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      .alert-sw {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #ff4d4d;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        animation: fadeIn 1s forwards, fadeOut 1s 10s forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-50%) translateY(-20px);
+        }
+      }
     </style>
-    <body style="background: #CBDAD5">
-        <div id="app"></div>
-    </body>
-    
+
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="alert" class="alert-sw" style="display: none;">
+      Service Worker no es soportado en este navegador.
+    </div>
+  </body>
 </html>

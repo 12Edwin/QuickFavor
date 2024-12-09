@@ -76,7 +76,7 @@
           <v-col xl="6" lg="6" md="12" sm="12" class="d-block" >
             <div class="d-flex justify-center">
               <div>
-                <div class="chat-container mx-auto" style="width: auto; max-width: 150px">
+                <div class="chat-container mx-auto" @click="()=> showChat = true" style="width: auto; max-width: 150px">
                   <div class="icon-circle">
                     <i class="fas fa-comment-dots chat-icon"></i>
                   </div>
@@ -179,8 +179,9 @@
     </div>
     </div>
   </div>
+  <ChatModal :name="order?.customer_name" @close="() => showChat = false" :current-user-id="no_user" :chat-id="order?.no_order" :show="showChat" />
   <MapModal v-if="showMap" :lat="selectedAddress.lat" :lng="selectedAddress.lng" @close="()=> showMap = false"/>
-  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="newStatus == 'Canceled' ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
+  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="(newStatus == 'Canceled' && order?.rejected_orders >= 2) ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
 </template>
 
 <script lang="ts">
@@ -195,16 +196,18 @@ import {
   UpdateStateOrderEntity
 } from "@/modules/order/entity/order.entity";
 import {showErrorToast, showPromiseToast, showWarningToast} from "@/kernel/alerts";
-import {getErrorMessages, getNo_order, removeNo_order} from "@/kernel/utils";
+import {getErrorMessages, getNo_courierByToken, getNo_order, removeNo_order} from "@/kernel/utils";
 import MapModal from "@/components/map_modal.vue";
 import router from "@/router";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
 import {ResponseEntity} from "@/kernel/error-response";
 import TakePhoto from "@/components/take_photo.vue";
+import ChatModal from "@/components/ChatModal.vue";
 
 export default defineComponent({
   name: "Order",
   components: {
+    ChatModal,
     TakePhoto,
     Switch,
     WaveComponent,
@@ -213,6 +216,7 @@ export default defineComponent({
   },
   data() {
     return {
+      no_user: '',
       statusToChange: '',
       newStatus: '',
       cost: 0,
@@ -224,7 +228,8 @@ export default defineComponent({
       status: "In shopping",
       showMap: false,
       selectedAddress: { lat: 0, lng: 0, name: '' } as Delivery,
-      loading: true
+      loading: true,
+      showChat: false,
     };
   },
 
@@ -238,6 +243,7 @@ export default defineComponent({
           "0"
       )}:${String(seconds).padStart(2, "0")}`;
     },
+
     statusColor(): string {
       switch (this.status) {
         case "In shopping":
@@ -403,9 +409,13 @@ export default defineComponent({
       this.selectedAddress = {lat: address.lat, lng: address.lng, name: address.name} as Delivery
       console.log(this.selectedAddress);
       this.showMap = true;
+    },
+    async setNoUser(){
+      this.no_user = await getNo_courierByToken() || '';
     }
   },
   mounted() {
+    this.setNoUser();
     this.startCountdown();
     this.getOrder();
     this.connectToSSE();

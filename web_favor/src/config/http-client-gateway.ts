@@ -41,6 +41,7 @@ const setUpInterceptors = (client: any) => {
                 return Promise.reject({response: {status: 502, message: 'Error network', data: {code: 502, message: 'Error network', data: null}}});
             }
             if(error.response.status){
+                console.log(error.response);
                 switch(error.response.status){
                     case 401:
                         localStorage.removeItem('token');

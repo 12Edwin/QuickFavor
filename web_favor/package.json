@@ -24,7 +24,7 @@
     "vue-class-component": "^7.2.6",
     "vue-router": "^4.4.5",
     "vue3-google-map": "^0.21.0",
-    "vue3-toastify": "^0.2.3",
+    "vue3-toastify": "^0.2.5",
     "vuetify": "^3.7.3"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
     "babel-jest": "^27.0.6",
     "jest": "^27.0.5",
     "ts-jest": "^27.0.4",
-    "typescript": "~4.5.5"
+    "typescript": "^5.7.2"
   },
   "browserslist": [
     "> 1%",

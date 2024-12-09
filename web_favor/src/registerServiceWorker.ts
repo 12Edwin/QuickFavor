@@ -1,10 +1,12 @@
+
+
 import { register } from 'register-service-worker'
 import firebaseMessaging from './firebase'
 import {showInfoToast} from "@/kernel/alerts";
 
-const messaging = firebaseMessaging
 
-if (true) {
+  const messaging = firebaseMessaging
+
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready() {
       console.log(
@@ -41,13 +43,14 @@ if (true) {
       console.error('Error during service worker registration:', error)
       showServiceWorkerErrorMessage(error)
     }
-  })
-}
+  });
+
 
 async function requestPushPermission() {
   try {
     Notification.requestPermission().then(async (permission) => {
       if (permission === 'granted') {
+        console.log('Notification permission granted.');
         const token = await messaging.getToken({vapidKey: 'BAUkujxVC6KfNTvjW7OrSz_e7Ca70ja3f6k_aP-U_DzKYXsM6C3nmMlDvQyPOTIVwABnelhf8LYEdCw9FurJyyU'});
         console.log('Firebase Messaging token:', token);
         // Envía el token al servidor para registrar el dispositivo

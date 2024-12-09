@@ -142,6 +142,19 @@ export const findNearbyDrivers = async(lat: number, lng: number, radiusKm: numbe
     }
   }
 
+  export const getOrderCreatedAt = async (orderId: string): Promise<any> => {
+    try {
+        const [orderRows] = await pool.query<RowDataPacket[]>(
+        'SELECT created_at FROM Orders WHERE no_order = ?;',
+        [orderId]
+      );
+        return orderRows[0].created_at;
+    }catch (error: any) {
+        console.error('Error in getOrderCreatedAt:', error);
+        throw (error as Error).message;
+    }
+  }
+
   export const offDriverService = async (driver: any): Promise<boolean> => {
     try {
         await pool.query<RowDataPacket[]>(

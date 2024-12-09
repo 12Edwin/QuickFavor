@@ -24,12 +24,12 @@ const getCustomerProfile = async (req: Request, res: Response) =>{
 
 const editCustomerProfile = async (req: Request, res: Response) =>{
     try {
-        const { user } = req.body;
+        const { user, lat, lng, phone } = req.body;
         const currentUid = user.uid;
         const repository: CustomerRepository = new CustomerRepository();
         const service: CustomerService = new CustomerService(repository);
-        const payload: User & Customer = req.body;
-        const response: ResponseApi<any> = Response200(await service.editCustomerProfile(currentUid, payload));
+        const result = await service.editCustomerProfile(currentUid, phone, lat, lng)
+        const response: ResponseApi<any> = Response200(result);
         res.status(response.code).json(response);
     }catch (error: any){
         const e: ResponseApi<any> = validateError(error as Error)

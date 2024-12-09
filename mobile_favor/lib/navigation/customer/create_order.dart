@@ -28,9 +28,9 @@ class _LoginState extends State<CreateOrder> {
   final TextEditingController _address1Controller = TextEditingController();
   final TextEditingController _address2Controller = TextEditingController();
   final TextEditingController _address3Controller = TextEditingController();
-  late LatLng? _coordinates1 = null;
-  LatLng? _coordinates2 = null;
-  LatLng? _coordinates3 = null;
+  late LatLng? _coordinates1;
+  LatLng? _coordinates2;
+  LatLng? _coordinates3;
 
   @override
   void initState() {
@@ -46,7 +46,8 @@ class _LoginState extends State<CreateOrder> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('Direcciones de Recolección'),
+        title: const Text('Crear pedido'),
+        automaticallyImplyLeading: widget.address != null,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -530,7 +531,7 @@ class _LoginState extends State<CreateOrder> {
                         final index =
                             products.indexWhere((p) => p.id == producto.id);
                         if (index != -1) {
-                          products[index] = new Products(
+                          products[index] = Products(
                               id: producto.id,
                               name: nombreController.text,
                               amount: cantidad,
@@ -538,7 +539,7 @@ class _LoginState extends State<CreateOrder> {
                         }
                       } else {
                         // Agregar nuevo producto
-                        products.add(new Products(
+                        products.add(Products(
                             id: products.length + 1,
                             name: nombreController.text,
                             amount: cantidad,
@@ -592,37 +593,37 @@ class _LoginState extends State<CreateOrder> {
       showWarningAlert(context, 'Por favor, agrega al menos un producto');
       return;
     }
-    final String? no_order = await getStorageNoOrder();
-    if (no_order != null) {
+    final String? noOrder = await getStorageNoOrder();
+    if (noOrder != null) {
       showWarningAlert(context, 'Ya tienes un pedido en curso');
       return;
     }
 
     final LatLng customerCoordinates = await getLatLngFromStorageOrCurrent();
-    final String id_customer = await getStorageNoUser() ?? '';
+    final String idCustomer = await getStorageNoUser() ?? '';
 
-    final order = new CreateOrderEntity(
-      id_customer: id_customer,
+    final order = CreateOrderEntity(
+      id_customer: idCustomer,
       products: products,
-      customer_direction: new CustomerDirection(
+      customer_direction: CustomerDirection(
         name: 'Dirección de entrega',
         lat: customerCoordinates.latitude,
         lng: customerCoordinates.longitude,
       ),
       collection_points: [
-        new CollectionPoints(
+        CollectionPoints(
           name: _address1Controller.text,
           lat: _coordinates1!.latitude,
           lng: _coordinates1!.longitude,
         ),
         if (_coordinates2 != null)
-          new CollectionPoints(
+          CollectionPoints(
             name: _address2Controller.text,
             lat: _coordinates2!.latitude,
             lng: _coordinates2!.longitude,
           ),
         if (_coordinates3 != null)
-          new CollectionPoints(
+          CollectionPoints(
             name: _address3Controller.text,
             lat: _coordinates3!.latitude,
             lng: _coordinates3!.longitude,
