@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 
 class FirebaseService {
   static Future<void> initializeFirebase() async {
@@ -23,7 +24,6 @@ class FirebaseService {
   static void configurePushNotifications() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Notificación recibida en primer plano: ${message.notification?.title}');
-      // Aquí puedes mostrar la notificación localmente
     });
 
     // Manejar cuando se hace tap en una notificación
