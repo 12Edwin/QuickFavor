@@ -29,17 +29,15 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final uid = prefs.getString('uid');
-    final role = prefs.getString('role');
 
-    if (token == null || uid == null || role == null) {
-      print('Token, UID o rol no disponibles');
+    if (token == null || uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: Token o UID no encontrados en localStorage')),
+      );
       return;
     }
 
-    // Construir el endpoint dinámicamente según el rol y UID
-    final String endpoint =
-        role == 'Courier' ? 'courier/profile/$uid' : 'customer/profile/$uid';
-    final url = Uri.parse('https://backend-app-y3z1.onrender.com/$endpoint'); //cambiar aqui en path de la url
+    final url = Uri.parse('http://54.243.28.11:3000/customer/profile/$uid');
 
     try {
       final response = await http.get(
@@ -51,7 +49,7 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.body)['data'];
         setState(() {
           name = data['name'] ?? '';
           email = data['email'] ?? '';
@@ -61,10 +59,14 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
           sex = data['sex'] ?? '';
         });
       } else {
-        print('Error al obtener perfil: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al obtener perfil: ${response.statusCode}')),
+        );
       }
     } catch (e) {
-      print('Error de red: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de red: $e')),
+      );
     }
   }
 
@@ -193,8 +195,6 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Tus TextFormFields existentes permanecen igual
-                    const SizedBox(height: 70),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
