@@ -38,8 +38,9 @@ class _CreateOrderState extends State<CreateOrder> {
     if (widget.lat != null && widget.lng != null) {
       _coordinates1 = LatLng(widget.lat!, widget.lng!);
       _address1Controller.text = widget.address ?? '';
+    }else {
+      _coordinates1 = null;
     }
-    _coordinates1 = null;
   }
 
   @override
