@@ -104,7 +104,6 @@ export default defineComponent({
         showSuccessToast(`Bienvenido ${result.data?.user.name}`);
         await router.push({name: "map"});
       }
-
     };
 
   const activeBtnLogin = () => {

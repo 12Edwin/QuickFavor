@@ -59,18 +59,7 @@
         }
       }
     </style>
-    <script>
-      if (('serviceWorker' in navigator)) {
-        console.log('Service worker supported');
-        
-      }
-      if (!('serviceWorker' in navigator)) {
-        
-        const alertBox = document.getElementById("alert");
-        alertBox.style.display = "block";
-        console.log("Service worker not supported");
-      }
-    </script>
+
   </head>
   <body>
     <div id="app"></div>

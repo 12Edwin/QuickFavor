@@ -3,17 +3,25 @@
       <v-card class="card-custom">
         <v-card-title class="headline">Selecciona el nuevo transporte</v-card-title>
         <v-card-text>
-          <!-- Botones en la parte superior -->
           <div>
-            <div class="input-container">
-                <v-icon class="fa-solid fa-phone icon"></v-icon>
-                <input type="tel" v-model="form.phone" placeholder="Teléfono" class="register-input" required>
-                </div>
+          <div class="input-container">
+            <v-icon class="fa-solid fa-phone icon"></v-icon>
+            <input 
+              type="tel" 
+              v-model="form.phone" 
+              placeholder="Teléfono" 
+              class="register-input" 
+              required 
+              :class="{ 'is-invalid': phoneError }" 
+              @input="validatePhone"
+            />
           </div>
+          <div v-if="phoneError" class="validation-message">El teléfono debe tener solo números y 10 dígitos</div>
+        </div>
         </v-card-text>
   
         <v-card-actions>
-            <v-btn color="secondary" @click="openModal">Guardar</v-btn>
+          <button class="btn-save" @click="openModal" :disabled="phoneError">GUARDAR</button>
           <v-btn color="primary" @click="closeModal">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
@@ -46,6 +54,7 @@ export default {
       form: {
         phone: '',
       },
+      phoneError: false,
     };
   },
   computed: {
@@ -73,6 +82,10 @@ export default {
     },
   },
   methods: {
+    validatePhone() {
+      const regex = /^[0-9]{10}$/;
+      this.phoneError = !regex.test(this.form.phone);
+    },
     openModal() {
       this.showModal = true;
     },
@@ -101,7 +114,6 @@ export default {
   },
 };
 </script>
-
   
   <style scoped>
   .icon-button-group {
@@ -265,6 +277,46 @@ export default {
     transform: translateY(-50%);
     color: #566981;
   }
-  
+  .error-message {
+  color: red;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.validation-message {
+  color: red;
+  margin-left: 16px;
+  text-align: left;
+  margin-top: 1px;
+}
+
+.btn-save {
+  background-color: #34344E; 
+  color: white;
+  border: none; 
+  padding: 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+}
+
+/* Efecto hover */
+.btn-save:hover {
+  background-color: #4a4a73; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.btn-save:active {
+  background-color: #2c2c3d;
+  transform: translateY(1px); 
+}
+
+.btn-save:disabled {
+  background-color: #b0b0b0; 
+  cursor: not-allowed; 
+}
   </style>
   

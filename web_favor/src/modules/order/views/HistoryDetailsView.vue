@@ -2,43 +2,53 @@
   <div class="back-container">
     <WaveComponent />
   </div>
-  <div class="history-container" v-if="historyItem">
-    <div class="title-container">
-      <i class="fa-solid fa-bell bell-icon"></i>
-      <h1 class="titlePrincipal">Detalles de la Orden</h1>
+  <div class="history-container">
+    <div class="card-header d-flex align-center justify-space-between">
+      <h2 class="header-title">
+        <i class="fas fa-history fa-lg text-white" style="font-size: 36px"></i>
+        <span class="ml-4 fas text-white">D E T A L L E S</span> <span class="ml-4 fas text-white">D E </span> <span class="ml-4 fas text-white">H I S T O R I A L </span>
+      </h2>
+      <Switch @onFalse="toggleStatus" @onTrue="toggleStatus" />
     </div>
-
     <div class="content-container">
-      <div class="left-section">
-        <div class="left-content">
-          <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
-            <img
-              :src="historyItem.face_url || '../../../assets/oldManUser.png'"
-              alt="User Avatar"
-              style="width: 100%; height: 100%; border-radius: 50%"
-            />
-          </v-avatar>
-          <p class="username">{{ historyItem.customer_name }}</p>
-          <v-chip
-            :color="getChipColor(historyItem.status)"
-            variant="flat"
-            class="chip-style"
-          >
-            <span style="color: white">{{ historyItem.status }}</span>
-          </v-chip>
-          <v-divider
-            class="chip-divider border-opacity-100"
-            :thickness="4"
-            color="#A3BBBF"
-          ></v-divider>
-          <p class="completion-text">Completado en</p>
-          <p class="completion-status">
-            {{ formatDate(historyItem.order_created_at) }}
-          </p>
+      <transition-group>
+        <transition name="fade" key="loading">
+          <div v-if="isLoading" class="loader-container">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </div>
+        </transition>
+        <transition name="fade" key="content">
+          <div v-if="!isLoading" class="left-section">
+          <div class="left-content">
+            <v-avatar color="#D9D9D9D9" size="200" class="avatar-border">
+              <img
+                src="@/assets/profile.png"
+                alt="User Avatar"
+                style="width: 100%; height: 100%; border-radius: 50%"
+              />
+            </v-avatar>
+            <p class="username">{{ historyItem.customer_name || '' }} {{ historyItem.customer_surname || '' }}</p>
+            <v-chip
+              :color="getChipColor(historyItem.status)"
+              variant="flat"
+              class="chip-style"
+            >
+              <span style="color: white">{{getStatus (historyItem.status) }}</span>
+            </v-chip>
+            <v-divider
+              class="chip-divider border-opacity-100"
+              :thickness="4"
+              color="#A3BBBF"
+            ></v-divider>
+            <p class="completion-text">Completado en</p>
+            <p class="completion-status">
+              {{ getMinutesDifference(historyItem.order_created_at, historyItem.order_finished_at)  }} / 120 minutos
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div class="details-section">
+        </transition>
+        <transition name="fade" key="content2">
+          <div v-if="!isLoading" class="details-section">
         <div class="header-container">
           <div class="left-stripe"></div>
           <p class="header-text">Productos</p>
@@ -100,7 +110,11 @@
           </div>
 
           <div class="summary-button-container">
-            <button class="summary-button" @click="viewReceipt">
+            <button
+              class="summary-button"
+              v-if="historyItem.receipt_url"
+              @click="viewReceipt"
+            >
               <div class="icon-circle-summary">
                 <i class="fa-solid fa-eye"></i>
               </div>
@@ -109,9 +123,11 @@
           </div>
         </div>
       </div>
+        </transition>
+      </transition-group>
     </div>
 
-    <v-dialog v-model="dialog" max-width="600" class="centered-dialog">
+    <v-dialog v-if="!isLoading" v-model="dialog" max-width="600" class="centered-dialog">
       <v-card>
         <v-card-title>Detalles del Producto</v-card-title>
         <v-card-text class="product-details">
@@ -134,12 +150,12 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="receiptDialog" max-width="800" class="centered-dialog">
+    <v-dialog v-if="!isLoading" v-model="receiptDialog" max-width="800" class="centered-dialog">
       <v-card>
         <v-card-title>Factura</v-card-title>
-        <v-card-text class="receipt-container">
+        <v-card-text>
           <img
-            :src="historyItem?.receipt_url"
+            :src="historyItem.receipt_url"
             alt="Factura"
             class="receipt-img"
           />
@@ -151,14 +167,10 @@
     </v-dialog>
   </div>
 
-  <!-- Mostrar loading si historyItem aún es null -->
-  <div v-else class="loading-container">
-    <p>Cargando detalles de la orden...</p>
-  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref } from "vue";
 import axios from "axios";
 import WaveComponent from "@/components/WaveComponent.vue";
 
@@ -167,32 +179,43 @@ export default defineComponent({
   components: { WaveComponent },
   props: {
     id: {
-      type: String, // El id debe ser un string como "ORD_26"
+      type: String,
       required: true,
     },
   },
   data() {
     return {
-      dialog: false, // Controla la visibilidad del diálogo de detalles del producto
-      receiptDialog: false, // Añadir aquí la propiedad para el modal
-      selectedProduct: { name: "", description: "", amount: 0 }, // Almacena el producto seleccionado para ver los detalles
-      historyItem: null as any, // Almacena los detalles de la orden
+      isLoading: true,
+      isActive: true,
+      dialog: false,
+      receiptDialog: false, // Nuevo estado para el modal de factura
+      selectedProduct: { name: "", description: "", amount: 0 },
+      historyItem: null as any,
     };
   },
   mounted() {
     this.fetchOrderDetails();
   },
   methods: {
+    toggleStatus() {
+      this.isActive = !this.isActive;
+    },
+    getMinutesDifference(startDate: string = new Date().toISOString(), endDate: string = new Date().toISOString()) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffMs = end.getTime() - start.getTime();
+      return Math.floor(diffMs / 60000);
+    },
     async fetchOrderDetails() {
       try {
-        const token = localStorage.getItem("token"); // Asegúrate de obtener el token correcto
+        const token = localStorage.getItem("token");
         if (!token) {
           console.error("Token no encontrado en el localStorage.");
           return;
         }
 
         const response = await axios.get(
-          `https://backend-app-y3z1.onrender.com/favor/details/${this.id}`,
+          `http://54.243.28.11:3000/favor/details/${this.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -201,7 +224,7 @@ export default defineComponent({
         );
 
         if (response.data.code === 200 && !response.data.error) {
-          this.historyItem = response.data.data; // Asignar los detalles de la orden a historyItem
+          this.historyItem = response.data.data;
         } else {
           console.error(
             "Error al obtener los detalles de la orden:",
@@ -210,33 +233,49 @@ export default defineComponent({
         }
       } catch (error) {
         console.error("Error al hacer la solicitud al backend:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
-    getChipColor(status: string) {
-      switch (status) {
-        case "Proceso de Compra":
+    getChipColor(estatus: string) {
+      switch (estatus) {
+        case "Pending":
           return "#fdab30";
-        case "Proceso de entrega":
+        case "In delivery":
           return "#89a7b1";
-        case "Finalizado":
+        case "In shopping":
+          return "#89a7b1";
+        case "Finished":
           return "#3a415a";
-        case "Cancelado":
+        case "Canceled":
           return "#f70b0b";
         default:
           return "#b0bec5"; // Gris por defecto si no coincide con ningún estado
       }
     },
-    viewReceipt() {
-      if (this.historyItem?.receipt_url) {
-        this.receiptDialog = true;
-      } else {
-        console.error("No hay factura disponible para esta orden.");
+
+    getStatus(status: string) {
+      switch (status) {
+        case "Pending":
+          return "Pendiente";
+        case "In delivery":
+          return "En entrega";
+        case "In shopping":
+          return "En compra";
+        case "Finished":
+          return "Finalizado";
+        case "Canceled":
+          return "Cancelado";
+        default:
+          return "Desconocido";
       }
     },
-
     viewDetails(product: any) {
       this.selectedProduct = product;
       this.dialog = true;
+    },
+    viewReceipt() {
+      this.receiptDialog = true;
     },
     formatDate(dateString: string) {
       return new Date(dateString).toLocaleString();
@@ -244,6 +283,7 @@ export default defineComponent({
   },
 });
 </script>
+
 
 <style scoped>
 .back-container {
@@ -256,27 +296,36 @@ export default defineComponent({
 }
 
 .history-container {
-  height: 88vh;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  position: static;
+  padding-bottom: 20px;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  height: 100%;
 }
 
-.receipt-container {
+.card-header {
   display: flex;
-  justify-content: center;
   align-items: center;
+  background-color: #566981;
+  padding: 1.5rem;
+  border-radius: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.receipt-img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Contenedor principal para la sección izquierda y derecha */
 .content-container {
+  background-color: rgba(255, 255, 255, 0.4);
   display: flex;
   gap: 20px;
   align-items: flex-start; /* Alinea los elementos al inicio verticalmente */
@@ -443,12 +492,6 @@ export default defineComponent({
   color: #34344e;
 }
 
-.products-table {
-  max-height: 350px; /* Ajusta esta altura según tus necesidades */
-  overflow-y: auto; /* Permite que la tabla tenga desplazamiento vertical */
-  text-align: center;
-}
-
 .centered-dialog {
   display: flex;
   justify-content: center;
@@ -547,153 +590,6 @@ export default defineComponent({
   margin-top: 20px;
 }
 
-/* Estilo para el contenedor del título */
-.title-container {
-  width: 100%;
-  background-color: #566981; /* Color de fondo azul claro */
-  padding: 16px;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.titlePrincipal {
-  color: #ffffff; /* Color de texto blanco */
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.bell-icon {
-  color: #ffffff; /* Mismo color que el texto del título */
-  font-size: 30px; /* Tamaño del icono */
-  margin-right: 30px;
-}
-
-/* Estilos para el botón de estado */
-.status-container {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
-
-.status-button {
-  display: flex;
-  align-items: center;
-  background-color: #89a7b1;
-  border: none;
-  border-radius: 50px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  position: relative;
-  overflow: visible; /* Permite que el icono salga del botón */
-}
-
-.status-button.inactive {
-  background-color: #f70b0b;
-}
-
-.icon-circle {
-  background-color: white;
-  border-radius: 50%;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  position: absolute;
-  left: -8px; /* Ajusta cuánto sobresale el icono */
-}
-
-.icon-circle.inactive-icon {
-  background-color: #ffffff;
-}
-
-.power-icon {
-  color: #0066cc; /* Color del icono de encendido */
-  font-size: 24px;
-}
-
-.power-icon.inactive-icon {
-  color: #f70b0b;
-}
-
-.status-text {
-  color: white;
-  margin-left: 30px;
-}
-
-/* Contenedor para centrar solo la sección de no-orders */
-.no-orders-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.no-orders {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  color: #34344e;
-  font-size: 18px;
-}
-
-.no-orders-image {
-  width: 300px;
-  height: auto;
-  margin-bottom: 30px;
-}
-
-.white-card {
-  background-color: white;
-  width: 85%;
-  margin: 0 auto;
-  margin-bottom: 20px; /* Espacio entre cards */
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.card-overlay {
-  z-index: 2;
-}
-
-.card-content {
-  display: flex;
-  align-items: center;
-  width: 95%;
-  gap: 15px;
-}
-
-.text-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-}
-
-.title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #34344e;
-  margin: 0;
-}
-
-.date {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  margin-left: 20px;
-}
-
 .chip-style {
   font-size: 14px;
   font-weight: bold;
@@ -703,16 +599,6 @@ export default defineComponent({
   margin-top: 12px;
 }
 
-.icon-style {
-  font-size: 30px;
-  color: #312070;
-  padding: 15px;
-}
-
-.icon-link {
-  margin-left: 100px; /* Espacio entre el chip y el icono */
-  text-decoration: none;
-}
 
 @media (max-width: 768px) {
   .history-container {
@@ -814,7 +700,6 @@ export default defineComponent({
     color: #34344e;
   }
 
-  /* Ajuste del botón de factura */
   .summary-button-container {
     display: flex;
     justify-content: center;
@@ -832,5 +717,19 @@ export default defineComponent({
     width: 100%;
     max-width: 200px;
   }
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
 }
 </style>

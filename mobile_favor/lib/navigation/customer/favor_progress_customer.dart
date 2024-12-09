@@ -271,9 +271,20 @@ class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
                                         style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 8),
+                                      if (_orderDetails?.brand != null)
                                       Text(
-                                        _orderDetails!.model ?? '',
+                                        _orderDetails?.brand ?? '',
                                         style: const TextStyle(color: Colors.grey, fontSize: 11),
+                                      ),
+                                      if(_orderDetails?.model != null)
+                                      Text(
+                                        _orderDetails?.model ?? '',
+                                        style: const TextStyle(color: Colors.grey, fontSize: 11),
+                                      ),
+                                      if(_orderDetails?.vehicle_description != null)
+                                      Text(
+                                        _orderDetails?.vehicle_description ?? '',
+                                        style: const TextStyle(color: Colors.white),
                                       ),
                                       const SizedBox(height: 8),
                                       if (_orderDetails!.license_plate != null) Row(

@@ -135,6 +135,7 @@ const getErrorMessages = (errorCode: string): string => {
         'favor not found': 'Favor no encontrado',
         'courier not available': 'Mensajero no disponible',
         'courier not near location': 'Mensajero no cerca de la ubicación',
+        'favor already accepted' : 'Favor ya aceptado por otro repartidor',
         'time to accept is over': 'El tiempo para aceptar ha terminado',
         'weak password': 'Contraseña débil',
         'time to finish is over': 'El tiempo para finalizar ha terminado',
@@ -228,6 +229,15 @@ function convertirImagenABase64(archivo: File): Promise<string> {
     });
   }  
 
+  // Función privada para extraer el base64, sin prefijo
+function extraerBase64(dataUrl: string): string | null {
+    const base64Prefix = 'base64,';
+    if (dataUrl.includes(base64Prefix)) {
+      return dataUrl.split(base64Prefix)[1]; // Retorna solo la parte base64
+    }
+    return null; // Si no tiene el prefijo esperado, devuelve null
+  }
+
 
 export {
     getRoleNameByToken,
@@ -242,5 +252,6 @@ export {
     getIconByStatus,
     filterByName,
     getColorByStatus,
-    convertirImagenABase64
+    convertirImagenABase64,
+    extraerBase64
 }
