@@ -4,6 +4,9 @@ import 'package:mobile_favor/navigation/courier/modal_courier_form.dart';
 import 'package:mobile_favor/navigation/courier/service/profile_courier.service.dart';
 import 'package:mobile_favor/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart'; // Import necesario para FilteringTextInputFormatter
+
+import '../customer/service/profile.service.dart';
 
 class ProfileCourier extends StatefulWidget {
   const ProfileCourier({super.key});
@@ -48,6 +51,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
   void _showEditPhoneModal(String currentPhone) {
     TextEditingController phoneController =
         TextEditingController(text: currentPhone);
+    ProfileCourierService profileService = ProfileCourierService(context);
 
     showDialog(
       context: context,
@@ -60,11 +64,16 @@ class _ProfileCourierState extends State<ProfileCourier> {
           content: TextField(
             controller: phoneController,
             keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // Permite solo números
+              LengthLimitingTextInputFormatter(10), // Limita a 10 caracteres
+            ],
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
+              hintText: 'Ingresa tu número de 10 dígitos',
             ),
           ),
           actions: [
@@ -75,10 +84,46 @@ class _ProfileCourierState extends State<ProfileCourier> {
               child: const Text('CERRAR'),
             ),
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  phone = phoneController.text;
-                });
+              onPressed: () async {
+                String newPhone = phoneController.text;
+
+                // Validar que el número tiene exactamente 10 dígitos
+                if (newPhone.length != 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'El número debe tener exactamente 10 dígitos')),
+                  );
+                  return;
+                }
+
+                // Crear una copia del perfil con el nuevo número
+                ProfileCourierEntity updatedProfile =
+                    profileCourier!.copyWith(phone: newPhone);
+
+                // Llamar al servicio para actualizar el perfil
+                bool success =
+                    await profileService.updateProfile(updatedProfile);
+
+                if (success) {
+                  setState(() {
+                    phone = newPhone;
+                    profileCourier =
+                        updatedProfile; // Actualizar el perfil en la vista
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Número de teléfono actualizado exitosamente')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('Error al actualizar el número de teléfono')),
+                  );
+                }
+
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
@@ -242,13 +287,22 @@ class _ProfileCourierState extends State<ProfileCourier> {
                   child: Column(
                     children: [
                       const SizedBox(height: 5),
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 50,
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.white,
-                        ),
+                        backgroundColor: Colors.grey[
+                            300], // Color de fondo por si la imagen no carga
+                        backgroundImage: profileCourier?.faceUrl != null &&
+                                profileCourier!.faceUrl!.isNotEmpty
+                            ? NetworkImage(profileCourier!.faceUrl!)
+                            : null, // Mostrar la imagen si faceUrl no es null o vacío
+                        child: profileCourier?.faceUrl == null ||
+                                profileCourier!.faceUrl!.isEmpty
+                            ? const Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.white,
+                              )
+                            : null, // Mostrar el ícono por defecto si no hay imagen
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -470,26 +524,32 @@ class _ProfileCourierState extends State<ProfileCourier> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Card que muestra el valor de licensePlate
                           Card(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                             elevation: 2,
                             color: Colors.white,
-                            child: const Padding(
-                              padding: EdgeInsets.all(16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('1234 BCD',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                    profileCourier?.licensePlate ??
+                                        'N/A', // Mostrar licensePlate
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
                           const Spacer(),
+                          // Card que muestra el icono del vehículo
                           SizedBox(
                             height: 60,
                             child: Card(
@@ -498,32 +558,36 @@ class _ProfileCourierState extends State<ProfileCourier> {
                               ),
                               elevation: 2,
                               color: Colors.white,
-                              child: const Padding(
-                                padding: EdgeInsets.all(16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
                                 child: Row(
                                   children: [
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      children: [
+                                      children: const [
                                         Icon(Icons.person,
                                             size: 20, color: Colors.black),
                                       ],
                                     ),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.directions_car,
-                                            size: 20, color: Colors.black),
+                                        Icon(
+                                          _getVehicleIcon(profileCourier
+                                              ?.vehicleType), // Icono dinámico
+                                          size: 20,
+                                          color: Colors.black,
+                                        ),
                                       ],
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       )
                     ],
