@@ -16,6 +16,10 @@ class ProfileCourierEntity {
   final int? rejectedOrders;
   final String? fcmToken;
   final String? uid;
+  final String? brand;       // Nuevo campo
+  final String? model;       // Nuevo campo
+  final String? color;       // Nuevo campo
+  final String? description; // Nuevo campo
 
   ProfileCourierEntity({
     this.name,
@@ -35,6 +39,10 @@ class ProfileCourierEntity {
     this.rejectedOrders,
     this.fcmToken,
     this.uid,
+    this.brand,        // Nuevo campo
+    this.model,        // Nuevo campo
+    this.color,        // Nuevo campo
+    this.description,  // Nuevo campo
   });
 
   // Método para convertir de JSON a ProfileCourierEntity
@@ -57,15 +65,20 @@ class ProfileCourierEntity {
       rejectedOrders: json['rejected_orders'],
       fcmToken: json['fcm_token'],
       uid: json['uid'],
+      brand: json['brand'],           // Nuevo campo
+      model: json['model'],           // Nuevo campo
+      color: json['color'],           // Nuevo campo
+      description: json['description'] // Nuevo campo
     );
   }
 
-  // Sobrescribir el método toString para mejorar la visualización en los logs
+  // Método toString para mejorar la visualización en los logs
   @override
   String toString() {
-    return 'ProfileCourierEntity(name: $name, surname: $surname, email: $email, phone: $phone, vehicleType: $vehicleType, status: $status)';
+    return 'ProfileCourierEntity(name: $name, surname: $surname, email: $email, phone: $phone, vehicleType: $vehicleType, status: $status, brand: $brand, model: $model, color: $color, description: $description)';
   }
 
+  // Método para convertir de ProfileCourierEntity a JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -85,6 +98,10 @@ class ProfileCourierEntity {
       'rejected_orders': rejectedOrders,
       'fcm_token': fcmToken,
       'uid': uid,
+      'brand': brand,            // Nuevo campo
+      'model': model,            // Nuevo campo
+      'color': color,            // Nuevo campo
+      'description': description // Nuevo campo
     };
   }
 }

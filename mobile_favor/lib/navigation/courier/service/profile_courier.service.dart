@@ -14,7 +14,7 @@ class ProfileCourierService {
       : dio = DioConfig.createDio(context);
 
   Future<void> _initPrefs() async {
-    prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();  
   }
 
   // Obtener el perfil del repartidor

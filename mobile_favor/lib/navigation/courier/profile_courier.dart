@@ -171,6 +171,19 @@ class _ProfileCourierState extends State<ProfileCourier> {
     );
   }
 
+  IconData _getVehicleIcon(String? vehicleType) {
+    final Map<String, IconData> vehicleIcons = {
+      'car': Icons.directions_car,
+      'Moto': Icons.motorcycle,
+      'bike': Icons.pedal_bike,
+      'scooter': Icons.electric_scooter,
+      'walk': Icons.directions_walk,
+      'other': Icons.more_horiz,
+    };
+
+    return vehicleIcons[vehicleType] ?? Icons.directions_car;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -367,33 +380,54 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(16.0),
-                                      width: screenWidth * 2,
-                                      constraints: BoxConstraints(
-                                        maxHeight:
-                                            MediaQuery.of(context).size.height *
-                                                0.8,
+                              if (profileCourier != null) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: const ModalCourier(),
-                                    ),
-                                  );
-                                },
-                              );
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16.0),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.9,
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.8,
+                                        ),
+                                        child: ModalCourier(
+                                            profile:
+                                                profileCourier!), // Pasar el perfil aquí
+                                      ),
+                                    );
+                                  },
+                                );
+                              } else {
+                                // Mostrar un mensaje si el perfil no está disponible
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Perfil no disponible, intenta nuevamente')),
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: const CircleBorder(),
-                              backgroundColor: Colors.white,
+                              backgroundColor:
+                                  Colors.white, // Color blanco para el botón
+                              shape: const CircleBorder(), // Forma circular
+                              padding: const EdgeInsets.all(
+                                  16), // Padding para que el botón sea circular y tenga buen tamaño
+                              elevation: 2, // Sombra para un efecto elevado
                             ),
-                            child: const Icon(Icons.edit, color: Colors.black),
+                            child: const Icon(
+                              Icons.edit, // Ícono de editar (lápiz)
+                              color: Colors.black, // Color del ícono
+                              size: 24, // Tamaño del ícono
+                            ),
                           ),
                           const Spacer(),
                           ElevatedButton(
@@ -428,16 +462,10 @@ class _ProfileCourierState extends State<ProfileCourier> {
                         style:
                             const TextStyle(color: Colors.white, fontSize: 16),
                       ),
-                      const Icon(
-                        Icons.motorcycle,
+                      Icon(
+                        _getVehicleIcon(profileCourier?.vehicleType),
                         size: 80,
                         color: Colors.white,
-                      ),
-                      Text(
-                        '${profileCourier?.licensePlate ?? ''} ',
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 13),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
