@@ -6,9 +6,6 @@ COPY . .
 RUN yarn build
 
 FROM nginx:latest AS prod
-
 COPY nginx.conf /etc/nginx/nginx.conf
-
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-EXPOSE 3001
+EXPOSE 80
