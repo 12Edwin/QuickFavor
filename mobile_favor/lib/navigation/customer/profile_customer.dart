@@ -39,7 +39,8 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
     // Construir el endpoint dinámicamente según el rol y UID
     final String endpoint =
         role == 'Courier' ? 'courier/profile/$uid' : 'customer/profile/$uid';
-    final url = Uri.parse('https://backend-app-y3z1.onrender.com/$endpoint'); //cambiar aqui en path de la url
+    final url = Uri.parse(
+        'https://backend-app-y3z1.onrender.com/$endpoint'); //cambiar aqui en path de la url
 
     try {
       final response = await http.get(
@@ -206,7 +207,6 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const ModalCourier(),
                               );
                             },
                           ),

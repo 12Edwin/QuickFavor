@@ -16,6 +16,10 @@ class ProfileCourierEntity {
   final int? rejectedOrders;
   final String? fcmToken;
   final String? uid;
+  final String? brand; // Nuevo campo
+  final String? model; // Nuevo campo
+  final String? color; // Nuevo campo
+  final String? description; // Nuevo campo
 
   ProfileCourierEntity({
     this.name,
@@ -35,37 +39,46 @@ class ProfileCourierEntity {
     this.rejectedOrders,
     this.fcmToken,
     this.uid,
+    this.brand, // Nuevo campo
+    this.model, // Nuevo campo
+    this.color, // Nuevo campo
+    this.description, // Nuevo campo
   });
 
   // Método para convertir de JSON a ProfileCourierEntity
   factory ProfileCourierEntity.fromJson(Map<String, dynamic> json) {
     return ProfileCourierEntity(
-      name: json['name'],
-      surname: json['surname'],
-      lastname: json['lastname'],
-      email: json['email'],
-      curp: json['curp'],
-      sex: json['sex'],
-      role: json['role'],
-      phone: json['phone'],
-      vehicleType: json['vehicle_type'],
-      status: json['status'],
-      licensePlate: json['license_plate'],
-      faceUrl: json['face_url'],
-      ineUrl: json['ine_url'],
-      plateUrl: json['plate_url'],
-      rejectedOrders: json['rejected_orders'],
-      fcmToken: json['fcm_token'],
-      uid: json['uid'],
-    );
+        name: json['name'],
+        surname: json['surname'],
+        lastname: json['lastname'],
+        email: json['email'],
+        curp: json['curp'],
+        sex: json['sex'],
+        role: json['role'],
+        phone: json['phone'],
+        vehicleType: json['vehicle_type'],
+        status: json['status'],
+        licensePlate: json['license_plate'],
+        faceUrl: json['face_url'],
+        ineUrl: json['ine_url'],
+        plateUrl: json['plate_url'],
+        rejectedOrders: json['rejected_orders'],
+        fcmToken: json['fcm_token'],
+        uid: json['uid'],
+        brand: json['brand'], // Nuevo campo
+        model: json['model'], // Nuevo campo
+        color: json['color'], // Nuevo campo
+        description: json['description'] // Nuevo campo
+        );
   }
 
-  // Sobrescribir el método toString para mejorar la visualización en los logs
+  // Método toString para mejorar la visualización en los logs
   @override
   String toString() {
-    return 'ProfileCourierEntity(name: $name, surname: $surname, email: $email, phone: $phone, vehicleType: $vehicleType, status: $status)';
+    return 'ProfileCourierEntity(name: $name, surname: $surname, email: $email, phone: $phone, vehicleType: $vehicleType, status: $status, brand: $brand, model: $model, color: $color, description: $description)';
   }
 
+  // Método para convertir de ProfileCourierEntity a JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -85,6 +98,59 @@ class ProfileCourierEntity {
       'rejected_orders': rejectedOrders,
       'fcm_token': fcmToken,
       'uid': uid,
+      'brand': brand, // Nuevo campo
+      'model': model, // Nuevo campo
+      'color': color, // Nuevo campo
+      'description': description // Nuevo campo
     };
+  }
+
+  // Método copyWith para crear una copia modificada
+  ProfileCourierEntity copyWith({
+    String? name,
+    String? surname,
+    String? lastname,
+    String? email,
+    String? curp,
+    String? sex,
+    String? role,
+    String? phone,
+    String? vehicleType,
+    String? status,
+    String? licensePlate,
+    String? faceUrl,
+    String? ineUrl,
+    String? plateUrl,
+    int? rejectedOrders,
+    String? fcmToken,
+    String? uid,
+    String? brand,
+    String? model,
+    String? color,
+    String? description,
+  }) {
+    return ProfileCourierEntity(
+      name: name ?? this.name,
+      surname: surname ?? this.surname,
+      lastname: lastname ?? this.lastname,
+      email: email ?? this.email,
+      curp: curp ?? this.curp,
+      sex: sex ?? this.sex,
+      role: role ?? this.role,
+      phone: phone ?? this.phone,
+      vehicleType: vehicleType ?? this.vehicleType,
+      status: status ?? this.status,
+      licensePlate: licensePlate ?? this.licensePlate,
+      faceUrl: faceUrl ?? this.faceUrl,
+      ineUrl: ineUrl ?? this.ineUrl,
+      plateUrl: plateUrl ?? this.plateUrl,
+      rejectedOrders: rejectedOrders ?? this.rejectedOrders,
+      fcmToken: fcmToken ?? this.fcmToken,
+      uid: uid ?? this.uid,
+      brand: brand ?? this.brand,
+      model: model ?? this.model,
+      color: color ?? this.color,
+      description: description ?? this.description,
+    );
   }
 }
