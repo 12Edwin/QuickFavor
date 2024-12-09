@@ -201,7 +201,18 @@ export const updateTransport = async (profile: ProfileEntity): Promise<ResponseE
 
 // Escuchar cuando la conexión vuelva a estar online y procesar las peticiones pendientes
 window.addEventListener('online', processPendingRequests);
-function removeFromPendingRequests(requestKey: any) {
-  throw new Error('Function not implemented.');
-}
+
+// Función para eliminar una solicitud de las pendientes en IndexedDB
+const removeFromPendingRequests = async (requestKey: string) => {
+  const db = await initDB();  // Abre la base de datos
+  const store = db.transaction(PENDING_REQUESTS_STORE_NAME, 'readwrite').objectStore(PENDING_REQUESTS_STORE_NAME);  // Accede al objeto de almacenamiento de solicitudes pendientes
+
+  try {
+    await store.delete(requestKey);  // Elimina la solicitud con el `requestKey` especificado
+    console.log(`Solicitud pendiente con key "${requestKey}" eliminada.`);
+  } catch (error) {
+    console.error(`Error al eliminar la solicitud pendiente con key "${requestKey}":`, error);
+  }
+};
+
 
