@@ -21,7 +21,7 @@ class ImageDialog extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Cerrar'),
+                child: const Text('Cerrar'),
               ),
             ],
           ),
@@ -43,11 +43,11 @@ class ImageDialog extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
               blurRadius: 4,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Icon(Icons.card_travel_outlined),
+        child: const Icon(Icons.card_travel_outlined),
       ),
     );
   }

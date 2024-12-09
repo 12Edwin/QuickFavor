@@ -15,7 +15,7 @@ class CanceledFavor extends StatelessWidget {
           SizedBox(
             height: screenHeight,
             child: CustomPaint(
-            painter: WavePainter(context: context, waveHeight: 100, color: Color(
+            painter: WavePainter(context: context, waveHeight: 100, color: const Color(
                 0xFF872F2F)),
               child: Container(),
             ),

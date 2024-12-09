@@ -22,14 +22,14 @@ class FavorProgressCustomer extends StatefulWidget {
 }
 
 class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
-  bool _isExpanded = false;
+  final bool _isExpanded = false;
   bool _isLoading = true; // Variable para controlar el estado de carga
   late FavorService _favorService;
   late String no_user;
   OrderPreviewEntity? _orderDetails;
   SSEOrderMessage? _orderStatus;
   Timer? _timer;
-  Duration _remainingTime = Duration(hours: 2);
+  Duration _remainingTime = const Duration(hours: 2);
   String _status = 'Cancelado';
 
   @override
@@ -86,10 +86,10 @@ class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingTime.inSeconds > 0) {
-          _remainingTime -= Duration(seconds: 1);
+          _remainingTime -= const Duration(seconds: 1);
         } else {
           _timer?.cancel();
         }
@@ -109,7 +109,7 @@ class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     return Scaffold(
       body: _isLoading // Muestra el loader si _isLoading es true
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Stack(
                 children: [
@@ -298,7 +298,7 @@ class _FavorProgressCustomerState extends State<FavorProgressCustomer> {
                                                 BoxShadow(
                                                   color: Colors.black.withOpacity(0.1),
                                                   blurRadius: 4,
-                                                  offset: Offset(0, 2),
+                                                  offset: const Offset(0, 2),
                                                 ),
                                               ],
                                             ),

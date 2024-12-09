@@ -99,7 +99,7 @@ class _NotificationsState extends State<Notifications> {
                   ),
                 ),
                 child: isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : notifications.isEmpty
                         ? Center(child: Image.asset('assets/empty2.png', width: 200, height: 200))
                         : ListView.builder(
@@ -111,12 +111,12 @@ class _NotificationsState extends State<Notifications> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: Color(0xFF6A9F9F).withOpacity(0.5),
+                                    color: const Color(0xFF6A9F9F).withOpacity(0.5),
                                   ),
                                   child: ListTile(
                                     leading: Container(
                                       width: 10,
-                                      color: Color(0xFF6A9F9F),
+                                      color: const Color(0xFF6A9F9F),
                                     ),
                                     title: Text("${notification.amount.toString()} producto(s)"),
                                     subtitle: Text(_formatDate(notification.created_at)),

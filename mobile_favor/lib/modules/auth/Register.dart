@@ -210,6 +210,7 @@ class _Register extends State<Register> {
     print(customer.toJson());
     final AuthService authService = AuthService(context);
     final response = await authService.registerCustomer(customer);
+    print(response.data);
     print(response.message);
     if (response.error) {
       showErrorAlert(context, getErrorMessages(response.message));

@@ -3,7 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:mobile_favor/kernel/widget/photo_picker.dart';
 
 class ModalCourier extends StatefulWidget {
-  const ModalCourier({Key? key}) : super(key: key);
+  const ModalCourier({super.key});
 
   @override
   _ModalCourierState createState() => _ModalCourierState();

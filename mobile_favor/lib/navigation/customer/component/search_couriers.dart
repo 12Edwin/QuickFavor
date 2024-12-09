@@ -11,7 +11,7 @@ import '../entity/sse.entity.dart';
 class SearchCouriers extends StatefulWidget {
   final CreateOrderEntity order;
 
-  const SearchCouriers({Key? key, required this.order}) : super(key: key);
+  const SearchCouriers({super.key, required this.order});
 
   @override
   _SearchCouriersState createState() => _SearchCouriersState();
@@ -202,9 +202,9 @@ class _SearchCouriersState extends State<SearchCouriers> {
                 _buildIconWithInput(hintText: "Buscando repartidores", icon: Icons.search, loading: isSearching),
                 if (!isCreating) ...[
                   const SizedBox(height: 32),
-                  Text(
+                  const Text(
                     'Buscando repartidor...',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
@@ -254,11 +254,11 @@ class _SearchCouriersState extends State<SearchCouriers> {
                   decoration: InputDecoration(
                     hintText: hintText,
                     border: InputBorder.none,
-                    hintStyle: TextStyle(
+                    hintStyle: const TextStyle(
                       color: Colors.black,
                     ),
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black,
                   ),

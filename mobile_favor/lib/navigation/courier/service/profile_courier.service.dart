@@ -31,7 +31,7 @@ class ProfileCourierService {
       final response = await dio.get('/courier/profile/$uid');
 
       if (response.statusCode == 200) {
-        print('response' + response.data.toString());
+        print('response${response.data}');
         return ProfileCourierEntity.fromJson(response.data['data']);
       } else {
         print('Error al obtener los datos del perfil: ${response.statusCode}');

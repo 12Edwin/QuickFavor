@@ -9,11 +9,11 @@ class LocationPreview extends StatefulWidget {
   final double lng;
 
   const LocationPreview({
-    Key? key,
+    super.key,
     required this.text,
     required this.lat,
     required this.lng,
-  }) : super(key: key);
+  });
 
   @override
   _LocationPreviewState createState() => _LocationPreviewState();
@@ -82,12 +82,12 @@ class _LocationPreviewState extends State<LocationPreview> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 _destinationName,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           Expanded(
             child: _currentLocation == null
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : GoogleMap(
                     onMapCreated: (controller) {
                       _controller = controller;
@@ -98,14 +98,14 @@ class _LocationPreviewState extends State<LocationPreview> {
                     ),
                     markers: {
                       Marker(
-                        markerId: MarkerId('currentLocation'),
+                        markerId: const MarkerId('currentLocation'),
                         position: _currentLocation!,
-                        infoWindow: InfoWindow(title: 'Current Location'),
+                        infoWindow: const InfoWindow(title: 'Current Location'),
                       ),
                       Marker(
-                        markerId: MarkerId('destination'),
+                        markerId: const MarkerId('destination'),
                         position: LatLng(widget.lat, widget.lng),
-                        infoWindow: InfoWindow(title: 'Destination'),
+                        infoWindow: const InfoWindow(title: 'Destination'),
                       ),
                     },
                   ),

@@ -19,7 +19,7 @@ class FavorService {
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -81,7 +81,7 @@ Future<ResponseEntity> getDetailsFavor(String idOrder) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -128,7 +128,7 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -138,14 +138,14 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
     }
   }
 
-  Future<ResponseEntity> cancelFavor(String no_order) async {
+  Future<ResponseEntity> cancelFavor(String noOrder) async {
     try {
-      final response = await dio.put('/favor/cancel/$no_order');
+      final response = await dio.put('/favor/cancel/$noOrder');
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -162,7 +162,7 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
@@ -172,14 +172,14 @@ Future<ResponseEntity> changeState(ChangeStateEntity state) async {
     }
   }
 
-  Future<ResponseEntity> getListCustomerHistory(String customer_id) async {
+  Future<ResponseEntity> getListCustomerHistory(String customerId) async {
     try {
-      final response = await dio.get('/favor/history-customer/$customer_id');
+      final response = await dio.get('/favor/history-customer/$customerId');
       print(ResponseEntity.fromJson(response.data).data);
       return ResponseEntity.fromJson(response.data);
     } catch (error) {
       print(error);
-      ResponseEntity resp = ResponseEntity.fromJson((error as DioError).response!.data);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
       print(resp.message);
       if (resp.data != null) {
         return getErrorMessages(resp);
