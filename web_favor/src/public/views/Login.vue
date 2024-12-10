@@ -45,9 +45,6 @@
               <button type="submit" class="login-button" :disabled="activeBtnLogin()">Login</button>
               <v-row class="mt-2">
                 <v-col cols="12" class="text-center">
-                  <button type="button" class="forgot-password" @click="redirectToForgotPassword">Recuperar contraseña</button>
-                </v-col>
-                <v-col cols="12" class="text-center">
                   <button type="button" class="sign-up" @click="redirectToRegister">Registrate</button>
                 </v-col>
               </v-row>

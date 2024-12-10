@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_favor/navigation/courier/modal_courier_form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'edit_profile_modal.dart';
 
 class ProfileCustomer extends StatefulWidget {
   const ProfileCustomer({super.key});
@@ -18,6 +18,7 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
   String name = '';
   String curp = '';
   String sex = '';
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -29,18 +30,20 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final uid = prefs.getString('uid');
-    final role = prefs.getString('role');
 
-    if (token == null || uid == null || role == null) {
-      print('Token, UID o rol no disponibles');
+    if (token == null || uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: Token o UID no encontrados en localStorage')),
+      );
       return;
     }
 
-    // Construir el endpoint dinámicamente según el rol y UID
-    final String endpoint =
-        role == 'Courier' ? 'courier/profile/$uid' : 'customer/profile/$uid';
     final url = Uri.parse(
-        'https://backend-app-y3z1.onrender.com/$endpoint'); //cambiar aqui en path de la url
+        'http://54.243.28.11:3000/customer/profile/$uid');
+
+    setState(() {
+      isLoading = true;
+    });
 
     try {
       final response = await http.get(
@@ -52,21 +55,35 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.body)['data'];
         setState(() {
           name = data['name'] ?? '';
           email = data['email'] ?? '';
           phone = data['phone'] ?? '';
-          address = data['address'] ?? '';
+          address = data['address1'] ?? '';
           curp = data['curp'] ?? '';
           sex = data['sex'] ?? '';
         });
       } else {
-        print('Error al obtener perfil: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al obtener perfil: ${response.statusCode}')),
+        );
       }
     } catch (e) {
-      print('Error de red: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de red: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -76,170 +93,144 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
       appBar: AppBar(
         title: const Text('Perfil'),
         actions: [
-          ElevatedButton(
-            onPressed: () => print('guardar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              padding: const EdgeInsets.all(15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-            child: const Text(
-              'Guardar',
-              style: TextStyle(color: Colors.black),
-            ),
-          )
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Cerrar Sesión',
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Stack(
-          children: [
-            Positioned(
-              top: -screenWidth * 0.809,
-              left: (screenWidth - (screenWidth * 1.5)) / 2,
-              child: Container(
-                width: screenWidth * 1.5,
-                height: screenWidth * 1.5,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF34344E),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 5),
-                    const CircleAvatar(
-                      radius: 50,
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.white,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -screenWidth * 0.809,
+                    left: (screenWidth - (screenWidth * 1.5)) / 2,
+                    child: Container(
+                      width: screenWidth * 1.5,
+                      height: screenWidth * 1.5,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF34344E),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.phone,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          phone,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 2,
-                      color: Colors.white.withOpacity(0.8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Cliente',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 5),
+                          const CircleAvatar(
+                            radius: 50,
+                            child: Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.white,
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                const Expanded(child: Text('CURP:')),
-                                Expanded(child: Text(curp)),
-                              ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                const Expanded(child: Text('SEXO:')),
-                                Expanded(child: Text(sex)),
-                              ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.phone,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                phone,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                const Expanded(child: Text('CORREO:')),
-                                Expanded(child: Text(email)),
-                              ],
+                            elevation: 2,
+                            color: Colors.white.withOpacity(0.8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Cliente',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildInfoRow('CURP:', curp),
+                                  _buildInfoRow('SEXO:', sex),
+                                  _buildInfoRow('CORREO:', email),
+                                  _buildInfoRow('DIRECCIÓN:', address),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                const Expanded(child: Text('DIRECCIÓN:')),
-                                Expanded(child: Text(address)),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Tus TextFormFields existentes permanecen igual
-                    const SizedBox(height: 70),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: EditProfileModal(
+                                      currentPhone: phone,
+                                      currentAddress: address,
+                                    ),
+                                  );
+                                },
                               );
                             },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.all(15),
+                              shape: const CircleBorder(),
+                              backgroundColor: Colors.white,
+                            ),
+                            child: const Icon(Icons.edit, color: Colors.black),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: const CircleBorder(),
-                            backgroundColor: Colors.white,
-                          ),
-                          child: const Icon(Icons.edit, color: Colors.black),
-                        ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: () async {
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            prefs.clear(); // Limpiar todas las preferencias
-                            Navigator.pushReplacementNamed(context, '/login');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(15),
-                            shape: const CircleBorder(),
-                            backgroundColor: Colors.white,
-                          ),
-                          child: const Icon(Icons.logout, color: Colors.black),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(value.isNotEmpty ? value : '(vacío)'),
+          ),
+        ],
       ),
     );
   }

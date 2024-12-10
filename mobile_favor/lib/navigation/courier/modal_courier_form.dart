@@ -131,74 +131,75 @@ class _ModalCourierState extends State<ModalCourier> {
     }
   }
 
-  Widget _buildVehicleTypes(List<Map<String, dynamic>> types) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: List.generate(
-          types.length,
-          (index) => GestureDetector(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5),
-                width: MediaQuery.of(context).size.width * 0.08,
-                height: MediaQuery.of(context).size.width * 0.08,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 15,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                  color: _currentVehicleType == index
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey,
-                ),
-                child: Icon(types[index]['icon'], color: Colors.white),
-              ),
-              onTap: () {
-                setState(() {
-                  _currentVehicleType = index;
+  void _updateFieldsForVehicleType(int index) {
+    setState(() {
+      _currentVehicleType = index;
 
-                  // Actualizar los controladores con los datos del perfil correspondientes al nuevo tipo de vehículo
-                  switch (_vehicles[_currentVehicleType]['name']) {
-                    case 'car':
-                    case 'Moto':
-                      _marcaController.text = widget.profile.brand ?? '';
-                      _modeloController.text = widget.profile.model ?? '';
-                      _placasController.text =
-                          widget.profile.licensePlate ?? '';
-                      _descripcionController.clear();
-                      break;
-                    case 'bike':
-                    case 'scooter':
-                      _marcaController.clear();
-                      _modeloController.text = widget.profile.model ?? '';
-                      _placasController.clear();
-                      _descripcionController.clear();
-                      break;
-                    case 'other':
-                      _marcaController.clear();
-                      _modeloController.clear();
-                      _placasController.clear();
-                      _descripcionController.text =
-                          widget.profile.description ?? '';
-                      break;
-                    default:
-                      _marcaController.clear();
-                      _modeloController.clear();
-                      _placasController.clear();
-                      _descripcionController.clear();
-                      break;
-                  }
-                });
-              }),
+      // Actualizar los controladores con los datos correspondientes al nuevo tipo de vehículo
+      switch (_vehicles[_currentVehicleType]['name']) {
+        case 'Carro':
+        case 'Moto':
+          _marcaController.text = widget.profile.brand ?? '';
+          _modeloController.text = widget.profile.model ?? '';
+          _placasController.text = widget.profile.licensePlate ?? '';
+          _descripcionController.clear();
+          break;
+        case 'Bicicleta':
+        case 'Scooter':
+          _marcaController.clear();
+          _modeloController.text = widget.profile.model ?? '';
+          _placasController.clear();
+          _descripcionController.clear();
+          break;
+        case 'Otro':
+          _marcaController.clear();
+          _modeloController.clear();
+          _placasController.clear();
+          _descripcionController.text = widget.profile.description ?? '';
+          break;
+        default:
+          _marcaController.clear();
+          _modeloController.clear();
+          _placasController.clear();
+          _descripcionController.clear();
+          break;
+      }
+    });
+  }
+
+  Widget _buildVehicleTypes(List<Map<String, dynamic>> types) {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: List.generate(
+        types.length,
+        (index) => GestureDetector(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 5),
+            width: MediaQuery.of(context).size.width * 0.08,
+            height: MediaQuery.of(context).size.width * 0.08,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
+                ),
+              ],
+              color: _currentVehicleType == index
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey,
+            ),
+            child: Icon(types[index]['icon'], color: Colors.white),
+          ),
+          onTap: () => _updateFieldsForVehicleType(index),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -221,26 +222,26 @@ class _ModalCourierState extends State<ModalCourier> {
               endIndent: 8,
             ),
             const SizedBox(height: 16),
-            if (['car', 'Moto']
+            if (['Carro', 'Moto']
                 .contains(_vehicles[_currentVehicleType]['name']))
               _buildTextField(
                   icon: Icons.car_crash,
                   hint: 'Marca',
                   controller: _marcaController),
-            if (['car', 'Moto', 'bike', 'scooter']
+            if (['Carro', 'Moto', 'Bicicleta', 'Scooter']
                 .contains(_vehicles[_currentVehicleType]['name']))
               _buildTextField(
                   icon: Icons.description,
                   hint: 'Modelo',
                   controller: _modeloController),
-            if (['car', 'Moto']
+            if (['Carro', 'Moto']
                 .contains(_vehicles[_currentVehicleType]['name']))
               _buildTextField(
                   icon: Icons.credit_card,
                   hint: 'Placas',
                   controller: _placasController),
-            if (_vehicles[_currentVehicleType]['name'] == 'other' ||
-                _vehicles[_currentVehicleType]['name'] == 'walk')
+            if (_vehicles[_currentVehicleType]['name'] == 'Otro' ||
+                _vehicles[_currentVehicleType]['name'] == 'Caminando')
               _buildTextField(
                   icon: Icons.description,
                   hint: 'Descripción',
@@ -248,7 +249,7 @@ class _ModalCourierState extends State<ModalCourier> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (['car', 'Moto', 'bike', 'scooter']
+                if (['Carro', 'Moto', 'Bicicleta', 'Scooter']
                     .contains(_vehicles[_currentVehicleType]['name']))
                   Flexible(
                     child: ElevatedButton.icon(
@@ -257,7 +258,7 @@ class _ModalCourierState extends State<ModalCourier> {
                       label: const Text('Color'),
                     ),
                   ),
-                if (['car', 'Moto']
+                if (['Carro', 'Moto']
                     .contains(_vehicles[_currentVehicleType]['name']))
                   Flexible(
                     child: ElevatedButton.icon(

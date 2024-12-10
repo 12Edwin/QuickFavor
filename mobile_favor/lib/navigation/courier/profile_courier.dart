@@ -140,7 +140,7 @@ class _ProfileCourierState extends State<ProfileCourier> {
     );
   }
 
-  void _showLicenseImageModal(String? plateUrl) {
+  void _showLicenseImageModal(String? plate_url) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -149,12 +149,12 @@ class _ProfileCourierState extends State<ProfileCourier> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: const Text('Foto de la licencia'),
-          content: plateUrl != null && plateUrl.isNotEmpty
+          content: plate_url != null && plate_url.isNotEmpty
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.network(
-                      plateUrl,
+                      plate_url,
                       fit: BoxFit.cover,
                     ),
                     const SizedBox(height: 10),
@@ -218,12 +218,12 @@ class _ProfileCourierState extends State<ProfileCourier> {
 
   IconData _getVehicleIcon(String? vehicleType) {
     final Map<String, IconData> vehicleIcons = {
-      'car': Icons.directions_car,
+      'Carro': Icons.directions_car,
       'Moto': Icons.motorcycle,
-      'bike': Icons.pedal_bike,
-      'scooter': Icons.electric_scooter,
-      'walk': Icons.directions_walk,
-      'other': Icons.more_horiz,
+      'Bicicleta': Icons.pedal_bike,
+      'Scooter': Icons.electric_scooter,
+      'Caminando': Icons.directions_walk,
+      'Otro': Icons.more_horiz,
     };
 
     return vehicleIcons[vehicleType] ?? Icons.directions_car;
@@ -238,18 +238,6 @@ class _ProfileCourierState extends State<ProfileCourier> {
           actions: [
             Padding(
               padding: EdgeInsets.only(right: screenWidth * 0.05),
-              child: ElevatedButton(
-                  onPressed: () => print('guardar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                  ),
-                  child: const Text(
-                    'Guardar',
-                    style: TextStyle(color: Colors.black),
-                  )),
             )
           ],
         ),
