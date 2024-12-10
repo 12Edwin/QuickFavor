@@ -49,7 +49,7 @@
                         variant="flat"
                         class="chip-style"
                     >
-                      <span style="color: white">{{ item.status }}</span>
+                    <span style="color: white">{{ translateStatus(item.status) }}</span>
                     </v-chip>
                   </div>
                   <div class="my-auto ml-auto">
@@ -146,6 +146,22 @@ export default defineComponent({
           return "#b0bec5";
       }
     },
+    translateStatus(status: string) {
+    switch (status) {
+      case "Pending":
+        return "Pendiente";
+      case "In delivery":
+        return "En entrega";
+      case "In shopping":
+        return "En compra";
+      case "Finished":
+        return "Finalizado";
+      case "Canceled":
+        return "Cancelado";
+      default:
+        return status; 
+    }
+  },
     formatDate(dateString: string) {
       const options: Intl.DateTimeFormatOptions = {
         weekday: "long",

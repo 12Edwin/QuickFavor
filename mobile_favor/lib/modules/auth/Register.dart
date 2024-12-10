@@ -64,6 +64,8 @@ class _Register extends State<Register> {
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  bool _showPassword = false;
+  bool _showRepeatPassword = false;
   bool _isLoading = false;
   Map<String, bool> validationForm = {};
 
@@ -727,7 +729,13 @@ class _Register extends State<Register> {
               ? IconButton(
                   icon: const Icon(Icons.remove_red_eye),
                   onPressed: () {
-                    print("Mostrar contraseña");
+                    setState(() {
+                      if (id == 'password') {
+                        _showPassword = !_showPassword;
+                      } else {
+                        _showRepeatPassword = !_showRepeatPassword;
+                      }
+                    });
                   },
                 )
               : null,
@@ -739,6 +747,7 @@ class _Register extends State<Register> {
               const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
         validator: (String? value) => validator(value, id),
+        obscureText: id == 'password' ? !_showPassword : id == 'repeatPassword' ? !_showRepeatPassword : false,
         onChanged: (value) {
           formKey.currentState?.validate();
         },

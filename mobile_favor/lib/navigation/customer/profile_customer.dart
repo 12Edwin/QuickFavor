@@ -38,7 +38,8 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
       return;
     }
 
-    final url = Uri.parse('http://54.243.28.11:3000/customer/profile/$uid');
+    final url = Uri.parse(
+        'http://54.243.28.11:3000/customer/profile/$uid');
 
     setState(() {
       isLoading = true;
