@@ -1,4 +1,5 @@
 import api from '@/config/http-client-gateway';
+import { showSuccessToast } from '@/kernel/alerts';
 import { getErrorMessages, ResponseEntity } from "@/kernel/error-response";
 import { ProfileEntity } from "@/modules/user/entity/profile.entity";
 import { openDB } from 'idb';  // Importación de `idb` al principio del archivo
@@ -6,7 +7,7 @@ import { toRaw } from 'vue';
 
 
 // Tiempo de expiración de caché (2 horas)
-const CACHE_EXPIRATION_TIME = 200 * 60 * 60 * 1000; // 2 horas
+const CACHE_EXPIRATION_TIME = 200 * 60 * 60 * 1000; // 200 horas
 
 const DB_NAME = 'appDB';
 const CACHE_STORE_NAME = 'cache';
@@ -63,6 +64,7 @@ const processPendingRequests = async () => {
     try {
       const response = await api.doPut(request.url, request.profileData);  // Usamos los datos simplificados
       if (response?.data?.data) {
+        showSuccessToast('Solicitud pendiente procesada con éxito.');
         // Guardamos la respuesta y la solicitud en caché
         await setCache(request.requestKey, response.data, { url: request.url, profileData: request.profileData });
       }
@@ -155,7 +157,7 @@ export const updateProfile = async (profile: ProfileEntity): Promise<ResponseEnt
   if (!isOnline()) {
     console.log('No internet connection. Request saved for later.');
     await addToPendingRequests('updateProfile', requestData);
-    return { error: false, message: 'Data guardada en local.', code: 200, data: null };
+    return { error: false, message: 'Data guardada en local.', code: 201, data: null };
   }
 
   try {
@@ -184,7 +186,7 @@ export const updateTransport = async (profile: ProfileEntity): Promise<ResponseE
   if (!isOnline()) {
     console.log('No internet connection. Request saved for later.');
     await addToPendingRequests('updateTransport', requestData);
-    return { error: false, message: 'Data guardada en local.', code: 200, data: null };
+    return { error: false, message: 'Data guardada en local.', code: 201, data: null };
   }
 
   try {

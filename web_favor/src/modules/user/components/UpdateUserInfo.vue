@@ -100,7 +100,17 @@ export default {
         }
         this.showModal = false;
         this.localIsModalVisible = false;
-        showSuccessToast('Información actualizada correctamente');
+        if (result.code === 200) {
+          showSuccessToast('Información actualizada correctamente');
+        }
+
+        if (result.code == 201) {
+          showSuccessToast('Información actualizada en cache');  
+        }
+
+        if (result.code === 400) {
+          showErrorToast('Error al actualizar la información');
+        }
         this.$emit('update:isModalVisibleUserInfo', this.localIsModalVisible);  
       } catch (error) {
         showErrorToast(getErrorMessages(error.message))
