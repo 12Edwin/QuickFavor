@@ -238,18 +238,6 @@ class _ProfileCourierState extends State<ProfileCourier> {
           actions: [
             Padding(
               padding: EdgeInsets.only(right: screenWidth * 0.05),
-              child: ElevatedButton(
-                  onPressed: () => print('guardar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                  ),
-                  child: const Text(
-                    'Guardar',
-                    style: TextStyle(color: Colors.black),
-                  )),
             )
           ],
         ),
