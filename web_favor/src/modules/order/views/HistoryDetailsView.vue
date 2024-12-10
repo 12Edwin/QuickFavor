@@ -40,10 +40,14 @@
               :thickness="4"
               color="#A3BBBF"
             ></v-divider>
-            <p class="completion-text">Completado en</p>
-            <p class="completion-status">
-              {{ getMinutesDifference(historyItem.order_created_at, historyItem.order_finished_at)  }} / 120 minutos
-            </p>
+            <div v-if="historyItem.status != 'Canceled'">
+              <p class="completion-text">Tiempo transcurrido:</p>
+              <p class="completion-status">{{ getMinutesDifference(historyItem.order_created_at, historyItem.order_finished_at) }} / 120 minutos</p>
+            </div>
+            <div v-else>
+              <p class="completion-text">Tiempo transcurrido:</p>
+              <p class="completion-status">Cancelado</p>
+            </div>
           </div>
         </div>
         </transition>
@@ -200,7 +204,10 @@ export default defineComponent({
     toggleStatus() {
       this.isActive = !this.isActive;
     },
-    getMinutesDifference(startDate: string = new Date().toISOString(), endDate: string = new Date().toISOString()) {
+    getMinutesDifference(startDate: string | null, endDate: string | null) {
+      if (!startDate || !endDate) {
+        return 0;
+      }
       const start = new Date(startDate);
       const end = new Date(endDate);
       const diffMs = end.getTime() - start.getTime();
