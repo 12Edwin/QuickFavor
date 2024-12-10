@@ -12,6 +12,7 @@ class ProfileCourierEntity {
   final String? licensePlate;
   final String? faceUrl;
   final String? ineUrl;
+  final String? plate_photo;
   final String? plateUrl;
   final int? rejectedOrders;
   final String? fcmToken;
@@ -35,6 +36,7 @@ class ProfileCourierEntity {
     this.licensePlate,
     this.faceUrl,
     this.ineUrl,
+    this.plate_photo,
     this.plateUrl,
     this.rejectedOrders,
     this.fcmToken,
@@ -61,7 +63,8 @@ class ProfileCourierEntity {
         licensePlate: json['license_plate'],
         faceUrl: json['face_url'],
         ineUrl: json['ine_url'],
-        plateUrl: json['plate_url'],
+        plate_photo: json['plate_photo'],
+        plateUrl: json['plate_url'], // Ajustado para coincidir con el JSON
         rejectedOrders: json['rejected_orders'],
         fcmToken: json['fcm_token'],
         uid: json['uid'],
@@ -94,7 +97,7 @@ class ProfileCourierEntity {
       'license_plate': licensePlate,
       'face_url': faceUrl,
       'ine_url': ineUrl,
-      'plate_url': plateUrl,
+      'plate_photo': plate_photo,
       'rejected_orders': rejectedOrders,
       'fcm_token': fcmToken,
       'uid': uid,
@@ -120,6 +123,7 @@ class ProfileCourierEntity {
     String? licensePlate,
     String? faceUrl,
     String? ineUrl,
+    String? plate_photo,
     String? plateUrl,
     int? rejectedOrders,
     String? fcmToken,
@@ -143,7 +147,7 @@ class ProfileCourierEntity {
       licensePlate: licensePlate ?? this.licensePlate,
       faceUrl: faceUrl ?? this.faceUrl,
       ineUrl: ineUrl ?? this.ineUrl,
-      plateUrl: plateUrl ?? this.plateUrl,
+      plate_photo: plate_photo ?? this.plate_photo,
       rejectedOrders: rejectedOrders ?? this.rejectedOrders,
       fcmToken: fcmToken ?? this.fcmToken,
       uid: uid ?? this.uid,

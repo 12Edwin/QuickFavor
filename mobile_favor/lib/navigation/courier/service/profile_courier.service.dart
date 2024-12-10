@@ -130,7 +130,7 @@ String _getMimeType(String filePath) {
         "license_plate": profile.licensePlate,
         "color": profile.color,
         "description": profile.description,
-        "plate_url": cleanedBase64, // Enviar la foto como base64 sin el prefijo
+        "plate_photo": cleanedBase64, // Enviar la foto como base64 sin el prefijo
       };
 
       print('Datos enviados a la API: $data'); // Para depuración
