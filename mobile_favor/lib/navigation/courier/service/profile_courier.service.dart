@@ -72,6 +72,40 @@ class ProfileCourierService {
     }
   }
 
+  String? extraerBase64(String? dataUrl) {
+    const String base64Prefix = 'base64,';
+    if (dataUrl != null && dataUrl.contains(base64Prefix)) {
+      return dataUrl.split(base64Prefix)[1]; // Retorna solo la parte base64
+    }
+    return null; // Si no tiene el prefijo esperado, devuelve null
+  }
+
+Future<String?> convertirImagenABase64(File? imageFile) async {
+  if (imageFile == null) return null;
+  try {
+    List<int> imageBytes = await imageFile.readAsBytes();
+    String base64Image = base64Encode(imageBytes);
+    String mimeType = _getMimeType(imageFile.path);
+    return 'data:$mimeType;base64,$base64Image'; // Devuelve el base64 con el prefijo
+  } catch (e) {
+    print('Error al convertir la imagen a base64: $e');
+    return null;
+  }
+}
+
+String _getMimeType(String filePath) {
+  String extension = filePath.split('.').last.toLowerCase();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
   // Actualizar el vehículo del repartidor
   Future<bool> updateVehicle(ProfileCourierEntity profile,
       {File? licensePhoto}) async {
@@ -84,12 +118,9 @@ class ProfileCourierService {
         return false;
       }
 
-      // Convertir la foto a base64 si existe
-      String? photoBase64;
-      if (licensePhoto != null) {
-        final bytes = await licensePhoto.readAsBytes();
-        photoBase64 = base64Encode(bytes);
-      }
+      // Convertir la foto a base64 si existe y extraer el base64 sin el prefijo
+      String? photoBase64 = await convertirImagenABase64(licensePhoto);
+      String? cleanedBase64 = extraerBase64(photoBase64);
 
       // Crear el cuerpo de la solicitud
       final data = {
@@ -99,8 +130,10 @@ class ProfileCourierService {
         "license_plate": profile.licensePlate,
         "color": profile.color,
         "description": profile.description,
-        "plate_url": photoBase64, // Enviar la foto como base64
+        "plate_url": cleanedBase64, // Enviar la foto como base64 sin el prefijo
       };
+
+      print('Datos enviados a la API: $data'); // Para depuración
 
       final response = await dio.put(
         '/courier/vehicle',
@@ -108,8 +141,7 @@ class ProfileCourierService {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            'Authorization':
-                'Bearer $credential', // Enviar la credencial en el encabezado
+            'Authorization': 'Bearer $credential',
           },
         ),
       );
