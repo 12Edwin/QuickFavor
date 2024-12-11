@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'edit_profile_modal.dart';
@@ -26,6 +28,31 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
     fetchProfile();
   }
 
+  Future<void> _getAddressFromLatLng(LatLng position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        setState(() {
+          address = "${place.street}, ${place.locality}, ${place.country}";
+        });
+      } else {
+        setState(() {
+          address = '(Dirección no encontrada)';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        address = '(Error al obtener la dirección)';
+      });
+      print('Error al obtener la dirección: $e');
+    }
+  }
+
   Future<void> fetchProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -33,13 +60,13 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
 
     if (token == null || uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Token o UID no encontrados en localStorage')),
+        const SnackBar(
+            content: Text('Error: Token o UID no encontrados en localStorage')),
       );
       return;
     }
 
-    final url = Uri.parse(
-        'http://54.243.28.11:3000/customer/profile/$uid');
+    final url = Uri.parse('http://54.243.28.11:3000/customer/profile/$uid');
 
     setState(() {
       isLoading = true;
@@ -60,13 +87,29 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
           name = data['name'] ?? '';
           email = data['email'] ?? '';
           phone = data['phone'] ?? '';
-          address = data['address1'] ?? '';
           curp = data['curp'] ?? '';
           sex = data['sex'] ?? '';
         });
+
+        // Convertir coordenadas a dirección
+        final double? latitude = data['lat'] != null
+            ? double.tryParse(data['lat'].toString())
+            : null;
+        final double? longitude = data['lng'] != null
+            ? double.tryParse(data['lng'].toString())
+            : null;
+
+        if (latitude != null && longitude != null) {
+          _getAddressFromLatLng(LatLng(latitude, longitude));
+        } else {
+          setState(() {
+            address = '(Dirección no disponible)';
+          });
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al obtener perfil: ${response.statusCode}')),
+          SnackBar(
+              content: Text('Error al obtener perfil: ${response.statusCode}')),
         );
       }
     } catch (e) {

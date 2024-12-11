@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_favor/modules/points/screens/map_customerPick.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_favor/kernel/widget/collection-picker.dart'; // Importa el widget del mapa
@@ -48,7 +49,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
     if (coordinates == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecciona una dirección en el mapa')),
+        const SnackBar(
+            content: Text('Por favor, selecciona una dirección en el mapa')),
       );
       return;
     }
@@ -77,13 +79,21 @@ class _EditProfileModalState extends State<EditProfileModal> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.pop(context);
+        // Limpiar almacenamiento local para cerrar sesión
+        await prefs.clear();
+
+        // Redirigir a la vista de login
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Perfil actualizado con éxito')),
+          const SnackBar(
+              content: Text('Perfil actualizado con éxito. Sesión cerrada.')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar el perfil: ${response.statusCode}')),
+          SnackBar(
+              content: Text(
+                  'Error al actualizar el perfil: ${response.statusCode}')),
         );
       }
     } catch (e) {
@@ -101,7 +111,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CollectionPicker(
+        builder: (context) => MapCustomerPick(
           onLocationPicked: (double lat, double lng, String address) {
             setState(() {
               addressController.text = address;
@@ -155,12 +165,14 @@ class _EditProfileModalState extends State<EditProfileModal> {
                     children: [
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey),
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
                         onPressed: _saveChanges,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue),
                         child: const Text('Guardar'),
                       ),
                     ],
