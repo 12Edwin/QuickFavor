@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+import 'package:mobile_favor/config/dio_config.dart';
 import 'package:mobile_favor/modules/points/screens/map_customerPick.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_favor/kernel/widget/collection-picker.dart'; // Importa el widget del mapa
+import 'package:dio/dio.dart';
 
 class EditProfileModal extends StatefulWidget {
   final String currentPhone;
   final String currentAddress;
+  final LatLng currentCoordinates;
 
   const EditProfileModal({
     Key? key,
     required this.currentPhone,
     required this.currentAddress,
+    required this.currentCoordinates,
   }) : super(key: key);
 
   @override
@@ -23,8 +24,7 @@ class EditProfileModal extends StatefulWidget {
 class _EditProfileModalState extends State<EditProfileModal> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-
-  LatLng? coordinates;
+  LatLng? newCoordinates;
   bool isLoading = false;
 
   @override
@@ -32,73 +32,85 @@ class _EditProfileModalState extends State<EditProfileModal> {
     super.initState();
     phoneController.text = widget.currentPhone;
     addressController.text = widget.currentAddress;
+    newCoordinates = widget.currentCoordinates;
   }
 
   Future<void> _saveChanges() async {
-    final String phone = phoneController.text;
+    final String phone = phoneController.text.trim();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Token no encontrado en localStorage')),
+        const SnackBar(content: Text('Token no encontrado')),
       );
       return;
     }
 
-    if (coordinates == null) {
+    // Validación del número de teléfono (exactamente 10 dígitos y solo números)
+    if (phone.isNotEmpty && (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone))) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Por favor, selecciona una dirección en el mapa')),
+        const SnackBar(content: Text('El número de teléfono debe tener exactamente 10 dígitos')),
       );
       return;
     }
 
-    final url = Uri.parse('http://54.243.28.11:3000/customer/profile');
     setState(() {
       isLoading = true;
     });
 
     try {
-      final body = {
-        'phone': phone,
-        'lat': coordinates!.latitude,
-        'lng': coordinates!.longitude,
+      final dio = DioConfig.createDio(context);
+      final Map<String, dynamic> data = {
+        'phone': phone.isNotEmpty ? phone : widget.currentPhone,
+        'lat': (newCoordinates ?? widget.currentCoordinates).latitude,
+        'lng': (newCoordinates ?? widget.currentCoordinates).longitude,
       };
 
-      print(jsonEncode(body)); // Depuración: imprimir el cuerpo de la petición
+      // Imprimir los datos enviados para depuración
+      print('Datos enviados: $data');
 
-      final response = await http.put(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
+      final response = await dio.put(
+        '/customer/profile',
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
+      print('Respuesta de la API: ${response.statusCode} - ${response.data}');
+
       if (response.statusCode == 200) {
-        // Limpiar almacenamiento local para cerrar sesión
-        await prefs.clear();
+        bool isLocationUpdated = newCoordinates != null && newCoordinates != widget.currentCoordinates;
 
-        // Redirigir a la vista de login
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Perfil actualizado con éxito. Sesión cerrada.')),
-        );
+        if (isLocationUpdated) {
+          await prefs.clear();
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Perfil actualizado con éxito. Sesión cerrada debido a cambio de ubicación.')),
+          );
+        } else {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Número de teléfono actualizado con éxito')),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Error al actualizar el perfil: ${response.statusCode}')),
+          SnackBar(content: Text('Error al actualizar el perfil: ${response.statusCode}')),
         );
       }
-    } catch (e) {
+    } on DioException catch (e) {
+      // Capturar y mostrar detalles del error de Dio
+      print('Error de Dio: ${e.message}');
+      print('Detalles del error: ${e.response?.data}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de red: $e')),
+        SnackBar(content: Text('Error de Dio: ${e.response?.data ?? e.message}')),
+      );
+    } catch (e) {
+      // Capturar cualquier otro tipo de error
+      print('Error general: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error inesperado: $e')),
       );
     } finally {
       setState(() {
@@ -115,7 +127,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
           onLocationPicked: (double lat, double lng, String address) {
             setState(() {
               addressController.text = address;
-              coordinates = LatLng(lat, lng);
+              newCoordinates = LatLng(lat, lng);
             });
           },
         ),
@@ -138,7 +150,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
             const SizedBox(height: 20),
             TextField(
               controller: phoneController,
-              keyboardType: TextInputType.phone,
+              keyboardType: TextInputType.number,
+              maxLength: 10,
               decoration: const InputDecoration(
                 labelText: 'Número de Teléfono',
                 border: OutlineInputBorder(),
@@ -166,13 +179,15 @@ class _EditProfileModalState extends State<EditProfileModal> {
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey),
+                          backgroundColor: Colors.grey,
+                        ),
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
                         onPressed: _saveChanges,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue),
+                          backgroundColor: Colors.blue,
+                        ),
                         child: const Text('Guardar'),
                       ),
                     ],
