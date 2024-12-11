@@ -67,6 +67,7 @@ const processPendingRequests = async () => {
         showSuccessToast('Solicitud pendiente procesada con éxito.');
         // Guardamos la respuesta y la solicitud en caché
         await setCache(request.requestKey, response.data, { url: request.url, profileData: request.profileData });
+        getProfile();
       }
       // Eliminar la petición procesada
       await removeFromPendingRequests(request.requestKey);
