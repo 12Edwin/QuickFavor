@@ -1,5 +1,5 @@
 import api from '@/config/http-client-gateway';
-import { showSuccessToast } from '@/kernel/alerts';
+import { showSuccessToast, showErrorToast } from '@/kernel/alerts';
 import { getErrorMessages, ResponseEntity } from "@/kernel/error-response";
 import { ProfileEntity } from "@/modules/user/entity/profile.entity";
 import { openDB } from 'idb';  // Importación de `idb` al principio del archivo

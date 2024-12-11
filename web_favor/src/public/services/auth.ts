@@ -64,7 +64,6 @@ const processPendingRequestsAuth = async () => {
         // Aquí puedes guardar en caché si lo deseas
         // await setCache(request.requestKey, response.data, { url: request.url, credentials: request.credentials });
       }
-      showErrorToast('Error al procesar la solicitud pendiente.');
       // Eliminar la petición procesada
       await removeFromPendingRequests(request.requestKey);
     } catch (error) {
