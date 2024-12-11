@@ -1,17 +1,6 @@
 import firebaseMessaging from './firebase'
 import { register } from 'register-service-worker'
 import { showInfoToast } from "@/kernel/alerts"
-import { Workbox } from 'workbox-window'
-
-const wb = new Workbox(`${process.env.BASE_URL}service-worker.js`)
-
-// Manejar actualización pendiente
-wb.addEventListener('waiting', () => {
-    wb.messageSkipWaiting()
-})
-
-// Registro del Service Worker
-wb.register()
 
 register(`${process.env.BASE_URL}service-worker.js`, {
   ready(registration) {
