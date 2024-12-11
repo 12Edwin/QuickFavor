@@ -187,7 +187,7 @@ export default defineComponent({
         showErrorToast(getErrorMessages(resp.message));
       } else {
         this.order = resp.data as OrderPreviewEntity;
-        this.remainingTime = Math.max(0, 900 - Math.floor((Date.now() - new Date(this.order.order_created_at).getTime()) / 1000));
+        this.remainingTime = Math.max(0, 600 - Math.floor((Date.now() - new Date(this.order.order_created_at).getTime()) / 1000));
         if (!this.order?.deliveryPoints) {
           return;
         }
