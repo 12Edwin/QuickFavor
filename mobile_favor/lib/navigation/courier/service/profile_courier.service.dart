@@ -11,8 +11,7 @@ class ProfileCourierService {
   final Dio dio;
   late SharedPreferences prefs;
 
-  ProfileCourierService(BuildContext context)
-      : dio = DioConfig.createDio(context);
+  ProfileCourierService(BuildContext context) : dio = DioConfig.createDio(context);
 
   Future<void> _initPrefs() async {
     prefs = await SharedPreferences.getInstance();
@@ -107,18 +106,9 @@ String _getMimeType(String filePath) {
 }
 
   // Actualizar el vehículo del repartidor
-  Future<bool> updateVehicle(ProfileCourierEntity profile,
-      {File? licensePhoto}) async {
+  Future<ResponseEntity> updateVehicle(ProfileCourierEntity profile, {File? licensePhoto}) async {
     await _initPrefs();
-
     try {
-      final credential = prefs.getString('token');
-      if (credential == null) {
-        print('Credencial no encontrada en SharedPreferences');
-        return false;
-      }
-
-      // Convertir la foto a base64 si existe y extraer el base64 sin el prefijo
       String? photoBase64 = await convertirImagenABase64(licensePhoto);
       String? cleanedBase64 = extraerBase64(photoBase64);
 
@@ -130,32 +120,23 @@ String _getMimeType(String filePath) {
         "license_plate": profile.licensePlate,
         "color": profile.color,
         "description": profile.description,
-        "plate_photo": cleanedBase64, // Enviar la foto como base64 sin el prefijo
+        "plate_photo": cleanedBase64,
       };
 
-      print('Datos enviados a la API: $data'); // Para depuración
+      print('Datos enviados a la API: $data');
+      final response = await dio.put('/courier/vehicle', data: data);
 
-      final response = await dio.put(
-        '/courier/vehicle',
-        data: data,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $credential',
-          },
-        ),
-      );
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
 
-      if (response.statusCode == 200) {
-        print('Vehículo actualizado exitosamente');
-        return true;
-      } else {
-        print('Error al actualizar el vehículo: ${response.statusCode}');
-        return false;
-      }
     } catch (e) {
-      print('Error en la llamada a la API para actualizar el vehículo: $e');
-      return false;
+      ResponseEntity resp = ResponseEntity.fromJson((e as DioException).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
     }
   }
 }
