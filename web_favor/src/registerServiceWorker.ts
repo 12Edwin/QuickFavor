@@ -14,7 +14,16 @@ const ASSETS_TO_CACHE = [
 
 const wb = new Workbox(`${process.env.BASE_URL}service-worker.js`)
 
-// Controlador de actualización de Service Worker
+// Manejar instalación del Service Worker
+wb.addEventListener('installed', (event) => {
+  if (event.isUpdate) {
+    console.log('Nueva versión del Service Worker instalada')
+  } else {
+    console.log('Service Worker instalado por primera vez')
+  }
+})
+
+// Manejar actualización pendiente
 wb.addEventListener('waiting', () => {
   // Mostrar notificación de actualización
   if (confirm('Nueva versión disponible. ¿Deseas actualizar?')) {
@@ -23,7 +32,17 @@ wb.addEventListener('waiting', () => {
   }
 })
 
+// Registro del Service Worker
 wb.register()
+
+// Verificar estado de caché offline
+window.addEventListener('offline', () => {
+  console.log('Sin conexión. Usando caché.')
+})
+
+window.addEventListener('online', () => {
+  console.log('Conexión restaurada.')
+})
 
 register(`${process.env.BASE_URL}service-worker.js`, {
   ready(registration) {
