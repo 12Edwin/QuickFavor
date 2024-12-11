@@ -10,41 +10,50 @@ module.exports = defineConfig({
 
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
-      // Eliminar precacheManifestFilename
-      // Usar runtimeCaching para estrategias de caché
+      // Estrategia de caché para documentos HTML (prioridad para la página principal)
       runtimeCaching: [
         {
-          urlPattern: /\.(js|css|html)$/,
-          handler: 'CacheFirst',
+          urlPattern: /\.html$/,
+          handler: 'NetworkFirst', // Intenta red primero, sino usa caché
           options: {
-            cacheName: 'static-resources',
+            cacheName: 'html-cache',
+            networkTimeoutSeconds: 3, // Timeout de 3 segundos
             expiration: {
-              maxEntries: 60,
-              maxAgeSeconds: 30 * 24 * 60 * 60
+              maxEntries: 10,
+              maxAgeSeconds: 24 * 60 * 60 // 1 día
+            },
+            cacheableResponse: {
+              statuses: [0, 200] // Cachear respuestas 0 y 200
             }
           }
         },
+        // Caché para archivos estáticos
         {
-          urlPattern: /\.(png|jpg|jpeg|gif|svg)$/,
-          handler: 'CacheFirst',
+          urlPattern: /\.(js|css|png|jpg|jpeg|svg)$/,
+          handler: 'CacheFirst', // Caché primero
           options: {
-            cacheName: 'images',
+            cacheName: 'static-assets',
             expiration: {
-              maxEntries: 50,
-              maxAgeSeconds: 30 * 24 * 60 * 60
+              maxEntries: 60,
+              maxAgeSeconds: 30 * 24 * 60 * 60 // 30 días
             }
           }
         }
       ],
 
-      // Usar additionalManifestEntries en lugar de precacheManifestFilename
-      // additionalManifestEntries: [],
+      // Precachear archivos críticos
+      navigateFallback: 'index.html',
+      navigateFallbackDenylist: [/\.(js|css|png|jpg|jpeg|svg)$/],
 
-      // Archivos a excluir
+      // Excluir mapas de fuente y manifiestos
       exclude: [
         /\.map$/,
         /^manifest.*\\.js$/
-      ]
+      ],
+
+      // Archivos a incluir en la precarga
+      skipWaiting: true, // Actualizar Service Worker inmediatamente
+      clientsClaim: true // Controlar clientes inmediatamente
     }
   }
 })
