@@ -1,99 +1,158 @@
-
-
-import { register } from 'register-service-worker'
 import firebaseMessaging from './firebase'
-import {showInfoToast} from "@/kernel/alerts";
+import { register } from 'register-service-worker'
+import { showInfoToast } from "@/kernel/alerts"
+import { Workbox } from 'workbox-window'
 
+const CACHE_NAME = 'vue-app-cache-v1'
+const ASSETS_TO_CACHE = [
+  '/',
+  'index.html',
+  'manifest.json',
+  '/favicon.ico',
+  'js/app.js',
+]
 
-  const CACHE_NAME = 'vue-app-cache-v1'
-  const ASSETS_TO_CACHE = [
-    '/',
-    'index.html',
-    'manifest.json',
-    '/favicon.ico',
-    'js/app.js',
-  ]
+const wb = new Workbox(`${process.env.BASE_URL}service-worker.js`)
 
-  const messaging = firebaseMessaging
+// Manejar instalación del Service Worker
+wb.addEventListener('installed', (event) => {
+  if (event.isUpdate) {
+    console.log('Nueva versión del Service Worker instalada')
+  } else {
+    console.log('Service Worker instalado por primera vez')
+  }
+})
 
-  register(`${process.env.BASE_URL}service-worker.js`, {
-    ready(registration) {
-      console.log('Service worker is active.')
-      cacheAppAssets(registration)
-      requestPushPermission()
-    },
-    registered(registration) {
-      console.log('Service worker has been registered.')
-      checkForUpdates(registration)
-    },
-    cached() {
-      console.log('Content cached for offline use')
-      showInfoToast('App available offline')
-    },
-    updatefound(registration) {
-      console.log('New content downloading')
-      registration.installing?.addEventListener('statechange', () => {
-        if (registration.waiting) {
-          showUpdateAvailableNotification()
+// Manejar actualización pendiente
+wb.addEventListener('waiting', () => {
+  // Mostrar notificación de actualización
+  if (confirm('Nueva versión disponible. ¿Deseas actualizar?')) {
+    wb.messageSkipWaiting()
+    window.location.reload()
+  }
+})
+
+// Registro del Service Worker
+wb.register()
+
+// Verificar estado de caché offline
+window.addEventListener('offline', () => {
+  console.log('Sin conexión. Usando caché.')
+})
+
+window.addEventListener('online', () => {
+  console.log('Conexión restaurada.')
+})
+
+register(`${process.env.BASE_URL}service-worker.js`, {
+  ready(registration) {
+    console.log('Service worker is active.')
+    cacheAppAssets(registration)
+    requestPushPermission()
+  },
+
+  registered(registration) {
+    console.log('Service worker has been registered.')
+    checkForUpdates(registration)
+  },
+
+  cached() {
+    console.log('Content cached for offline use')
+    showInfoToast('App disponible sin conexión')
+  },
+
+  updatefound(registration) {
+    console.log('Nuevo contenido descargándose')
+    const installingWorker = registration.installing
+    if (installingWorker) {
+      installingWorker.addEventListener('statechange', () => {
+        if (installingWorker.state === 'installed') {
+          if (navigator.serviceWorker.controller) {
+            showUpdateAvailableNotification()
+          }
         }
       })
-    },
-    updated(registration) {
-      console.log('New content available')
-      handleServiceWorkerUpdate(registration)
-    },
-    offline() {
-      console.log('No internet connection')
-      showCachedContent()
-    },
-    error(error) {
-      console.error('Error during service worker registration:', error)
     }
-  });
+  },
+
+  updated(registration) {
+    console.log('Nuevo contenido disponible')
+    handleServiceWorkerUpdate(registration)
+  },
+
+  offline() {
+    console.log('Sin conexión a internet')
+    showCachedContent()
+  },
+
+  error(error) {
+    console.error('Error durante el registro del service worker:', error)
+  }
+})
 
 async function cacheAppAssets(registration: ServiceWorkerRegistration) {
   try {
-    console.log('Caching assets');
-    const cache = await caches.open(CACHE_NAME);
+    const cache = await caches.open(CACHE_NAME)
+
     for (const asset of ASSETS_TO_CACHE) {
       try {
-        await cache.add(asset);
+        const response = await fetch(asset)
+        if (response.ok) {
+          await cache.put(asset, response)
+          console.log(`Cached successfully: ${asset}`)
+        }
       } catch (error) {
-        console.error(`Failed to cache asset: ${asset}`, error);
+        console.warn(`Failed to cache asset: ${asset}`, error)
       }
     }
   } catch (error) {
-    console.error('Asset caching failed:', error);
+    console.error('Asset caching failed:', error)
   }
 }
 
 async function showCachedContent() {
   try {
-    const cache = await caches.open(CACHE_NAME);
+    const cache = await caches.open(CACHE_NAME)
     const cachedResponses = await Promise.all(
         ASSETS_TO_CACHE.map(asset => cache.match(asset))
-    );
+    )
 
     cachedResponses.forEach((response, index) => {
       if (response) {
-        console.log(`Cached asset available: ${ASSETS_TO_CACHE[index]}`);
-        // Display the cached content as needed
+        console.log(`Cached asset available: ${ASSETS_TO_CACHE[index]}`)
+        // Aquí puedes agregar lógica para mostrar contenido cached
       } else {
-        console.warn(`Asset not found in cache: ${ASSETS_TO_CACHE[index]}`);
+        console.warn(`Asset not found in cache: ${ASSETS_TO_CACHE[index]}`)
       }
-    });
+    })
   } catch (error) {
-    console.error('Error showing cached content:', error);
+    console.error('Error mostrando contenido cached:', error)
   }
 }
 
 function handleServiceWorkerUpdate(registration: ServiceWorkerRegistration) {
-  // Prompt user to reload for new version
   if (registration.waiting) {
+    // Enviar mensaje para saltar la fase de espera
     registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+
+    // Recargar la página para usar la nueva versión
     window.location.reload()
   }
 }
+
+function checkForUpdates(registration: ServiceWorkerRegistration) {
+  if (registration.waiting) {
+    showUpdateAvailableNotification()
+  }
+}
+
+function showUpdateAvailableNotification() {
+  showInfoToast('Nueva versión disponible. Actualiza para continuar.')
+}
+
+// -----------------------Firebase----------------------------------------------
+
+const messaging = firebaseMessaging
 
 async function requestPushPermission() {
   try {
@@ -138,52 +197,4 @@ async function showPushNotification(payload: any) {
       });
     });
   }
-}
-
-function checkForUpdates(registration: ServiceWorkerRegistration) {
-  // Implement update checking logic
-  if (registration.waiting) {
-    showUpdateAvailableNotification()
-  }
-}
-
-function showUpdateAvailableNotification() {
-  showInfoToast('New version available. Refresh to update.')
-}
-
-function sendPendingRequests() {
-  //const pendingRequests = await getPendingRequests()
-  //pendingRequests.forEach(sendRequest)
-  clearPendingRequests()
-}
-
-async function getPendingRequests() {
-  // Obtener las solicitudes pendientes almacenadas en IndexedDB u otra fuente de datos
-  //const db = await openDatabase()
-  //return db.getPendingRequests()
-}
-
-function sendRequest(request: any) {
-  // Enviar la solicitud al servidor
-  fetch('/api/favors', {
-    method: 'POST',
-    body: JSON.stringify(request),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-      .then(() => {
-        // Eliminar la solicitud de la lista de pendientes
-        //db.deletePendingRequest(request.id)
-      })
-      .catch((error) => {
-        // Volver a intentar enviar la solicitud más tarde
-        //db.addPendingRequest(request)
-      })
-}
-
-function clearPendingRequests() {
-  // Eliminar todas las solicitudes pendientes de la base de datos
-  //const db = await openDatabase()
-  //db.clearPendingRequests()
 }

@@ -551,7 +551,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   background-color: white;
-  border: 2px solid #b1c7d6;
+  border: 2px solid red;
   border-radius: 50px;
   padding: 8px 16px;
   cursor: pointer;
@@ -600,7 +600,7 @@ export default defineComponent({
 }
 
 .chat-icon {
-  color: #0066cc;
+  color: red;
   font-size: 18px;
 }
 
