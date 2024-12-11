@@ -55,7 +55,7 @@ const addToPendingRequests = async (requestKey: string, requestData: any) => {
 
 
 // Función para procesar las peticiones pendientes
-const processPendingRequests = async () => {
+const processPendingRequestsProfile = async () => {
   const db = await initDB();
   const store = db.transaction(PENDING_REQUESTS_STORE_NAME).objectStore(PENDING_REQUESTS_STORE_NAME);
   const pendingRequests = await store.getAll();
@@ -203,7 +203,7 @@ export const updateTransport = async (profile: ProfileEntity): Promise<ResponseE
 }
 
 // Escuchar cuando la conexión vuelva a estar online y procesar las peticiones pendientes
-window.addEventListener('online', processPendingRequests);
+window.addEventListener('online', processPendingRequestsProfile);
 
 // Función para eliminar una solicitud de las pendientes en IndexedDB
 const removeFromPendingRequests = async (requestKey: string) => {
