@@ -1,206 +1,327 @@
 <template>
   <div class="back-container">
-    <WaveComponent :wave-height="800"/>
+    <WaveComponent :wave-height="800" />
   </div>
 
   <div class="container-detail">
     <div class="card-header d-flex align-center justify-space-between">
       <h2 class="header-title">
-        <i class="fas fa-cart-shopping fa-lg text-white" style="font-size: 36px;"></i>
+        <i
+          class="fas fa-cart-shopping fa-lg text-white"
+          style="font-size: 36px"
+        ></i>
         <span class="ml-4 fas text-white">O r d e n</span>
       </h2>
-      <Switch @onFalse="" @onTrue=""/>
+      <Switch @onFalse="" @onTrue="" />
     </div>
 
     <div class="details-container">
       <div v-if="nothingToShow" class="no-orders-container">
-        <img src="@/assets/empty2.png" width="200" alt="No Orders" class="no-orders-image"/>
+        <img
+          src="@/assets/empty2.png"
+          width="200"
+          alt="No Orders"
+          class="no-orders-image"
+        />
         <p class="no-orders-text">No hay pedidos activos</p>
       </div>
       <div v-else>
-      <div v-if="loading" class="loader-container">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </div>
-      <div v-else>
-        <div class="d-flex w-100 justify-space-between flex-wrap ga-1 mb-3">
-          <h2 class="details-title">Detalles del pedido</h2>
-          <div class="ml-auto">
-            <div class="badge-style" :style="{'background-color': statusColor}">
-              {{statusText}}
+        <div v-if="loading" class="loader-container">
+          <v-progress-circular
+            indeterminate
+            color="primary"
+          ></v-progress-circular>
+        </div>
+        <div v-else>
+          <div class="d-flex w-100 justify-space-between flex-wrap ga-1 mb-3">
+            <h2 class="details-title">Detalles del pedido</h2>
+            <div class="ml-auto">
+              <div
+                class="badge-style"
+                :style="{ 'background-color': statusColor }"
+              >
+                {{ statusText }}
+              </div>
             </div>
           </div>
-        </div>
-        <div class="w-100 d-flex justify-end mb-5">
-          <v-btn :disabled="status !== 'In shopping'" rounded class="cancel-button" color="red" @click="showConfirm('Canceled', 'Cancelado' )">
-            <span class="font-weight-bold" style="color: white"> Cancelar </span>
-          </v-btn>
-        </div>
+          <div class="w-100 d-flex justify-end mb-5">
+            <v-btn
+              :disabled="status !== 'In shopping'"
+              rounded
+              class="cancel-button"
+              color="red"
+              @click="showConfirm('Canceled', 'Cancelado')"
+            >
+              <span class="font-weight-bold" style="color: white">
+                Cancelar
+              </span>
+            </v-btn>
+          </div>
 
-        <v-row justify="space-between">
-          <v-col xl="6" lg="6" md="12" sm="12">
-            <div class="d-flex justify-start">
-              <div class="profile-avatar">
-                <v-avatar size="120">
-                  <img alt="User Avatar" src="@/assets/profile.png"/>
-                </v-avatar>
+          <v-row justify="space-between">
+            <v-col xl="6" lg="6" md="12" sm="12">
+              <div class="d-flex justify-start">
+                <div class="profile-avatar">
+                  <v-avatar size="120">
+                    <img alt="User Avatar" src="@/assets/profile.png" />
+                  </v-avatar>
+                </div>
+                <div class="ml-4">
+                  <h2>
+                    {{ order?.customer_name }} {{ order?.customer_surname }}
+                  </h2>
+                  <p class="user-role">Cliente</p>
+                  <span class="info-row">
+                    <i class="fas fa-phone info-icon"></i>
+                    <span>{{ order?.customer_phone }}</span>
+                  </span>
+                  <br />
+                  <v-btn
+                    class="info-row"
+                    rounded
+                    @click="
+                      showAddress({
+                        lat: order?.place_lat,
+                        lng: order?.place_lng,
+                        name: 'Ubicación',
+                      })
+                    "
+                  >
+                    <i class="fas fa-eye info-icon"></i>
+                    <span>Ubicación</span>
+                  </v-btn>
+                </div>
               </div>
-              <div class="ml-4">
-                <h2>{{ order?.customer_name }} {{ order?.customer_surname }}</h2>
-                <p class="user-role">Cliente</p>
-                <span class="info-row">
-                  <i class="fas fa-phone info-icon"></i>
-                  <span>{{ order?.customer_phone }}</span>
-                </span>
-                <br>
-                <v-btn class="info-row" rounded @click="showAddress({lat: order?.place_lat, lng: order?.place_lng, name: 'Ubicación'})">
-                  <i class="fas fa-eye info-icon"></i>
-                  <span>Ubicación</span>
-                </v-btn>
-              </div>
-            </div>
 
-            <div class="direction-buttons">
-              <div class="line-connector"></div>
-              <div
+              <div class="direction-buttons">
+                <div class="line-connector"></div>
+                <div
                   v-for="(address, index) in order?.deliveryPoints || []"
                   :key="index"
                   class="direction-button"
-                  @click="()=> !address.isClosed ? showAddress(address) : null"
-              >
-                <i :class="['fas', address.isClosed ? 'fa-ban' : 'fa-eye', 'direction-icon']"></i>
-                <p v-if="address.active" class="address-name">{{ address.name }}</p>
-              </div>
-            </div>
-          </v-col>
-
-          <v-col xl="6" lg="6" md="12" sm="12" class="d-block" >
-            <div class="d-flex justify-center">
-              <div>
-                <div class="chat-container mx-auto" @click="()=> showChat = true" style="width: auto; max-width: 150px">
-                  <div class="icon-circle">
-                    <i class="fas fa-comment-dots chat-icon"></i>
-                  </div>
-                  <span class="chat-text">Chatear</span>
+                  @click="
+                    () => (!address.isClosed ? showAddress(address) : null)
+                  "
+                >
+                  <i
+                    :class="[
+                      'fas',
+                      address.isClosed ? 'fa-ban' : 'fa-eye',
+                      'direction-icon',
+                    ]"
+                  ></i>
+                  <p v-if="address.active" class="address-name">
+                    {{ address.name }}
+                  </p>
                 </div>
-
-                <div class="timer text-center"><p>{{ formattedTime }}</p></div>
-
-                <img alt="Caja" class="box-image position-static" src="@/assets/box.png"/>
               </div>
-            </div>
-          </v-col>
-        </v-row>
+            </v-col>
 
-        <div class="h-100 w-100">
-          <div class="product-section-title">Productos</div>
-          <v-card class="product-list" outlined>
-            <v-list>
-              <v-list-item
+            <v-col xl="6" lg="6" md="12" sm="12" class="d-block">
+              <div class="d-flex justify-center">
+                <div>
+                  <div
+                    class="chat-container mx-auto"
+                    @click="() => (showChat = true)"
+                    style="width: auto; max-width: 150px"
+                  >
+                    <div class="icon-circle">
+                      <i class="fas fa-comment-dots chat-icon"></i>
+                    </div>
+                    <span class="chat-text">Chatear</span>
+                  </div>
+
+                  <div class="timer text-center">
+                    <p>{{ formattedTime }}</p>
+                  </div>
+
+                  <img
+                    alt="Caja"
+                    class="box-image position-static"
+                    src="@/assets/box.png"
+                  />
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+
+          <div class="h-100 w-100">
+            <div class="product-section-title">Productos</div>
+            <v-card class="product-list" outlined>
+              <v-list>
+                <v-list-item
                   v-for="(product, index) in order?.products || []"
                   :key="index"
                   class="product-item"
+                >
+                  <v-row align="center" no-gutters>
+                    <v-col cols="1">
+                      <span class="product-number">{{ index + 1 }}.</span>
+                    </v-col>
+
+                    <v-col class="product-info-column" cols="8">
+                      <span class="product-name">{{ product.name }}</span>
+                      <p class="product-description">
+                        {{ product.description }}
+                      </p>
+                      <p class="product-amount">
+                        Cantidad: {{ product.amount }}
+                      </p>
+                    </v-col>
+
+                    <v-col class="eye-icon-column" cols="3">
+                      <i class="fas fa-eye eye-icon"></i>
+                    </v-col>
+                  </v-row>
+                </v-list-item>
+              </v-list>
+            </v-card>
+
+            <div class="step-progress">
+              <div class="step-item-large step-item-large-first">
+                <i class="fas fa-shopping-cart step-icon"></i>
+              </div>
+
+              <div
+                class="step-item-small hovered"
+                @click="
+                  status == 'In shopping'
+                    ? showConfirm('In delivery', 'En entrega')
+                    : null
+                "
               >
-                <v-row align="center" no-gutters>
-                  <v-col cols="1">
-                    <span class="product-number">{{ index + 1 }}.</span>
-                  </v-col>
+                <span>-</span>
+                <i class="fas fa-chevron-right step-icon"></i>
+              </div>
 
-                  <v-col class="product-info-column" cols="8">
-                    <span class="product-name">{{ product.name }}</span>
-                    <p class="product-description">{{ product.description }}</p>
-                    <p class="product-amount">Cantidad: {{ product.amount }}</p>
-                  </v-col>
+              <div
+                class="step-item-large"
+                :class="{ 'step-item-large-first': status == 'In delivery' }"
+              >
+                <i class="fas fa-walking step-icon"></i>
+              </div>
 
-                  <v-col class="eye-icon-column" cols="3">
-                    <i class="fas fa-eye eye-icon"></i>
-                  </v-col>
-                </v-row>
-              </v-list-item>
-            </v-list>
-          </v-card>
+              <div
+                class="step-item-small hovered"
+                @click="
+                  status == 'In delivery'
+                    ? showConfirm('Finished', 'Completado')
+                    : null
+                "
+              >
+                <span>-</span>
+                <i class="fas fa-chevron-right step-icon"></i>
+              </div>
 
-          <div class="step-progress">
-            <div class="step-item-large step-item-large-first">
-              <i class="fas fa-shopping-cart step-icon"></i>
+              <div class="step-item-large">
+                <i class="fas fa-dollar-sign step-icon"></i>
+              </div>
             </div>
 
-            <div class="step-item-small hovered" @click="status == 'In shopping' ? showConfirm('In delivery', 'En entrega'): null">
-              <span>-</span>
-              <i class="fas fa-chevron-right step-icon"></i>
-            </div>
-
-            <div class="step-item-large" :class="{'step-item-large-first': status == 'In delivery'}">
-              <i class="fas fa-walking step-icon"></i>
-            </div>
-
-            <div class="step-item-small hovered" @click="status == 'In delivery' ? showConfirm('Finished', 'Completado'): null">
-              <span>-</span>
-              <i class="fas fa-chevron-right step-icon"></i>
-            </div>
-
-            <div class="step-item-large">
-              <i class="fas fa-dollar-sign step-icon"></i>
-            </div>
-          </div>
-
-          <div class="w-100">
-            <v-progress-linear
+            <div class="w-100">
+              <v-progress-linear
                 :color="white"
                 height="15"
                 rounded
                 :active="true"
                 :striped="true"
-                :model-value="status === 'In shopping' ? 33 : status === 'In delivery' ? 66 : 100"
-            ></v-progress-linear>
-          </div>
-
-          <div class="buttons-container">
-            <div class="icon-button">
-              <div class="input-container">
-                <v-text-field
-                  v-model="cost"
-                  placeholder="Monto"
-                  type="number"
-                  outlined
-                  rounded
-                  :rules="[value => value > 0 || 'El monto debe ser al menos 100']"
-                />
-                <div class="icon-circle-large">
-                  <i class="fas fa-dollar-sign icon"></i>
-                </div>
-              </div>
+                :model-value="
+                  status === 'In shopping'
+                    ? 33
+                    : status === 'In delivery'
+                    ? 66
+                    : 100
+                "
+              ></v-progress-linear>
             </div>
 
-            <TakePhoto label="Factura" @photo-taken="(value) => receipt = value"/>
-          </div>
+            <div class="buttons-container">
+              <div class="icon-button">
+                <div class="input-container">
+                  <v-text-field
+                    v-model="cost"
+                    placeholder="Monto"
+                    type="number"
+                    outlined
+                    rounded
+                    :rules="[
+                      (value) => value > 0 || 'El monto debe ser al menos 100',
+                    ]"
+                  />
+                  <div class="icon-circle-large">
+                    <i class="fas fa-dollar-sign icon"></i>
+                  </div>
+                </div>
+              </div>
 
+              <TakePhoto
+                label="Factura"
+                @photo-taken="(value) => (receipt = value)"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    </div>
   </div>
-  <ChatModal :name="order?.customer_name" @close="() => showChat = false" :current-user-id="no_user" :chat-id="order?.no_order" :show="showChat" />
-  <MapModal v-if="showMap" :lat="selectedAddress.lat" :lng="selectedAddress.lng" @close="()=> showMap = false"/>
-  <ConfirmationModal :message="`Estás seguro de cambiar el estado a ${statusToChange}`" :extraText="(newStatus == 'Canceled' && order?.rejected_orders >= 2) ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará': ''" :is-visible="showConfirmation" title="Editar estado" @confirm="() => changeStatus(newStatus)" @cancel="() => showConfirmation = false"/>
+  <ChatModal
+    :name="order?.customer_name"
+    @close="() => (showChat = false)"
+    :current-user-id="no_user"
+    :chat-id="order?.no_order"
+    :show="showChat"
+  />
+  <MapModal
+    v-if="showMap"
+    :lat="selectedAddress.lat"
+    :lng="selectedAddress.lng"
+    @close="() => (showMap = false)"
+  />
+  <ConfirmationModal
+    :message="`Estás seguro de cambiar el estado a ${statusToChange}`"
+    :extraText="
+      newStatus == 'Canceled' && order?.rejected_orders >= 2
+        ? 'Ya has rechazado 2 pedidos, si cancelas este, se te penalizará'
+        : ''
+    "
+    :is-visible="showConfirmation"
+    title="Editar estado"
+    @confirm="() => changeStatus(newStatus)"
+    @cancel="() => (showConfirmation = false)"
+  />
 </template>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import { defineComponent } from "vue";
 import WaveComponent from "@/components/WaveComponent.vue";
 import Switch from "@/components/Switch.vue";
-import {cancelOrder, getOrderDetails, getStreamAxios, updateOrderState} from "@/modules/order/services/order.service";
+import {
+  cancelOrder,
+  getOrderDetails,
+  getStreamAxios,
+  updateOrderState,
+} from "@/modules/order/services/order.service";
 import {
   Delivery,
   OrderPreviewEntity,
   SSEOrderMessage,
-  UpdateStateOrderEntity
+  UpdateStateOrderEntity,
 } from "@/modules/order/entity/order.entity";
-import {showErrorToast, showPromiseToast, showWarningToast} from "@/kernel/alerts";
-import {getErrorMessages, getNo_courierByToken, getNo_order, removeNo_order} from "@/kernel/utils";
+import {
+  showErrorToast,
+  showPromiseToast,
+  showWarningToast,
+} from "@/kernel/alerts";
+import {
+  getErrorMessages,
+  getNo_courierByToken,
+  getNo_order,
+  removeNo_order,
+} from "@/kernel/utils";
 import MapModal from "@/components/map_modal.vue";
 import router from "@/router";
 import ConfirmationModal from "@/kernel/confirmation_modal.vue";
-import {ResponseEntity} from "@/kernel/error-response";
+import { ResponseEntity } from "@/kernel/error-response";
 import TakePhoto from "@/components/take_photo.vue";
 import ChatModal from "@/components/ChatModal.vue";
 
@@ -212,22 +333,22 @@ export default defineComponent({
     Switch,
     WaveComponent,
     MapModal,
-    ConfirmationModal
+    ConfirmationModal,
   },
   data() {
     return {
-      no_user: '',
-      statusToChange: '',
-      newStatus: '',
+      no_user: "",
+      statusToChange: "",
+      newStatus: "",
       cost: 0,
-      receipt: '',
+      receipt: "",
       showConfirmation: false,
       nothingToShow: false,
       remainingTime: 3600,
       order: null as OrderPreviewEntity | null,
       status: "In shopping",
       showMap: false,
-      selectedAddress: { lat: 0, lng: 0, name: '' } as Delivery,
+      selectedAddress: { lat: 0, lng: 0, name: "" } as Delivery,
       loading: true,
       showChat: false,
     };
@@ -239,8 +360,8 @@ export default defineComponent({
       const minutes = Math.floor((this.remainingTime % 3600) / 60);
       const seconds = this.remainingTime % 60;
       return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-          2,
-          "0"
+        2,
+        "0"
       )}:${String(seconds).padStart(2, "0")}`;
     },
 
@@ -267,13 +388,12 @@ export default defineComponent({
         default:
           return "Completado";
       }
-    }
+    },
   },
   methods: {
-
     async connectToSSE() {
       try {
-        const no_order = await getNo_order()
+        const no_order = await getNo_order();
         if (!no_order) {
           this.nothingToShow = true;
           return;
@@ -284,46 +404,60 @@ export default defineComponent({
       }
     },
 
-    async updateStatus(response: SSEOrderMessage){
+    async updateStatus(response: SSEOrderMessage) {
       console.log(response);
-      this.status = response.data.status
-      this.remainingTime = Math.max(0, 7200 - Math.floor((Date.now() - new Date(response.data.order_created_at).getTime()) / 1000));
-      if (this.status == 'Finished' || this.status == 'Canceled'){
+      this.status = response.data.status;
+      this.remainingTime = Math.max(
+        0,
+        7200 -
+          Math.floor(
+            (Date.now() - new Date(response.data.order_created_at).getTime()) /
+              1000
+          )
+      );
+      if (this.status == "Finished" || this.status == "Canceled") {
         this.loading = false;
-        await removeNo_order()
-        await router.push({name: "map"});
+        await removeNo_order();
+        await router.push({ name: "map" });
       }
     },
 
-    async getOrder(){
+    async getOrder() {
       this.loading = true;
-      const no_order = await getNo_order()
+      const no_order = await getNo_order();
       if (!no_order) {
         this.nothingToShow = true;
         return;
       }
       const resp = await getOrderDetails(no_order);
       console.log(resp);
-      if (resp.error){
+      if (resp.error) {
         showErrorToast(getErrorMessages(resp.message));
       } else {
         this.order = resp.data as OrderPreviewEntity;
-        if (!this.order?.deliveryPoints){
+        if (!this.order?.deliveryPoints) {
           return;
         }
-        for (let i = this.order?.deliveryPoints.length || 0; i < 3; i++){
-          this.order?.deliveryPoints.push({name: '', lat: 0, lng: 0, isClosed: true});
+        for (let i = this.order?.deliveryPoints.length || 0; i < 3; i++) {
+          this.order?.deliveryPoints.push({
+            name: "",
+            lat: 0,
+            lng: 0,
+            isClosed: true,
+          });
         }
       }
       this.loading = false;
     },
 
-    showConfirm(new_status: string, newStatusText: string){
-      if (new_status == 'Finished'){
-        if (this.cost < 1) return showWarningToast('El monto debe ser mayor a 0');
-        if (!this.receipt) return showWarningToast('Debes subir una foto de la factura');
-        if (this.receipt.includes('data:image/png;base64,')){
-          this.receipt = this.receipt.replace('data:image/png;base64,', '');
+    showConfirm(new_status: string, newStatusText: string) {
+      if (new_status == "Finished") {
+        if (this.cost < 1)
+          return showWarningToast("El monto debe ser mayor a 0");
+        if (!this.receipt)
+          return showWarningToast("Debes subir una foto de la factura");
+        if (this.receipt.includes("data:image/png;base64,")) {
+          this.receipt = this.receipt.replace("data:image/png;base64,", "");
         }
       }
       this.statusToChange = newStatusText;
@@ -331,18 +465,18 @@ export default defineComponent({
       this.showConfirmation = true;
     },
 
-    async changeStatus(new_status: string){
+    async changeStatus(new_status: string) {
       this.showConfirmation = false;
       const payload = {
         newStatus: new_status,
-        no_order: await getNo_order()
-      } as UpdateStateOrderEntity
+        no_order: await getNo_order(),
+      } as UpdateStateOrderEntity;
 
-      if (new_status == 'Canceled'){
+      if (new_status == "Canceled") {
         let resp = {} as ResponseEntity;
         const promise = new Promise(async (resolve, reject) => {
           resp = await cancelOrder(payload);
-          if (resp.error){
+          if (resp.error) {
             reject(resp);
           } else {
             resolve(resp);
@@ -350,21 +484,19 @@ export default defineComponent({
         });
 
         try {
-          await showPromiseToast(promise,
-              {
-                pending: "Cancelando orden...",
-                success: "Orden cancelada con éxito",
-                error: "Error al actualizar la orden"
-              }
-          )
-        } catch (e){}
+          await showPromiseToast(promise, {
+            pending: "Cancelando orden...",
+            success: "Orden cancelada con éxito",
+            error: "Error al actualizar la orden",
+          });
+        } catch (e) {}
         if (resp.error) {
           showErrorToast(getErrorMessages(resp.message));
         }
-        return
+        return;
       }
 
-      if (new_status == 'Finished'){
+      if (new_status == "Finished") {
         payload.cost = this.cost;
         payload.receipt = this.receipt;
       }
@@ -372,27 +504,24 @@ export default defineComponent({
       let resp = {} as ResponseEntity;
       const promise = new Promise(async (resolve, reject) => {
         resp = await updateOrderState(payload);
-        if (resp.error){
+        if (resp.error) {
           reject(resp);
         } else {
           resolve(resp);
         }
       });
       try {
-        await showPromiseToast(promise,
-            {
-              pending: "Actualizando estado de la orden...",
-              success: "Orden actualizada con éxito",
-              error: "Error al actualizar la orden"
-            }
-        )
-      } catch (e){}
+        await showPromiseToast(promise, {
+          pending: "Actualizando estado de la orden...",
+          success: "Orden actualizada con éxito",
+          error: "Error al actualizar la orden",
+        });
+      } catch (e) {}
       if (resp.error) {
         showErrorToast(getErrorMessages(resp.message));
-      }else {
+      } else {
         this.showConfirmation = false;
       }
-
     },
 
     startCountdown() {
@@ -406,13 +535,17 @@ export default defineComponent({
     },
 
     showAddress(address: Delivery) {
-      this.selectedAddress = {lat: address.lat, lng: address.lng, name: address.name} as Delivery
+      this.selectedAddress = {
+        lat: address.lat,
+        lng: address.lng,
+        name: address.name,
+      } as Delivery;
       console.log(this.selectedAddress);
       this.showMap = true;
     },
-    async setNoUser(){
-      this.no_user = await getNo_courierByToken() || '';
-    }
+    async setNoUser() {
+      this.no_user = (await getNo_courierByToken()) || "";
+    },
   },
   mounted() {
     this.setNoUser();
@@ -420,7 +553,6 @@ export default defineComponent({
     this.getOrder();
     this.connectToSSE();
   },
-
 });
 </script>
 
@@ -502,7 +634,7 @@ export default defineComponent({
 }
 
 .details-title {
-  color: #4A4A4A;
+  color: #4a4a4a;
   margin-bottom: 1rem;
   font-size: 2rem;
   font-weight: bold;
@@ -523,7 +655,7 @@ export default defineComponent({
 
 .user-role {
   font-size: 1rem;
-  color: #4A8DA6;
+  color: #4a8da6;
 }
 
 .info-row {
@@ -533,7 +665,7 @@ export default defineComponent({
 }
 
 .info-icon {
-  color: #4A4A4A;
+  color: #4a4a4a;
   margin-right: 8px;
 }
 
@@ -551,7 +683,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   background-color: white;
-  border: 2px solid red;
+  border: 2px solid #b1c7d6;
   border-radius: 50px;
   padding: 8px 16px;
   cursor: pointer;
@@ -565,7 +697,7 @@ export default defineComponent({
   left: 12%;
   right: 12%;
   height: 4px;
-  background-color: #A0A0A0;
+  background-color: #a0a0a0;
   z-index: -1;
 }
 
@@ -574,7 +706,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #B1C7D6;
+  background-color: #b1c7d6;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -584,23 +716,23 @@ export default defineComponent({
 }
 
 .direction-button .direction-icon {
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 24px;
 }
 
 .direction-button.inactive .direction-icon {
-  color: #A0A0A0;
+  color: #a0a0a0;
 }
 
 .address-name {
   font-size: 0.8rem;
-  color: #4A4A4A;
+  color: #4a4a4a;
   text-align: center;
   margin-top: 1rem;
 }
 
 .chat-icon {
-  color: red;
+  color: #0066cc;
   font-size: 18px;
 }
 
@@ -613,7 +745,7 @@ export default defineComponent({
 .timer {
   font-size: 2rem;
   font-weight: bold;
-  color: #4A8DA6;
+  color: #4a8da6;
   margin: 1rem 0;
 }
 
@@ -694,7 +826,7 @@ export default defineComponent({
 .step-item-large {
   width: 56px;
   height: 56px;
-  background-color: #89A7B1; /* Color base para círculos grandes */
+  background-color: #89a7b1; /* Color base para círculos grandes */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -717,7 +849,7 @@ export default defineComponent({
 .step-item-small {
   height: 40px;
   width: 60px;
-  background-color: #3A415A; /* Color base para círculos pequeños */
+  background-color: #3a415a; /* Color base para círculos pequeños */
   border-radius: 32px;
   display: flex;
   align-items: center;
@@ -729,7 +861,7 @@ export default defineComponent({
 /* Estilo para los círculos pequeños */
 .step-item-small {
   height: 40px;
-  background-color: #3A415A; /* Color base para círculos pequeños */
+  background-color: #3a415a; /* Color base para círculos pequeños */
   border-radius: 32px;
   display: flex;
   align-items: center;
@@ -785,7 +917,7 @@ export default defineComponent({
 .button-text {
   margin-top: 8px;
   font-size: 1rem;
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 
 .no-orders-container {
@@ -804,7 +936,7 @@ export default defineComponent({
 
 .no-orders-text {
   font-size: 1.5rem;
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 
 .hovered:hover {

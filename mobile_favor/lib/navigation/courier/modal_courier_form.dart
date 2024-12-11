@@ -3,14 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_favor/config/alerts.dart';
+import 'package:mobile_favor/config/error_types.dart';
 import 'package:mobile_favor/kernel/widget/photo_picker.dart';
 import 'package:mobile_favor/navigation/courier/entity/profile_courier.entity.dart';
 import 'package:mobile_favor/navigation/courier/service/profile_courier.service.dart';
 
 class ModalCourier extends StatefulWidget {
-  final ProfileCourierEntity profile; // Asegúrate de tener esta línea
+  final ProfileCourierEntity profile;
+  final Function callback;
 
-  const ModalCourier({Key? key, required this.profile}) : super(key: key);
+  const ModalCourier({Key? key, required this.profile, required this.callback}) : super(key: key);
 
   @override
   _ModalCourierState createState() => _ModalCourierState();
@@ -25,6 +28,7 @@ class _ModalCourierState extends State<ModalCourier> {
   final TextEditingController _placasController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _photoController = TextEditingController();
+  bool _isLoading = false;
 
   final List<Map<String, dynamic>> _vehicles = [
     {'icon': Icons.directions_car, 'name': 'Carro'},
@@ -206,8 +210,8 @@ class _ModalCourierState extends State<ModalCourier> {
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: MediaQuery.of(context).size.width * 0.04,
-        right: MediaQuery.of(context).size.width * 0.04,
+        left: 10,
+        right: 10,
         top: 16,
       ),
       child: SingleChildScrollView(
@@ -264,7 +268,7 @@ class _ModalCourierState extends State<ModalCourier> {
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.camera_alt),
                       onPressed: _pickImage,
-                      label: const Text('Tomar Foto'),
+                      label: const Text('Licencia'),
                     ),
                   ),
               ],
@@ -305,9 +309,12 @@ class _ModalCourierState extends State<ModalCourier> {
                 Flexible(
                   child: ElevatedButton(
                     onPressed: () async {
-                      // Crear una copia actualizada del perfil con los nuevos datos del vehículo
+                      setState(() {
+                        _isLoading = true;
+                      });
+
                       ProfileCourierEntity updatedProfile =
-                          widget.profile.copyWith(
+                      widget.profile.copyWith(
                         vehicleType: _vehicles[_currentVehicleType]['name'],
                         brand: _marcaController.text,
                         model: _modeloController.text,
@@ -318,30 +325,24 @@ class _ModalCourierState extends State<ModalCourier> {
                       );
 
                       // Llamar al servicio para actualizar la información del vehículo y subir la foto
-                      bool success = await _profileCourierService.updateVehicle(
-                        updatedProfile,
-                        licensePhoto:
-                            _selectedPhoto, // Pasar la foto seleccionada al servicio
-                      );
+                      final response = await _profileCourierService.updateVehicle(updatedProfile, licensePhoto: _selectedPhoto);
 
-                      if (success) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Información del vehículo actualizada exitosamente'),
-                          ),
-                        );
+                      if (response.error) {
+                        showErrorAlert(context, getErrorMessages(response.message));
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Error al actualizar la información del vehículo'),
-                          ),
-                        );
+                        showSuccessAlert(context, 'Información del vehículo actualizada exitosamente');
+                        widget.callback();
+                        setState(() {
+                          _isLoading = false;
+                          _selectedPhoto = null; // Limpiar la foto si se cancela
+                        });
+                        Navigator.of(context).pop();
                       }
+                      setState(() {
+                        _isLoading = false;
+                      });
                     },
-                    child: const Text('Guardar'),
+                    child: _isLoading ? const CircularProgressIndicator( color: Colors.white, ) : const Text('Guardar'),
                   ),
                 ),
               ],

@@ -1,7 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'package:mobile_favor/config/dio_config.dart';
 import 'edit_profile_modal.dart';
 
 class ProfileCustomer extends StatefulWidget {
@@ -18,6 +20,7 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
   String name = '';
   String curp = '';
   String sex = '';
+  LatLng? coordinates;
   bool isLoading = false;
 
   @override
@@ -26,44 +29,68 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
     fetchProfile();
   }
 
+  Future<void> _getAddressFromLatLng(LatLng position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        setState(() {
+          address = "${place.street}, ${place.locality}, ${place.country}";
+        });
+      } else {
+        setState(() {
+          address = '(Dirección no encontrada)';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        address = '(Error al obtener la dirección)';
+      });
+      print('Error al obtener la dirección: $e');
+    }
+  }
+
   Future<void> fetchProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
     final uid = prefs.getString('uid');
 
-    if (token == null || uid == null) {
+    if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Token o UID no encontrados en localStorage')),
+        const SnackBar(content: Text('Error: UID no encontrado en localStorage')),
       );
       return;
     }
-
-    final url = Uri.parse(
-        'http://54.243.28.11:3000/customer/profile/$uid');
 
     setState(() {
       isLoading = true;
     });
 
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+      final dio = DioConfig.createDio(context);
+      final response = await dio.get('/customer/profile/$uid');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body)['data'];
+        final data = response.data['data'];
         setState(() {
           name = data['name'] ?? '';
           email = data['email'] ?? '';
           phone = data['phone'] ?? '';
-          address = data['address1'] ?? '';
           curp = data['curp'] ?? '';
           sex = data['sex'] ?? '';
+          coordinates = LatLng(data['lat']?.toDouble() ?? 0.0, data['lng']?.toDouble() ?? 0.0);
         });
+
+        if (coordinates != null) {
+          _getAddressFromLatLng(coordinates!);
+        } else {
+          setState(() {
+            address = '(Dirección no disponible)';
+          });
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al obtener perfil: ${response.statusCode}')),
@@ -195,10 +222,11 @@ class _ProfileCustomerState extends State<ProfileCustomer> {
                                     child: EditProfileModal(
                                       currentPhone: phone,
                                       currentAddress: address,
+                                      currentCoordinates: coordinates ?? LatLng(0.0, 0.0),
                                     ),
                                   );
                                 },
-                              );
+                              ).then((_) => fetchProfile()); // Refrescar el perfil tras cerrar el modal
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.all(15),
