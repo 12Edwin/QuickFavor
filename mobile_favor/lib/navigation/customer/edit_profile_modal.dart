@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mobile_favor/config/alerts.dart';
 import 'package:mobile_favor/config/dio_config.dart';
+import 'package:mobile_favor/config/error_types.dart';
 import 'package:mobile_favor/modules/points/screens/map_customerPick.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+
+import 'service/profile.service.dart';
 
 class EditProfileModal extends StatefulWidget {
   final String currentPhone;
@@ -50,9 +54,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
     // Validación del número de teléfono (exactamente 10 dígitos y solo números)
     if (phone.isNotEmpty && (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('El número de teléfono debe tener exactamente 10 dígitos')),
-      );
+      showWarningAlert(context, 'El número de teléfono debe tener exactamente 10 dígitos y solo números.');
       return;
     }
 
@@ -60,63 +62,29 @@ class _EditProfileModalState extends State<EditProfileModal> {
       isLoading = true;
     });
 
-    try {
-      final dio = DioConfig.createDio(context);
-      final Map<String, dynamic> data = {
-        'phone': phone.isNotEmpty ? phone : widget.currentPhone,
-        'lat': (newCoordinates ?? widget.currentCoordinates).latitude,
-        'lng': (newCoordinates ?? widget.currentCoordinates).longitude,
-      };
+    final service = ProfileService(context);
+    final Map<String, dynamic> data = {
+      'phone': phone.isNotEmpty ? phone : widget.currentPhone,
+      'lat': (newCoordinates ?? widget.currentCoordinates).latitude,
+      'lng': (newCoordinates ?? widget.currentCoordinates).longitude,
+    };
 
-      // Imprimir los datos enviados para depuración
-      print('Datos enviados: $data');
+    final response = await service.updateCustomerProfile(data);
 
-      final response = await dio.put(
-        '/customer/profile',
-        data: data,
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
-
-      print('Respuesta de la API: ${response.statusCode} - ${response.data}');
-
-      if (response.statusCode == 200) {
-        bool isLocationUpdated = newCoordinates != null && newCoordinates != widget.currentCoordinates;
-
-        if (isLocationUpdated) {
-          await prefs.clear();
-          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Perfil actualizado con éxito. Sesión cerrada debido a cambio de ubicación.')),
-          );
-        } else {
-          Navigator.pop(context, true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Número de teléfono actualizado con éxito')),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar el perfil: ${response.statusCode}')),
-        );
-      }
-    } on DioException catch (e) {
-      // Capturar y mostrar detalles del error de Dio
-      print('Error de Dio: ${e.message}');
-      print('Detalles del error: ${e.response?.data}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de Dio: ${e.response?.data ?? e.message}')),
-      );
-    } catch (e) {
-      // Capturar cualquier otro tipo de error
-      print('Error general: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error inesperado: $e')),
-      );
-    } finally {
+    if (response.error) {
+      showErrorAlert(context, getErrorMessages(response.message));
       setState(() {
         isLoading = false;
       });
+      return;
     }
+    showSuccessAlert(context, 'Perfil actualizado con éxito. Sesión cerrada debido a cambio de ubicación.');
+    await prefs.clear();
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _openMap() {

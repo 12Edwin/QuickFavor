@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_favor/navigation/customer/entity/profile.entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../config/dio_config.dart';
+import '../../../config/error_response.dart';
 
 class ProfileService {
   final Dio dio;
@@ -51,6 +53,23 @@ class ProfileService {
     } catch (e) {
       print('Error en la llamada a la API: $e');
       return null;
+    }
+  }
+
+  Future<ResponseEntity> updateCustomerProfile(Map<String, dynamic> customer) async {
+    try {
+      final response = await dio.put('/customer/profile', data: customer);
+      print(ResponseEntity.fromJson(response.data).data);
+      return ResponseEntity.fromJson(response.data);
+    } catch (error) {
+      print(error);
+      ResponseEntity resp = ResponseEntity.fromJson((error as DioException).response!.data);
+      print(resp.message);
+      if (resp.data != null) {
+        return getErrorMessages(resp);
+      } else {
+        return resp;
+      }
     }
   }
 
