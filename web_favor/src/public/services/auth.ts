@@ -50,7 +50,7 @@ const addToPendingRequests = async (requestKey: string, requestData: any) => {
 };
 
 // Función para procesar las peticiones pendientes
-const processPendingRequests = async () => {
+const processPendingRequestsAuth = async () => {
   const db = await initDB();
   const store = db.transaction(PENDING_REQUESTS_STORE_NAME).objectStore(PENDING_REQUESTS_STORE_NAME);
   const pendingRequests = await store.getAll();
@@ -67,7 +67,6 @@ const processPendingRequests = async () => {
       // Eliminar la petición procesada
       await removeFromPendingRequests(request.requestKey);
     } catch (error) {
-      showErrorToast('Error al procesar la solicitud pendiente.');
       console.error('Error procesando solicitud pendiente:', error);
     }
   }
@@ -136,4 +135,4 @@ export const login = async (credentials: LoginEntity): Promise <ResponseEntity> 
 }
 
 // Escuchar cuando la conexión vuelva a estar online y procesar las peticiones pendientes
-window.addEventListener('online', processPendingRequests);
+window.addEventListener('online', processPendingRequestsAuth);
