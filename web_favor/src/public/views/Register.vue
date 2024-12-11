@@ -25,27 +25,26 @@
                 <div class="input-container">
                   <v-icon class="fa-solid fa-user icon"></v-icon>
                   <input type="text" @input="validateNombre" v-model="form.nombre" placeholder="Nombre"
-                    class="register-input" required>
+                    class="register-input">
                 </div>
                 <div v-if="nombreValidationMessage" class="validation-message">{{ nombreValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-user icon"></v-icon>
                   <input type="text" @input="validateApellidoPaterno" v-model="form.apellidoPaterno"
-                    placeholder="Apellido Paterno" class="register-input" required>
+                    placeholder="Apellido Paterno" class="register-input">
                 </div>
                 <div v-if="apellidoPaternoValidationMessage" class="validation-message">{{
                   apellidoPaternoValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-user icon"></v-icon>
                   <input type="text" @input="validateApellidoMaterno" v-model="form.apellidoMaterno"
-                    placeholder="Apellido Materno" class="register-input" required>
+                    placeholder="Apellido Materno" class="register-input">
                 </div>
                 <div v-if="apellidoMaternoValidationMessage" class="validation-message">{{
                   apellidoMaternoValidationMessage }}</div>
                 <div class="input-container">
                   <v-icon class="fa-solid fa-address-card icon"></v-icon>
-                  <input type="text" @input="validateCurp" v-model="form.curp" placeholder="CURP" class="register-input"
-                    required>
+                  <input type="text" @input="validateCurp" v-model="form.curp" placeholder="CURP" class="register-input">
                 </div>
                 <div v-if="curpValidationMessage" class="validation-message">{{
                   curpValidationMessage }}</div>
@@ -95,7 +94,7 @@
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" v-model="form.descripcion" placeholder="Descripción" class="register-input"
-                      required>
+                    >
                   </div>
                 </div>
 
@@ -111,24 +110,39 @@
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
-                      class="register-input" required>
+                      class="register-input">
                   </div>
                   <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
+                  <v-row align="start" no-gutters>
+                    <v-col cols="6" class="col-item">
+                      <div class="color-container">
+                        <div class="color-picker">
+                          <input type="color" v-model="form.color" class="color-input" />
+                          <div class="color-label">Color</div>
+                        </div>
+                      </div>
+                    </v-col>
+                  </v-row>
                 </div>
 
                 <!-- Mostrar formulario completo de Matrícula y Modelo si no es descripción ni imagen -->
                 <div v-else>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-address-card icon"></v-icon>
+                    <input type="text" v-model="form.marca" placeholder="Marca"
+                      class="register-input">
+                  </div>
+                  <div class="input-container">
+                    <v-icon class="fa-solid fa-address-card icon"></v-icon>
                     <input type="text" @input="validateMatricula" v-model="form.matricula" placeholder="Matrícula"
-                      class="register-input" required>
+                      class="register-input">
                   </div>
                   <div v-if="matriculaValidationMessage" class="validation-message">{{ matriculaValidationMessage }}
                   </div>
                   <div class="input-container">
                     <v-icon class="fa-solid fa-file icon"></v-icon>
                     <input type="text" @input="validateModelo" v-model="form.modelo" placeholder="Modelo"
-                      class="register-input" required>
+                      class="register-input">
                   </div>
                   <div v-if="modeloValidationMessage" class="validation-message">{{ modeloValidationMessage }}</div>
                   <!-- Selector de Color y Licencia -->
@@ -194,7 +208,7 @@
                 <div class="input-container">
                   <v-icon class="fa-solid fa-phone icon"></v-icon>
                   <input type="tel" @input="validateTelefono" v-model="form.telefono" placeholder="Teléfono"
-                    class="register-input" required>
+                    class="register-input">
                 </div>
                 <div v-if="telefonoValidationMessage" class="validation-message">{{ telefonoValidationMessage }}</div>
 
@@ -202,7 +216,7 @@
                 <div class="input-container">
                   <v-icon class="fa-solid fa-envelope icon"></v-icon>
                   <input type="text" @input="validateEmail" v-model="form.correo" placeholder="Correo electronico"
-                    class="register-input" required>
+                    class="register-input">
                 </div>
                 <div v-if="emailValidationMessage" class="validation-message">{{ emailValidationMessage }}</div>
 
@@ -210,7 +224,7 @@
                 <div class="input-container">
                   <v-icon class="fa-solid fa-key icon"></v-icon>
                   <input type="password" @input="validatePassword" v-model="form.contrasena" placeholder="Contraseña"
-                    class="register-input" required />
+                    class="register-input" />
                 </div>
                 <div v-if="passwordValidationMessage" class="validation-message">{{ passwordValidationMessage }}</div>
 
@@ -219,7 +233,7 @@
                 <div class="input-container">
                   <v-icon class="fa-solid fa-key icon"></v-icon>
                   <input type="password" @input="validateConfirmPassword" v-model="form.confirmarContrasena"
-                    placeholder="Repita la contraseña" class="register-input" required />
+                    placeholder="Repita la contraseña" class="register-input" />
                 </div>
                 <div v-if="confirmPasswordValidationMessage" class="validation-message">{{
                   confirmPasswordValidationMessage }}</div>
@@ -235,7 +249,7 @@
                   </v-col>
                   <v-col>
                     <button class="btn-rigth" @click="nextStep" v-if="step < 3">SIGUIENTE</button>
-                    <button class="btn-rigth" @click="submitForm" v-if="step === 3">REGISTRARSE</button>
+                    <button class="btn-rigth" v-if="step === 3">REGISTRARSE</button>
                   </v-col>
                 </v-row>
 
@@ -260,7 +274,7 @@
 <script lang="ts">
 import router from '@/router';
 import { defineComponent, ref } from 'vue';
-import { showErrorToast, showSuccessToast } from '@/kernel/alerts';
+import { showErrorToast, showInfoToast, showSuccessToast } from '@/kernel/alerts';
 import { RegisterCourierEntity } from "@/public/entity/auth.entity";
 import { register } from "@/public/services/auth";
 import { convertirImagenABase64, extraerBase64, getErrorMessages, setStatusCourier } from "@/kernel/utils";
@@ -279,6 +293,7 @@ export default defineComponent({
       matricula: '',
       modelo: '',
       color: '',
+      marca: '',
       licenciaFile: '',
       rostroFile: '',
       ineFile: '',
@@ -416,155 +431,168 @@ export default defineComponent({
     };
 
     const submitForm = async () => {
-      const type = selectOptionClick.value;
-      let vehiculeType = '';
-      let credentials = {} as unknown as RegisterCourierEntity;;
+  if (step.value === 3) {
+    const type = selectOptionClick.value;
+    let vehiculeType = '';
+    let credentials = {} as unknown as RegisterCourierEntity;
 
-      switch (type) {
-        case 1:
-          vehiculeType = 'Carro';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: form.value.modelo,
-            color: form.value.color,
-            brand: undefined,
-            license_plate: form.value.matricula,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: form.value.licenciaFile,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: undefined
-          };
-          break;
-        case 2:
-          vehiculeType = 'Moto';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: form.value.modelo,
-            color: form.value.color,
-            brand: undefined,
-            license_plate: form.value.matricula,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: form.value.licenciaFile,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: undefined
-          };
-          break;
-        case 3:
-          vehiculeType = 'Bicicleta';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: form.value.modelo,
-            color: undefined,
-            brand: undefined,
-            license_plate: undefined,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: undefined,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: undefined
-          };
-          break;
-        case 4:
-          vehiculeType = 'Scooter';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: form.value.modelo,
-            color: undefined,
-            brand: undefined,
-            license_plate: undefined,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: undefined,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: undefined
-          };
-          break;
-        case 5:
-          vehiculeType = 'Caminando';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: undefined,
-            color: undefined,
-            brand: undefined,
-            license_plate: undefined,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: undefined,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: undefined
-          };
-          break;
-        case 6:
-          vehiculeType = 'Otro';
-          credentials = {
-            name: form.value.nombre,
-            surname: form.value.apellidoPaterno,
-            lastname: form.value.apellidoMaterno || undefined,
-            CURP: form.value.curp,
-            sex: form.value.sexo,
-            phone: form.value.telefono,
-            vehicle_type: vehiculeType,
-            model: undefined,
-            color: undefined,
-            brand: undefined,
-            license_plate: undefined,
-            INE_photo: form.value.ineFile,
-            face_photo: form.value.rostroFile,
-            plate_photo: undefined,
-            email: form.value.correo,
-            password: form.value.contrasena,
-            desciption: form.value.descripcion
-          };
-          break;
-      }
+    switch (type) {
+      case 1:
+        vehiculeType = 'Carro';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          brand: form.value.marca,
+          vehicle_type: vehiculeType,
+          model: form.value.modelo,
+          color: form.value.color,
+          license_plate: form.value.matricula,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: form.value.licenciaFile,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: undefined
+        };
+        break;
+      case 2:
+        vehiculeType = 'Moto';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          vehicle_type: vehiculeType,
+          model: form.value.modelo,
+          color: form.value.color,
+          brand: form.value.marca,
+          license_plate: form.value.matricula,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: form.value.licenciaFile,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: undefined
+        };
+        break;
+      case 3:
+        vehiculeType = 'Bicicleta';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          vehicle_type: vehiculeType,
+          model: form.value.modelo,
+          color: form.value.color,
+          brand: undefined,
+          license_plate: undefined,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: undefined,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: undefined
+        };
+        break;
+      case 4:
+        vehiculeType = 'Scooter';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          vehicle_type: vehiculeType,
+          model: form.value.modelo,
+          color: form.value.color,
+          brand: undefined,
+          license_plate: undefined,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: undefined,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: undefined
+        };
+        break;
+      case 5:
+        vehiculeType = 'Caminando';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          vehicle_type: vehiculeType,
+          model: undefined,
+          color: undefined,
+          brand: undefined,
+          license_plate: undefined,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: undefined,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: undefined
+        };
+        break;
+      case 6:
+        vehiculeType = 'Otro';
+        credentials = {
+          name: form.value.nombre,
+          surname: form.value.apellidoPaterno,
+          lastname: form.value.apellidoMaterno || undefined,
+          CURP: form.value.curp,
+          sex: form.value.sexo,
+          phone: form.value.telefono,
+          vehicle_type: vehiculeType,
+          model: undefined,
+          color: undefined,
+          brand: undefined,
+          license_plate: undefined,
+          INE_photo: form.value.ineFile,
+          face_photo: form.value.rostroFile,
+          plate_photo: undefined,
+          email: form.value.correo,
+          password: form.value.contrasena,
+          desciption: form.value.descripcion
+        };
+        break;
+    }
 
-      const result = await register(credentials);
-      
-      if (result.error) {
-        showErrorToast(getErrorMessages(result.message));
-      } else {
-        await router.push({ name: "login" });
+    // Validación de los campos
+    const fieldsToValidate = Object.entries(credentials);
+    for (let [key, value] of fieldsToValidate) {
+      // Saltamos los campos que son undefined
+      if (value !== undefined && typeof value === 'string' && value.trim().length < 3) {
+        showErrorToast(`El campo ${key} debe tener al menos 3 caracteres.`);
+        return; // Interrumpir flujo si algún campo no cumple la validación
       }
-      console.log(credentials);
-      
-    };
+    }
+
+    showInfoToast('Registrando...');
+    const result = await register(credentials);
+
+    if (result.error) {
+      showErrorToast(getErrorMessages(result.message));
+    } else {
+      showSuccessToast('Registro exitoso');
+      await router.push({ name: "login" });
+    }
+  }
+};
+
 
     const goToInicio = () => {
       router.push({ name: 'login' });
