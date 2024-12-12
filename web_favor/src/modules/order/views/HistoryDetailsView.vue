@@ -222,7 +222,7 @@ export default defineComponent({
         }
 
         const response = await axios.get(
-          `http://54.243.28.11:3000/favor/details/${this.id}`,
+          `http://54.164.226.143:3000/favor/details/${this.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
